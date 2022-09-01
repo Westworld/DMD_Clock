@@ -1,3 +1,18 @@
+#define firsttimeinit 5
+
+#ifdef firsttimeinit
+#include <ESPUI.h>
+
+void setup(void)
+{
+  Serial.begin(115200);
+  ESPUI.prepareFileSystem();
+}
+
+void loop()
+{
+}
+#else
 
 #include <WiFiManager.h> 
 #include <Arduino.h>
@@ -9,6 +24,7 @@
 //#include "SPIFFS.h"
 #include <TFT_eSPI.h>
 #include "gfxfont.h" // Include the header file attached to this sketch
+#include "Adafruit_GFX.h"// Hardware-specific library
 
 
 WiFiManager wifiManager;
@@ -16,8 +32,8 @@ WiFiManager wifiManager;
 #define MY_TZ "CET-1CEST,M3.5.0/02,M10.5.0/03" 
 const char* wifihostname = "DMD Clock";
 
-#include "Adafruit_GFX.h"// Hardware-specific library
 #include "video.h"
+#include "Web.h"
 #include "main.h"
 
 TFT_eSPI tft = TFT_eSPI();       // Invoke custom library
@@ -40,6 +56,8 @@ int16_t timeCounter = 0;
 
 void setup() {
   Serial.begin(115200);
+  //ESPUI.prepareFileSystem();
+
   delay(1000);
   Serial.println("start");
 
@@ -62,10 +80,11 @@ void setup() {
 
   SPISD.begin(14, 2, 15, 13);//SCK MISO MOSI SS
   if (!SD.begin(13, SPISD))  {
-    Serial.println("initialization failed!");
-    while (1);
+    Serial.println("SD Card initialization failed!");
+    tft.drawString("SD Card error", 5, 5, 1);
+    //while (1);
   }
-  Serial.println("initialization done.");
+  Serial.println("SD Card initialization done.");
 
   randomSeed(analogRead(39));
 
@@ -74,8 +93,9 @@ void setup() {
   getLocalTime(&local, 10000);      // Versuche 10 s zu Synchronisieren
   Serial.println(&local, "%A, %B %d %Y %H:%M:%S");
 
+  Web_Init();
 
-   tft.setSwapBytes(true); // We need to swap the colour bytes (endianess)
+  tft.setSwapBytes(true); // We need to swap the colour bytes (endianess)
 
   root = SD.open("/clips");
   getFilesList(root);
@@ -147,3 +167,5 @@ void DisplayTime() {
   last_sec = cur_sec;
 
 }
+
+#endif
