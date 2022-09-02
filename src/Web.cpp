@@ -12,7 +12,7 @@ void Web_timedisplayCall(Control* sender, int type)
     Serial.println(sender->value);
   #endif
 
-  displayTime = sender->value;
+  displayTime = sender->value.toInt();
 }
 
 void Web_Init() {

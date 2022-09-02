@@ -1,4 +1,4 @@
-#define firsttimeinit 5
+//#define firsttimeinit 5
 
 #ifdef firsttimeinit
 #include <ESPUI.h>
@@ -51,7 +51,7 @@ byte uhrzeit[6] = {1, 2, 3, 0, 0, 0};
   int16_t last_sec  = -1;
 const bool twelveHourFormat = false;  
 const bool displaySeconds = false;
-const int16_t displayTime = 10;
+int16_t displayTime = 10;
 int16_t timeCounter = 0;
 
 void setup() {
