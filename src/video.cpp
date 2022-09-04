@@ -1,3 +1,5 @@
+#define UseDMD true
+
 #include "video.h"
 
 /* MJPEG Video */
@@ -12,7 +14,12 @@ short nextclipid=-1;
 File myfile;
 JPEGDEC jpeg;
 
+#ifdef UseDMD
+extern MatrixPanel_I2S_DMA *display;
+#else
 extern TFT_eSPI tft;
+extern TFT_eSPI * display;
+#endif
 
 void * myOpen(const char *filename, int32_t *size) {
   myfile = SD.open(filename);
@@ -31,6 +38,21 @@ int32_t mySeek(JPEGFILE *handle, int32_t position) {
   return myfile.seek(position);
 }
 
+#ifdef UseDMD
+
+void drawImg(int x, int y, int width, int height, uint16_t* bitmap) 
+{
+  for (int yy=0; yy<height; yy++) {
+
+
+    for (int xx=0; xx<<width; xx++) {
+        display->drawPixel(xx+x, yy+y, bitmap[(yy*width+xx)]);
+    }
+  }  
+}
+#else
+  display->pushImage(x, y, w, h, bitmap);
+#endif
 
 // This next function will be called during decoding of the jpeg file to
 // render each block to the TFT.  If you use a different TFT library
@@ -38,10 +60,10 @@ int32_t mySeek(JPEGFILE *handle, int32_t position) {
 bool tft_output(int16_t x, int16_t y, uint16_t w, uint16_t h, uint16_t* bitmap)
 {
    // Stop further decoding as image is running off bottom of screen
-  if ( y >= tft.height() ) return 0;
+  if ( y >= display->height() ) return 0;
 
   // This function will clip the image block rendering automatically at the TFT boundaries
-  tft.pushImage(x, y, w, h, bitmap);
+ drawImg(x, y, w, h, bitmap);
 
   // This might work instead if you adapt the sketch to use the Adafruit_GFX library
   // tft.drawRGBBitmap(x, y, bitmap, w, h);
@@ -55,7 +77,7 @@ int drawMCUs(JPEGDRAW *pDraw)
   int iCount;
   iCount = pDraw->iWidth * pDraw->iHeight; // number of pixels to draw in this call
 
-  tft.pushImage(pDraw->x, pDraw->y, pDraw->iWidth, pDraw->iHeight, pDraw->pPixels);
+  drawImg(pDraw->x, pDraw->y, pDraw->iWidth, pDraw->iHeight, pDraw->pPixels);
   return 1; // returning true (1) tells JPEGDEC to continue decoding. Returning false (0) would quit decoding immediately.
 } /* drawMCUs() */
 
@@ -63,7 +85,7 @@ int drawMCUs(JPEGDRAW *pDraw)
 static int drawMCU(JPEGDRAW *pDraw)
 {
   //gfx->draw16bitBeRGBBitmap(pDraw->x, pDraw->y, pDraw->pPixels, pDraw->iWidth, pDraw->iHeight);
-  tft.pushImage(pDraw->x, pDraw->y, pDraw->iWidth, pDraw->iHeight, pDraw->pPixels);
+  drawImg(pDraw->x, pDraw->y, pDraw->iWidth, pDraw->iHeight, pDraw->pPixels);
   return 1;
 }
 

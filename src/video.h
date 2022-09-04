@@ -1,7 +1,12 @@
 #include "JPEGDEC.h"
 #include "MjpegClass.h"
 #include "SD.h"
+
+#ifdef UseDMD
+#include <ESP32-HUB75-MatrixPanel-I2S-DMA.h>
+#else
 #include <TFT_eSPI.h>
+#endif
 
 void * myOpen(const char *filename, int32_t *size);
 void myClose(void *handle);
@@ -15,3 +20,8 @@ void drawimage(char * name);
 void PlayVideo(String name);
 void getFilesList(File dir);
 void playRandomVideo() ;
+
+#ifdef UseDMD
+
+void drawImg(int x, int y, int width, int height, uint16_t* bitmap) ;
+#endif
