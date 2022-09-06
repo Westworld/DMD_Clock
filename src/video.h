@@ -5,7 +5,8 @@
 #ifdef UseDMD
 #include <ESP32-HUB75-MatrixPanel-I2S-DMA.h>
 #else
-#include <TFT_eSPI.h>
+#include "Adafruit_GFX.h"// Hardware-specific library
+#include "Adafruit_ILI9341.h"
 #endif
 
 void * myOpen(const char *filename, int32_t *size);

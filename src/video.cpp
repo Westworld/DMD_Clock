@@ -17,8 +17,8 @@ JPEGDEC jpeg;
 #ifdef UseDMD
 extern MatrixPanel_I2S_DMA *display;
 #else
-extern TFT_eSPI tft;
-extern TFT_eSPI * display;
+extern Adafruit_ILI9341 tft;
+extern Adafruit_ILI9341  * display;
 #endif
 
 void * myOpen(const char *filename, int32_t *size) {
@@ -38,21 +38,23 @@ int32_t mySeek(JPEGFILE *handle, int32_t position) {
   return myfile.seek(position);
 }
 
-#ifdef UseDMD
+//#ifdef UseDMD
 
 void drawImg(int x, int y, int width, int height, uint16_t* bitmap) 
 {
+
+ // Serial.print("x ");Serial.print(x);Serial.print(" ");Serial.println(width);
+ // Serial.print("y ");Serial.print(y);Serial.print(" ");  Serial.println(height);
   for (int yy=0; yy<height; yy++) {
-
-
-    for (int xx=0; xx<<width; xx++) {
+    for (int xx=0; xx<width; xx++) {
         display->drawPixel(xx+x, yy+y, bitmap[(yy*width+xx)]);
+       // Serial.print("p: ");Serial.print(x);Serial.print(" ");Serial.print(y); Serial.print(" ");Serial.println(bitmap[(yy*width+xx)]);
     }
   }  
 }
-#else
-  display->pushImage(x, y, w, h, bitmap);
-#endif
+//#else
+//  display->pushImage(x, y, w, h, bitmap);
+//#endif
 
 // This next function will be called during decoding of the jpeg file to
 // render each block to the TFT.  If you use a different TFT library
@@ -76,7 +78,6 @@ int drawMCUs(JPEGDRAW *pDraw)
 {
   int iCount;
   iCount = pDraw->iWidth * pDraw->iHeight; // number of pixels to draw in this call
-
   drawImg(pDraw->x, pDraw->y, pDraw->iWidth, pDraw->iHeight, pDraw->pPixels);
   return 1; // returning true (1) tells JPEGDEC to continue decoding. Returning false (0) would quit decoding immediately.
 } /* drawMCUs() */
@@ -187,7 +188,12 @@ void PlayVideo(String name) {
             ++skipped_frames;
             Serial.println(F("Skip frame"));
           }
-          curr_ms = millis();
+          // here we script misses a delay!
+          while (millis() < next_frame_ms)
+            yield();
+            
+          //start_ms += 250;
+          //curr_ms = millis();
 
           next_frame_ms = start_ms + (++next_frame * 1000 / FPS);
         }

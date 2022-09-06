@@ -26,6 +26,10 @@ void loop()
 #include "SPI.h"
 //#include "SPIFFS.h"
 
+    #define TFT_WHITE 0xFFFF
+    #define TFT_BLACK 0x0000
+    #define TFT_RED   0xF800      /* 255,   0,   0 */
+
 #ifdef UseDMD
 #define PANEL_WIDTH 64 // width: number of LEDs for 1 pannel
 #define PANEL_HEIGHT 32 // height: number of LEDs
@@ -55,16 +59,30 @@ void loop()
 
     // frei: 32, 33   
 
-    #define TFT_WHITE 0xFFFF
-    #define TFT_BLACK 0x0000
-    #define TFT_RED   0xF800      /* 255,   0,   0 */
-
 #include <ESP32-HUB75-MatrixPanel-I2S-DMA.h>
 
 #else
-#include <TFT_eSPI.h>
-#include "gfxfont.h" // Include the header file attached to this sketch
+//#include <TFT_eSPI.h>
+//#include "gfxfont.h" // Include the header file attached to this sketch
 #include "Adafruit_GFX.h"// Hardware-specific library
+#include "Adafruit_ILI9341.h"
+#include <Fonts/FreeSansBold18pt7b.h>
+/*
+GND
+VCC
+SCK   18
+SDA   MOSI  23
+RST 22
+DC  21
+CS  5
+*/
+
+#define TFT_SCK    18
+#define TFT_MOSI   23
+#define TFT_MISO   19
+#define TFT_CS     5
+#define TFT_DC     21
+#define TFT_RESET  22
 #endif
 
 WiFiManager wifiManager;
@@ -87,8 +105,14 @@ HUB75_I2S_CFG mxconfig(
 MatrixPanel_I2S_DMA *display = nullptr;
 
 #else
-TFT_eSPI tft = TFT_eSPI();       // Invoke custom library
-TFT_eSPI * display = &tft;
+//TFT_eSPI tft = TFT_eSPI();       // Invoke custom library
+//TFT_eSPI * display = &tft;
+
+//Adafruit_ILI9341 tft;
+  Adafruit_ILI9341 tft = Adafruit_ILI9341(TFT_CS, TFT_DC, TFT_MOSI, TFT_SCK, TFT_RESET, TFT_MISO);
+
+Adafruit_ILI9341  * display = nullptr;
+
 #endif
 
 #define TFT_GREY 0x5AEB // New colour
@@ -117,11 +141,11 @@ void setup() {
 #ifdef UseDMD
   display = new MatrixPanel_I2S_DMA(mxconfig);
 #else
-  display->init();
+  display = &tft;
  #endif 
 
   display->begin();
-  display->setRotation(1); 
+  display->setRotation(0); 
   display->setTextColor(TFT_WHITE, 0x0000);
   display->fillScreen(TFT_BLACK);
   display->drawRect(0, 0, 128, 32, TFT_RED);
@@ -154,21 +178,24 @@ void setup() {
   Web_Init();
 
 #ifndef UseDMD
-  display->setSwapBytes(true); // We need to swap the colour bytes (endianess)
+  // display->setSwapBytes(true); // We need to swap the colour bytes (endianess)
 #endif
   root = SD.open("/clips");
   getFilesList(root);
 
   delay(2000);
   display->fillScreen(TFT_BLACK);
+#ifndef UseDMD
+  display->setFont(&FreeSansBold18pt7b);
+#endif
 
 }
 
 
 void loop() {
-
-  if (timeCounter < displayTime)
+  if (timeCounter < displayTime) {
      DisplayTime();
+  }
   else {
     display->fillScreen(TFT_BLACK);
     playRandomVideo(); 
@@ -183,7 +210,9 @@ void drawString(const char * thetext, int16_t x, int16_t y, int16_t font) {
   display->setCursor(0, 0);    // start at top left, with 8 pixel of spacing
   display->print(thetext);
 #else
-display->drawString(thetext, x, y, font);
+// display->drawString(thetext, x, y, font);
+  display->setCursor(x, y);    // start at top left, with 8 pixel of spacing
+  display->print(thetext);
 #endif 
 }
 
@@ -216,21 +245,20 @@ void DisplayTime() {
 
   if (cur_sec != last_sec) {
     timeCounter++;
-
     //display->fillScreen(TFT_BLACK);
     display->fillRect(0, 0, 128, 32, TFT_BLACK);
     display->setTextColor(TFT_WHITE, 0x0000);
     display->drawRect(0, 0, 128, 32, TFT_RED);
 
-    char timeString [8];
+    char timeString [10];
     if ((cur_sec % 2) == 1)
       sprintf(timeString, "%d%d:%d%d", uhrzeit[0], uhrzeit[1], uhrzeit[2], uhrzeit[3]);
     else 
       sprintf(timeString, "%d%d %d%d", uhrzeit[0], uhrzeit[1], uhrzeit[2], uhrzeit[3]);
     #ifndef UseDMD
-        display->setFreeFont(FSS9);
+       // display->setFreeFont(FSS9);
     #endif    
-    drawString(timeString, 20, 5);
+    drawString(timeString, 8, 29);
   }
 
 
