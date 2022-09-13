@@ -1,10 +1,18 @@
-//#define firsttimeinit 5
+#include <WiFiManager.h> 
+#include <Arduino.h>
 
+#include <time.h>  
+//#include "FS.h"
+#include "SD.h"
+#include "Web.h"
+#include "SPI.h"
+//#include "SPIFFS.h"
+
+
+//#define firsttimeinit 5
 #define UseDMD true
 
 #ifdef firsttimeinit
-#include <ESPUI.h>
-
 void setup(void)
 {
   Serial.begin(115200);
@@ -16,15 +24,7 @@ void loop()
 }
 #else
 
-#include <WiFiManager.h> 
-#include <Arduino.h>
 
-#include <time.h>  
-//#include "FS.h"
-#include "SD.h"
-#include "Web.h"
-#include "SPI.h"
-//#include "SPIFFS.h"
 
     #define TFT_WHITE 0xFFFF
     #define TFT_BLACK 0x0000
@@ -53,20 +53,23 @@ void loop()
     #define PIN_D   22
     #define PIN_E   -1 
               
-    #define PIN_LE 4
+    #define PIN_LE 4 // LAT 4
     #define PIN_OE  32 //15++++
     #define PIN_CLK 0 //16
 
-    // frei: 32, 33   
-
+    
 #include <ESP32-HUB75-MatrixPanel-I2S-DMA.h>
+#include <Adafruit_GFX.h>
+#include <Fonts/FreeSansBold18pt7b.h>
 
 #else
 //#include <TFT_eSPI.h>
 //#include "gfxfont.h" // Include the header file attached to this sketch
 #include "Adafruit_GFX.h"// Hardware-specific library
-#include "Adafruit_ILI9341.h"
-#include <Fonts/FreeSansBold18pt7b.h>
+//#include "Adafruit_ILI9341.h"
+//#include <Fonts/FreeSansBold18pt7b.h>
+
+#include <Arduino_GFX_Library.h>
 /*
 GND
 VCC
@@ -109,9 +112,17 @@ MatrixPanel_I2S_DMA *display = nullptr;
 //TFT_eSPI * display = &tft;
 
 //Adafruit_ILI9341 tft;
-  Adafruit_ILI9341 tft = Adafruit_ILI9341(TFT_CS, TFT_DC, TFT_MOSI, TFT_SCK, TFT_RESET, TFT_MISO);
+ // Adafruit_ILI9341 tft = Adafruit_ILI9341(TFT_CS, TFT_DC, TFT_MOSI, TFT_SCK, TFT_RESET, TFT_MISO);
 
-Adafruit_ILI9341  * display = nullptr;
+// Adafruit_ILI9341  * display = nullptr;
+
+//Arduino_DataBus *bus = create_default_Arduino_DataBus();
+Arduino_DataBus *bus = new Arduino_SWSPI(TFT_DC, TFT_CS, TFT_SCK, TFT_MOSI, GFX_NOT_DEFINED /* MISO */);
+
+/* More display class: https://github.com/moononournation/Arduino_GFX/wiki/Display-Class */
+Arduino_GFX *display = new Arduino_ILI9341(bus, TFT_RESET, 3 /* rotation */, false /* IPS */);
+
+
 
 #endif
 
@@ -141,7 +152,7 @@ void setup() {
 #ifdef UseDMD
   display = new MatrixPanel_I2S_DMA(mxconfig);
 #else
-  display = &tft;
+  //display = &tft;
  #endif 
 
   display->begin();
@@ -149,6 +160,7 @@ void setup() {
   display->setTextColor(TFT_WHITE, 0x0000);
   display->fillScreen(TFT_BLACK);
   display->drawRect(0, 0, 128, 32, TFT_RED);
+
  // display->setCursor(10, 10);
  // display->setTextSize(1);
  // display->setFreeFont(FSS9);
@@ -177,6 +189,7 @@ void setup() {
 
   Web_Init();
 
+
 #ifndef UseDMD
   // display->setSwapBytes(true); // We need to swap the colour bytes (endianess)
 #endif
@@ -186,7 +199,7 @@ void setup() {
   delay(2000);
   display->fillScreen(TFT_BLACK);
 #ifndef UseDMD
-  display->setFont(&FreeSansBold18pt7b);
+  //display->setFont(&FreeSansBold18pt7b);
 #endif
 
 }
@@ -197,7 +210,7 @@ void loop() {
      DisplayTime();
   }
   else {
-    display->fillScreen(TFT_BLACK);
+    //display->fillScreen(TFT_BLACK);
     playRandomVideo(); 
     timeCounter = 0;
   }  
@@ -207,7 +220,7 @@ void loop() {
 
 void drawString(const char * thetext, int16_t x, int16_t y, int16_t font) {
 #ifdef UseDMD
-  display->setCursor(0, 0);    // start at top left, with 8 pixel of spacing
+  display->setCursor(x, y);    // start at top left, with 8 pixel of spacing
   display->print(thetext);
 #else
 // display->drawString(thetext, x, y, font);
@@ -251,14 +264,24 @@ void DisplayTime() {
     display->drawRect(0, 0, 128, 32, TFT_RED);
 
     char timeString [10];
+#ifndef UseDMD    
     if ((cur_sec % 2) == 1)
       sprintf(timeString, "%d%d:%d%d", uhrzeit[0], uhrzeit[1], uhrzeit[2], uhrzeit[3]);
     else 
       sprintf(timeString, "%d%d %d%d", uhrzeit[0], uhrzeit[1], uhrzeit[2], uhrzeit[3]);
-    #ifndef UseDMD
-       // display->setFreeFont(FSS9);
-    #endif    
-    drawString(timeString, 8, 29);
+      // display->setFreeFont(FSS9);
+      drawString(timeString, 8, 29);
+#else
+    display->setFont(&FreeSansBold18pt7b);
+    if ((cur_sec % 2) == 1)
+      sprintf(timeString, "%d%d:", uhrzeit[0], uhrzeit[1]);
+    else 
+      sprintf(timeString, "%d%d", uhrzeit[0], uhrzeit[1]);  
+    drawString(timeString, 22, 28);
+    sprintf(timeString, "%d%d", uhrzeit[2], uhrzeit[3]);
+    drawString(timeString, 70, 28);   
+#endif   
+
   }
 
 

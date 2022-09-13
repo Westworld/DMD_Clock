@@ -6,7 +6,9 @@
 #include <ESP32-HUB75-MatrixPanel-I2S-DMA.h>
 #else
 #include "Adafruit_GFX.h"// Hardware-specific library
-#include "Adafruit_ILI9341.h"
+//#include "Adafruit_ILI9341.h"
+
+#include <Arduino_GFX_Library.h>
 #endif
 
 void * myOpen(const char *filename, int32_t *size);
@@ -21,7 +23,8 @@ void drawimage(char * name);
 void PlayVideo(String name);
 void getFilesList(File dir);
 void playRandomVideo() ;
-
+void PlayRawVideo(String name, short filetype);
+void drawmyframe();
 #ifdef UseDMD
 
 void drawImg(int x, int y, int width, int height, uint16_t* bitmap) ;

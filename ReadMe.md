@@ -16,10 +16,8 @@ Project is work in process.
 For testing it uses today a little 3.5" display, later to be replaced with DMD.
 
 ## Open jobs:
-- add wifi connector (to get current time)
 - add web interface (for setup)
 - add a switch to use real dmd or display
-- display time
 - interface for color/config of time
 - add tetris routine to display time, optionally
 - documentation
@@ -44,23 +42,19 @@ https://github.com/SuperMakeSomething/mini-video-player
 format SD card as Fat32
 Create folder "clips"
 
+best to use raw video clips, in RGB format (24 bit per pixel), with extension .rgb
+Also supported: MJPEG (but reduced quality).
+
+To record in raw/RGB:
+
 use DMDlibrary.ini, set [Video] to true and add path to folder
 Play your games, try to play as long as possible with all rewards such as multiball, extraball, etc.
 
 The folder will contain Romname.avi with the full game recording.
-Now you need to cut that in parts.
-On Mac I use VLC to convert the avi to m4v.
-Start VLC, use File/Convert, select recording, select profil "Video - H.264+MP3" and save as file.
-Open the converted file with QuickTime Player.
-Scroll near (a little bit before) to begin of scene, click marker. 
-Use Edit/split clip.
-Move to end of scene (a little bit behind), click marker, use Edit/split clip
-delete begin/end, to keep only scene.
-Now select exact begin/end, split clip, then save the final scene with a name such as
-ACDC_Multiball.m4v
-Return to full video, find all scenes
-Finally, we need to convert all clips to .mjpeg.
-I use FFMPEG for that, executing in terminal on Mac:
 
-for i in /Users/thomas/ownCloud/Flipper/dmdrecordings/clips_m4v/*.m4v; do /Users/thomas/Documents/ffmpeg/ffmpeg -i "$i" -vf "fps=30,scale=128:32:flags=lanczos" -q:v 9 "${i%.*}.mjpeg"; done
+Now you need to find a software able to convert that avi to raw format and to cut it...
+
+to just convert:
+ffmpeg -i acd_170c.avi -vcodec rawvideo -pix_fmt rgb24 test.rgb
+
 

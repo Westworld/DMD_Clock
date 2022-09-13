@@ -50,10 +50,10 @@ static void drawTask(void *arg)
   for (int i = 0; i < NUMBER_OF_DRAW_BUFFER; i++)
   {
     jpegdraws[i].pPixels = (uint16_t *)heap_caps_malloc(MAXOUTPUTSIZE * 16 * 16 * 2, MALLOC_CAP_DMA);
-    Serial.printf("#%d draw buffer allocated\n", i);
+    //Serial.printf("#%d draw buffer allocated\n", i);
   }
   JPEGDRAW *pDraw;
-  Serial.println("drawTask start");
+  //Serial.println("drawTask start");
   while (xQueueReceive(xqh, &pDraw, portMAX_DELAY))
   {
     // Serial.printf("task work: x: %d, y: %d, iWidth: %d, iHeight: %d\r\n", pDraw->x, pDraw->y, pDraw->iWidth, pDraw->iHeight);
@@ -62,7 +62,7 @@ static void drawTask(void *arg)
     ++draw_cnt;
   }
   vQueueDelete(xqh);
-  Serial.println("drawTask end");
+  //Serial.println("drawTask end");
   vTaskDelete(NULL);
 }
 

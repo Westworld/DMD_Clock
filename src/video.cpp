@@ -1,24 +1,32 @@
 #define UseDMD true
+#define ImageTest true
 
 #include "video.h"
 
 /* MJPEG Video */
-#define FPS 24
+#define FPS 30
 #define MJPEG_BUFFER_SIZE (160 * 128 * 2 / 4)
 
 static MjpegClass mjpeg;
 int noFiles = 0; // Number of media files on SD Card in clips directory
 #define maxFiles 100
 String filenames[maxFiles];
+int filetypes[maxFiles];
 short nextclipid=-1;
 File myfile;
 JPEGDEC jpeg;
 
+#ifdef ImageTest
+unsigned char buffer[12288];
+#endif
+
 #ifdef UseDMD
 extern MatrixPanel_I2S_DMA *display;
 #else
-extern Adafruit_ILI9341 tft;
-extern Adafruit_ILI9341  * display;
+//extern Adafruit_ILI9341 tft;
+//extern Adafruit_ILI9341  * display;
+
+extern Arduino_GFX *display;
 #endif
 
 void * myOpen(const char *filename, int32_t *size) {
@@ -38,23 +46,33 @@ int32_t mySeek(JPEGFILE *handle, int32_t position) {
   return myfile.seek(position);
 }
 
-//#ifdef UseDMD
+//
+
+void drawmyframe() {
+    for (int xx=0; xx<128; xx++) {
+        display->drawPixelRGB888(xx, 0, 0xE6, 0, 0);
+        display->drawPixelRGB888(xx, 31, 0xE6, 0, 0);
+  }
+}
+
 
 void drawImg(int x, int y, int width, int height, uint16_t* bitmap) 
 {
 
  // Serial.print("x ");Serial.print(x);Serial.print(" ");Serial.println(width);
  // Serial.print("y ");Serial.print(y);Serial.print(" ");  Serial.println(height);
+ #ifdef UseDMD
   for (int yy=0; yy<height; yy++) {
     for (int xx=0; xx<width; xx++) {
         display->drawPixel(xx+x, yy+y, bitmap[(yy*width+xx)]);
        // Serial.print("p: ");Serial.print(x);Serial.print(" ");Serial.print(y); Serial.print(" ");Serial.println(bitmap[(yy*width+xx)]);
     }
   }  
-}
-//#else
+#else
 //  display->pushImage(x, y, w, h, bitmap);
-//#endif
+    display->draw16bitRGBBitmap(x, y, bitmap, width, height);  // draw16bitBeRGBBitmap
+#endif
+}
 
 // This next function will be called during decoding of the jpeg file to
 // render each block to the TFT.  If you use a different TFT library
@@ -92,9 +110,11 @@ static int drawMCU(JPEGDRAW *pDraw)
 
 int getNoFiles(File dir, int numTabs)
 {  
+  String dirchar = "/";
   while (true)
   {
     File entry =  dir.openNextFile();
+    short filetype=0;
     if (! entry)
     {
       // no more files
@@ -110,13 +130,21 @@ int getNoFiles(File dir, int numTabs)
     {
       //Serial.println(entry.name());
       String dirname = dir.name();
-      String dirchar = "/";
       String filename = entry.name();
+
       if (filename.startsWith(".")) continue;
-      if (!(filename.endsWith(".mjpeg"))) continue;
+
+      filetype=0;
+      if ((filename.endsWith(".mjpeg"))) filetype=1;
+      if ((filename.endsWith(".rgb"))) filetype=2;
+      if ((filename.endsWith(".bgr"))) filetype=3;
+     
+      if (filetype == 0) continue;
+
       filename = dirchar + dirname + dirchar + filename;
       Serial.println("filename: "+filename);
 
+      filetypes[noFiles] = filetype;
       filenames[noFiles++] = filename;
       entry.close();
       if (noFiles>maxFiles)
@@ -188,9 +216,9 @@ void PlayVideo(String name) {
             ++skipped_frames;
             Serial.println(F("Skip frame"));
           }
-          // here we script misses a delay!
-          while (millis() < next_frame_ms)
-            yield();
+          // here the script misses a delay!
+          //while (millis() < (next_frame_ms-50))
+          //  yield();
             
           //start_ms += 250;
           //curr_ms = millis();
@@ -211,18 +239,69 @@ void PlayVideo(String name) {
     }
 }
 
+
+void PlayRawVideo(String name, short filetype) {
+  #define rawsize 12288
+
+  Serial.println("Play: "+name);
+  Serial.print("Filetype: ");
+  Serial.println(filetype);
+
+  int32_t size;
+  myfile = SD.open(name);
+  if (!myfile) {
+   Serial.println("file not found");
+   return;
+ }
+  size = myfile.size();
+  Serial.println(size);
+
+  uint8_t *buffer = (uint8_t *)malloc(rawsize);
+
+  while(myfile) {
+    int nextread = myfile.read(buffer, rawsize);
+    if (nextread < rawsize)  {
+      break;
+    }
+
+    int counter=0, report=20;
+    int start_ms = millis();
+    for (int yy=0; yy<32; yy++) 
+      for (int xx=0; xx<128; xx++) {
+        if (filetype == 2)
+          display->drawPixelRGB888(xx, yy, buffer[counter], buffer[counter+1], buffer[counter+2]);  / rgb
+        else
+          display->drawPixelRGB888(xx, yy, buffer[counter+2], buffer[counter+1], buffer[counter]);   // bgr     
+        counter += 3;
+      }     
+
+   int end_ms=millis();
+   if ((end_ms-start_ms) <33)
+      delay(33-(end_ms-start_ms));
+  }
+
+  myfile.close();
+  if (buffer) free(buffer);
+}
+
 void getFilesList(File dir) {
   noFiles = getNoFiles(dir,0);
 }  
 
 void playRandomVideo() {
   short next = random(noFiles);
+  
   while(nextclipid == next) {
     next = random(noFiles);
   }
+  
   nextclipid = next;
 
   String name = filenames[nextclipid];
+  short filetype = filetypes[nextclipid];
 
-   PlayVideo( name);
+  if (filetype == 1)
+    PlayVideo( name);
+  else
+    PlayRawVideo(name, filetype);
 }
