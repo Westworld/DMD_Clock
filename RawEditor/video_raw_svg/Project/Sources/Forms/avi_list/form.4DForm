@@ -1,0 +1,170 @@
+{
+	"$4d": {
+		"version": "1",
+		"kind": "form"
+	},
+	"windowSizingX": "variable",
+	"windowSizingY": "variable",
+	"windowMinWidth": 0,
+	"windowMinHeight": 0,
+	"windowMaxWidth": 32767,
+	"windowMaxHeight": 32767,
+	"rightMargin": 20,
+	"bottomMargin": 20,
+	"events": [
+		"onLoad",
+		"onPageChange",
+		"onValidate",
+		"onClick",
+		"onDoubleClick",
+		"onOutsideCall",
+		"onBeginDragOver",
+		"onDragOver",
+		"onDrop",
+		"onAfterKeystroke",
+		"onMenuSelect",
+		"onPluginArea",
+		"onAfterEdit",
+		"onTimer",
+		"onBoundVariableChange"
+	],
+	"windowTitle": "Select game",
+	"destination": "detailScreen",
+	"pages": [
+		{
+			"objects": {}
+		},
+		{
+			"objects": {
+				"List Box": {
+					"type": "listbox",
+					"left": 17,
+					"top": 16,
+					"width": 608,
+					"height": 522,
+					"events": [
+						"onClick",
+						"onHeaderClick",
+						"onDataChange",
+						"onSelectionChange"
+					],
+					"listboxType": "collection",
+					"dataSource": "Form:C1466.list",
+					"currentItemSource": "Form:C1466.game",
+					"selectionMode": "single",
+					"scrollbarHorizontal": "hidden",
+					"columns": [
+						{
+							"header": {
+								"text": "name",
+								"name": "Kopf1"
+							},
+							"name": "this.name",
+							"footer": {
+								"name": "Fußteil1"
+							},
+							"dataSource": "This:C1470.name",
+							"width": 204,
+							"enterable": false
+						},
+						{
+							"header": {
+								"name": "Kopf2",
+								"text": "size"
+							},
+							"name": "Spalte2",
+							"footer": {
+								"name": "Fußteil2"
+							},
+							"dataSource": "This:C1470.size",
+							"dataSourceTypeHint": "number",
+							"width": 94,
+							"enterable": false
+						},
+						{
+							"header": {
+								"name": "Kopf3",
+								"text": "frames"
+							},
+							"name": "Spalte3",
+							"footer": {
+								"name": "Fußteil3"
+							},
+							"dataSource": "This:C1470.frames",
+							"width": 103,
+							"dataSourceTypeHint": "number",
+							"numberFormat": "###,###,##0 ;###,##0-",
+							"enterable": false
+						},
+						{
+							"header": {
+								"name": "Kopf4",
+								"text": "converted"
+							},
+							"name": "Spalte4",
+							"footer": {
+								"name": "Fußteil4"
+							},
+							"dataSource": "This:C1470.converted",
+							"dataSourceTypeHint": "boolean",
+							"width": 92,
+							"controlTitle": "converted",
+							"enterable": false
+						},
+						{
+							"header": {
+								"name": "Kopf5",
+								"text": "segmented"
+							},
+							"name": "Spalte5",
+							"footer": {
+								"name": "Fußteil5"
+							},
+							"dataSource": "This:C1470.segmented",
+							"dataSourceTypeHint": "boolean",
+							"width": 98,
+							"controlTitle": "Segmented",
+							"enterable": false
+						}
+					]
+				},
+				"Schaltfläche": {
+					"type": "button",
+					"text": "Select",
+					"top": 558,
+					"left": 526,
+					"width": 94,
+					"height": 27,
+					"events": [
+						"onClick"
+					],
+					"defaultButton": true,
+					"action": "accept",
+					"method": "ObjectMethods/Schaltfläche.4dm"
+				},
+				"Schaltfläche1": {
+					"type": "button",
+					"text": "Cancel",
+					"top": 558,
+					"left": 412,
+					"width": 94,
+					"height": 27,
+					"events": [
+						"onClick"
+					],
+					"defaultButton": false,
+					"action": "cancel"
+				}
+			}
+		}
+	],
+	"geometryStamp": 12,
+	"method": "method.4dm",
+	"editor": {
+		"activeView": "View 1",
+		"defaultView": "View 1",
+		"views": {
+			"View 1": {}
+		}
+	}
+}

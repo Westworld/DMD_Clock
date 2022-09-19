@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE base SYSTEM "http://www.4d.com/dtd/2007/base.dtd" >
+<base name="video_raw_svg" uuid="9EDDDD44D385497E9911AED5F24307BA" collation_locale="de">
+	<schema name="DEFAULT_SCHEMA"/>
+	<table name="Games" uuid="B68548A4269441ACB293D4058032DEDF" id="1">
+		<field name="ID" uuid="2A61AF8E98E64F2ABD102294032EE520" type="10" unique="true" autogenerate="true" store_as_UUID="true" not_null="true" id="1"/>
+		<field name="avi_name" uuid="E230DCB6682847EB8BECA1E97901E87E" type="10" limiting_length="255" id="2"/>
+		<field name="framecount" uuid="CA690DBAA5EA4BFDADAC2C7E2F9EE6BB" type="4" id="3"/>
+		<field name="filesize" uuid="AF328AE1C8134D989B42B3E628D06620" type="4" id="4"/>
+		<field name="parts" uuid="7F931BBF60BB4BDFB41407D32FA4C1E9" type="21" blob_switch_size="2147483647" id="5"/>
+		<field name="converted" uuid="55D0F82AC83B4A40B426468062EFDF05" type="1" id="6"/>
+		<field name="segmented" uuid="DC4B3D8ABAC54AD89C0DB2104110061B" type="1" id="7"/>
+		<primary_key field_name="ID" field_uuid="2A61AF8E98E64F2ABD102294032EE520"/>
+		<table_extra>
+			<editor_table_info displayable_fields_count="9">
+				<color red="255" green="255" blue="255" alpha="0"/>
+				<coordinates left="138.203125" top="88.3125" width="133.35546875" height="238.3125"/>
+			</editor_table_info>
+		</table_extra>
+	</table>
+	<table name="Settings" uuid="A0D574AD9461460FAD67111922B0023B" id="2">
+		<field name="ID" uuid="B52ADB81A80A46C0A92CE3E5F026DD04" type="10" unique="true" autogenerate="true" store_as_UUID="true" not_null="true" id="1"/>
+		<field name="root" uuid="5EBC72645F484A6EB331E40024D02795" type="10" limiting_length="255" id="2"/>
+		<primary_key field_name="ID" field_uuid="B52ADB81A80A46C0A92CE3E5F026DD04"/>
+		<table_extra>
+			<editor_table_info displayable_fields_count="6">
+				<color red="255" green="255" blue="255" alpha="0"/>
+				<coordinates left="430.58203125" top="96.7265625" width="120" height="167.33203125"/>
+			</editor_table_info>
+		</table_extra>
+	</table>
+	<index kind="regular" unique_keys="true" uuid="34D90A8D4E8943FCBB0472F3F84FADE7" type="7">
+		<field_ref uuid="B52ADB81A80A46C0A92CE3E5F026DD04" name="ID">
+			<table_ref uuid="A0D574AD9461460FAD67111922B0023B" name="Settings"/>
+		</field_ref>
+	</index>
+	<index kind="regular" unique_keys="true" uuid="965342DAE0214578B26F9A9A6A4E4DF4" type="7">
+		<field_ref uuid="2A61AF8E98E64F2ABD102294032EE520" name="ID">
+			<table_ref uuid="B68548A4269441ACB293D4058032DEDF" name="Games"/>
+		</field_ref>
+	</index>
+	<base_extra __stringCompHash="icu:68.1.0" __keywordBuildingHash="icu:68.1.0">
+		<journal_file journal_file_enabled="true"/>
+	</base_extra>
+</base>

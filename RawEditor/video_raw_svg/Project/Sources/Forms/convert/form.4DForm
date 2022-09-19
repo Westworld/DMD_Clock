@@ -1,0 +1,394 @@
+{
+	"$4d": {
+		"version": "1",
+		"kind": "form"
+	},
+	"windowSizingX": "variable",
+	"windowSizingY": "variable",
+	"windowMinWidth": 0,
+	"windowMinHeight": 0,
+	"windowMaxWidth": 32767,
+	"windowMaxHeight": 32767,
+	"rightMargin": 20,
+	"bottomMargin": 20,
+	"events": [
+		"onLoad",
+		"onPageChange",
+		"onValidate",
+		"onClick",
+		"onDoubleClick",
+		"onOutsideCall",
+		"onBeginDragOver",
+		"onDragOver",
+		"onDrop",
+		"onAfterKeystroke",
+		"onMenuSelect",
+		"onPluginArea",
+		"onAfterEdit",
+		"onTimer",
+		"onBoundVariableChange"
+	],
+	"windowTitle": "RAW edit",
+	"destination": "detailScreen",
+	"pages": [
+		{
+			"objects": {}
+		},
+		{
+			"objects": {
+				"Eingabe": {
+					"type": "input",
+					"left": 18,
+					"top": 55,
+					"width": 819,
+					"height": 209,
+					"dataSourceTypeHint": "picture",
+					"dataSource": "mypicture",
+					"sizingX": "fixed",
+					"sizingY": "fixed"
+				},
+				"Schaltfläche": {
+					"type": "button",
+					"text": "Frame",
+					"top": 346,
+					"left": 388,
+					"width": 72,
+					"height": 21,
+					"events": [
+						"onClick"
+					],
+					"method": "ObjectMethods/Schaltfläche.4dm"
+				},
+				"Eingabe1": {
+					"type": "input",
+					"left": 388,
+					"top": 322,
+					"width": 72,
+					"height": 17,
+					"dataSource": "Form:C1466.frame",
+					"dataSourceTypeHint": "integer",
+					"method": "ObjectMethods/Eingabe1.4dm"
+				},
+				"Schaltfläche2": {
+					"type": "button",
+					"text": "Auto",
+					"top": 322,
+					"left": 22,
+					"width": 86,
+					"height": 39,
+					"events": [
+						"onClick"
+					],
+					"method": "ObjectMethods/Schaltfläche2.4dm"
+				},
+				"Schaltfläche3": {
+					"type": "button",
+					"text": "Stop",
+					"top": 322,
+					"left": 123,
+					"width": 86,
+					"height": 39,
+					"events": [
+						"onClick"
+					],
+					"method": "ObjectMethods/Schaltfläche3.4dm"
+				},
+				"Schaltfläche4": {
+					"type": "button",
+					"text": "< 1 F",
+					"top": 322,
+					"left": 339,
+					"width": 36,
+					"height": 39,
+					"events": [
+						"onClick"
+					],
+					"method": "ObjectMethods/Schaltfläche4.4dm"
+				},
+				"Schaltfläche5": {
+					"type": "button",
+					"text": "< 10 F",
+					"top": 322,
+					"left": 287,
+					"width": 44,
+					"height": 39,
+					"events": [
+						"onClick"
+					],
+					"method": "ObjectMethods/Schaltfläche5.4dm"
+				},
+				"Schaltfläche6": {
+					"type": "button",
+					"text": "< 30 F",
+					"top": 322,
+					"left": 231,
+					"width": 46,
+					"height": 39,
+					"events": [
+						"onClick"
+					],
+					"method": "ObjectMethods/Schaltfläche6.4dm"
+				},
+				"Schaltfläche7": {
+					"type": "button",
+					"text": "> 1 F",
+					"top": 322,
+					"left": 479,
+					"width": 36,
+					"height": 39,
+					"events": [
+						"onClick"
+					],
+					"method": "ObjectMethods/Schaltfläche7.4dm"
+				},
+				"Schaltfläche8": {
+					"type": "button",
+					"text": "> 10 F",
+					"top": 322,
+					"left": 524,
+					"width": 44,
+					"height": 39,
+					"events": [
+						"onClick"
+					],
+					"method": "ObjectMethods/Schaltfläche8.4dm"
+				},
+				"Schaltfläche9": {
+					"type": "button",
+					"text": "> 30 F",
+					"top": 322,
+					"left": 576,
+					"width": 46,
+					"height": 39,
+					"events": [
+						"onClick"
+					],
+					"method": "ObjectMethods/Schaltfläche9.4dm"
+				},
+				"Thermometer": {
+					"type": "progress",
+					"left": 11,
+					"top": 284,
+					"width": 826,
+					"height": 18,
+					"max": 100,
+					"dataSource": "Form:C1466.pos",
+					"method": "ObjectMethods/Thermometer.4dm",
+					"events": [
+						"onClick"
+					],
+					"enterable": true
+				},
+				"Schaltfläche10": {
+					"type": "button",
+					"text": "Select AVI",
+					"top": 14,
+					"left": 177,
+					"width": 129,
+					"height": 24,
+					"events": [
+						"onClick"
+					],
+					"method": "ObjectMethods/Schaltfläche10.4dm"
+				},
+				"Eingabe2": {
+					"type": "input",
+					"left": 319,
+					"top": 18,
+					"width": 352,
+					"height": 17,
+					"dataSource": "Form:C1466.info",
+					"enterable": false
+				},
+				"List Box": {
+					"type": "listbox",
+					"left": 18,
+					"top": 412,
+					"width": 804,
+					"height": 275,
+					"events": [
+						"onClick",
+						"onHeaderClick",
+						"onDataChange",
+						"onSelectionChange"
+					],
+					"listboxType": "collection",
+					"rowHeight": "68px",
+					"dataSource": "Form:C1466.clips",
+					"selectionMode": "single",
+					"currentItemSource": "Form:C1466.theclip",
+					"currentItemPositionSource": "Form:C1466.clippos",
+					"columns": [
+						{
+							"header": {
+								"text": "name",
+								"name": "Kopf1"
+							},
+							"name": "Spalte1",
+							"footer": {
+								"name": "Fußteil1"
+							},
+							"dataSource": "This:C1470.name",
+							"width": 197
+						},
+						{
+							"header": {
+								"name": "Kopf2",
+								"text": "from"
+							},
+							"name": "Spalte2",
+							"footer": {
+								"name": "Fußteil2"
+							},
+							"dataSource": "This:C1470.from",
+							"width": 81
+						},
+						{
+							"header": {
+								"name": "Kopf3",
+								"text": "till"
+							},
+							"name": "Spalte3",
+							"footer": {
+								"name": "Fußteil3"
+							},
+							"dataSource": "This:C1470.till",
+							"width": 78
+						},
+						{
+							"header": {
+								"name": "Kopf4",
+								"text": "frames"
+							},
+							"name": "Spalte4",
+							"footer": {
+								"name": "Fußteil4"
+							},
+							"dataSource": "This:C1470.frames",
+							"width": 88
+						},
+						{
+							"header": {
+								"name": "Kopf5",
+								"text": "preview"
+							},
+							"name": "Spalte5",
+							"footer": {
+								"name": "Fußteil5"
+							},
+							"dataSource": "This:C1470.pict",
+							"dataSourceTypeHint": "picture",
+							"width": 262,
+							"pictureFormat": "truncatedTopLeft"
+						}
+					]
+				},
+				"Schaltfläche1": {
+					"type": "button",
+					"text": "Save clips",
+					"top": 701,
+					"left": 15,
+					"width": 129,
+					"height": 24,
+					"events": [
+						"onClick"
+					],
+					"method": "ObjectMethods/Schaltfläche1.4dm"
+				},
+				"Schaltfläche11": {
+					"type": "button",
+					"text": "Set root",
+					"top": 14,
+					"left": 18,
+					"width": 129,
+					"height": 24,
+					"events": [
+						"onClick"
+					],
+					"method": "ObjectMethods/Schaltfläche11.4dm"
+				},
+				"Schaltfläche12": {
+					"type": "button",
+					"text": "+",
+					"top": 386,
+					"left": 15,
+					"width": 36,
+					"height": 18,
+					"events": [
+						"onClick"
+					],
+					"method": "ObjectMethods/Schaltfläche12.4dm"
+				},
+				"Schaltfläche13": {
+					"type": "button",
+					"text": "Setze [",
+					"top": 386,
+					"left": 80,
+					"width": 77,
+					"height": 18,
+					"events": [
+						"onClick"
+					],
+					"method": "ObjectMethods/Schaltfläche13.4dm"
+				},
+				"Schaltfläche14": {
+					"type": "button",
+					"text": "Setze ]",
+					"top": 386,
+					"left": 177,
+					"width": 77,
+					"height": 18,
+					"events": [
+						"onClick"
+					],
+					"method": "ObjectMethods/Schaltfläche14.4dm"
+				},
+				"Schaltfläche15": {
+					"type": "button",
+					"text": "Gehe [",
+					"top": 386,
+					"left": 312,
+					"width": 77,
+					"height": 18,
+					"events": [
+						"onClick"
+					],
+					"method": "ObjectMethods/Schaltfläche15.4dm"
+				},
+				"Schaltfläche16": {
+					"type": "button",
+					"text": "Gehe ]",
+					"top": 386,
+					"left": 403,
+					"width": 77,
+					"height": 18,
+					"events": [
+						"onClick"
+					],
+					"method": "ObjectMethods/Schaltfläche16.4dm"
+				},
+				"Schaltfläche18": {
+					"type": "button",
+					"text": "Create clips",
+					"top": 701,
+					"left": 164,
+					"width": 129,
+					"height": 24,
+					"events": [
+						"onClick"
+					],
+					"method": "ObjectMethods/Schaltfläche18.4dm"
+				}
+			}
+		}
+	],
+	"geometryStamp": 100,
+	"editor": {
+		"activeView": "View 1",
+		"defaultView": "View 1",
+		"views": {
+			"View 1": {}
+		}
+	},
+	"method": "method.4dm"
+}
