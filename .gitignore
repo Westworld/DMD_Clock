@@ -3,3 +3,25 @@
 .vscode/c_cpp_properties.json
 .vscode/launch.json
 .vscode/ipch
+
+
+##4D stuff
+# Data folder
+[dD][aA][tT][aA]/
+
+# Derived data
+DerivedData/
+
+# Libraries
+Libraries/
+
+# User preferences
+userPreferences.*/
+
+# Uncomment (remove the following # ) to ignore Trash
+# Project/Trash
+
+# System files
+.DS_Store
+ehthumbs.db
+Thumbs.db
