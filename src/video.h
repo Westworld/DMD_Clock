@@ -22,6 +22,7 @@ int getNoFiles(File dir, int numTabs);
 void drawimage(char * name);
 void PlayVideo(String name);
 void getFilesList(File dir);
+void getCacheList(String path);
 void playRandomVideo() ;
 void PlayRawVideo(String name, short filetype);
 void drawmyframe();

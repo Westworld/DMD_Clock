@@ -7,6 +7,6 @@ If (Form:C1466.theclip.from#0)
 	LoadFrame(->$pict)
 	Form:C1466.frame:=$old
 	Form:C1466.theclip.pict:=$pict  //$pict
-	SET PICTURE TO PASTEBOARD:C521($pict)
+	//SET PICTURE TO PASTEBOARD($pict)
 	Form:C1466.theclip:=Form:C1466.theclip
 End if 

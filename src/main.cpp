@@ -6,11 +6,12 @@
 #include "SD.h"
 #include "Web.h"
 #include "SPI.h"
+#include <ArduinoOTA.h>
 //#include "SPIFFS.h"
 
 
 //#define firsttimeinit 5
-#define UseDMD true
+// #define UseDMD true   // defined in platformio.ini
 
 #ifdef firsttimeinit
 void setup(void)
@@ -139,7 +140,7 @@ byte uhrzeit[6] = {1, 2, 3, 0, 0, 0};
   int16_t last_sec  = -1;
 const bool twelveHourFormat = false;  
 const bool displaySeconds = false;
-int16_t displayTime = 10;
+int16_t displayTime = 20;
 int16_t timeCounter = 0;
 
 void setup() {
@@ -189,14 +190,46 @@ void setup() {
 
   Web_Init();
 
+    ArduinoOTA
+    .onStart([]() {
+      String type;
+      if (ArduinoOTA.getCommand() == U_FLASH)
+        type = "sketch";
+      else // U_SPIFFS
+        type = "filesystem";
+
+      // NOTE: if updating SPIFFS this would be the place to unmount SPIFFS using SPIFFS.end()
+      Serial.println("Start updating " + type);
+    })
+    .onEnd([]() {
+      Serial.println("\nEnd");
+    })
+    .onProgress([](unsigned int progress, unsigned int total) {
+      Serial.printf("Progress: %u%%\r", (progress / (total / 100)));
+    })
+    .onError([](ota_error_t error) {
+      Serial.printf("Error[%u]: ", error);
+      if (error == OTA_AUTH_ERROR) Serial.println("Auth Failed");
+      else if (error == OTA_BEGIN_ERROR) Serial.println("Begin Failed");
+      else if (error == OTA_CONNECT_ERROR) Serial.println("Connect Failed");
+      else if (error == OTA_RECEIVE_ERROR) Serial.println("Receive Failed");
+      else if (error == OTA_END_ERROR) Serial.println("End Failed");
+    });
+
+  ArduinoOTA.begin();
+
 
 #ifndef UseDMD
   // display->setSwapBytes(true); // We need to swap the colour bytes (endianess)
 #endif
-  root = SD.open("/clips");
-  getFilesList(root);
 
-  delay(2000);
+
+  root = SD.open("/clips");
+  if (SD.exists("/cache.txt"))
+    getCacheList("/cache.txt");
+  else
+    getFilesList(root);
+
   display->fillScreen(TFT_BLACK);
 #ifndef UseDMD
   //display->setFont(&FreeSansBold18pt7b);
@@ -204,8 +237,14 @@ void setup() {
 
 }
 
+void loopalwaysrun() {
+    ArduinoOTA.handle();
+}
 
 void loop() {
+  loopalwaysrun();  // also called from Video player
+
+
   if (timeCounter < displayTime) {
      DisplayTime();
   }
@@ -256,9 +295,8 @@ void DisplayTime() {
   int16_t cur_sec;
   GetTime( cur_hour,cur_min, cur_sec);
 
-  if (cur_sec != last_sec) {
+  if ((cur_min != last_min) | (timeCounter == 0)) {
     timeCounter++;
-    //display->fillScreen(TFT_BLACK);
     display->fillRect(0, 0, 128, 32, TFT_BLACK);
     display->setTextColor(TFT_WHITE, 0x0000);
     display->drawRect(0, 0, 128, 32, TFT_RED);
@@ -283,6 +321,18 @@ void DisplayTime() {
 #endif   
 
   }
+  else
+  if(cur_sec != last_sec) {
+    timeCounter++;
+    if ((cur_sec % 2) == 1) {
+        display->setTextColor(TFT_WHITE, 0x0000);
+        drawString(":", 60, 28);
+    } 
+    else 
+    {
+      display->fillRect(60, 5, 10, 24, TFT_BLACK);
+    }
+  }
 
 
   last_hour = cur_hour;
@@ -290,5 +340,6 @@ void DisplayTime() {
   last_sec = cur_sec;
 
 }
+
 
 #endif

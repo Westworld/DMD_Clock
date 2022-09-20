@@ -1,4 +1,4 @@
-#define UseDMD true
+// #define UseDMD true  // defined in platformio.ini
 #define ImageTest true
 
 #include "video.h"
@@ -9,7 +9,7 @@
 
 static MjpegClass mjpeg;
 int noFiles = 0; // Number of media files on SD Card in clips directory
-#define maxFiles 100
+#define maxFiles 500
 String filenames[maxFiles];
 int filetypes[maxFiles];
 short nextclipid=-1;
@@ -28,6 +28,8 @@ extern MatrixPanel_I2S_DMA *display;
 
 extern Arduino_GFX *display;
 #endif
+
+extern void loopalwaysrun();
 
 void * myOpen(const char *filename, int32_t *size) {
   myfile = SD.open(filename);
@@ -147,7 +149,7 @@ int getNoFiles(File dir, int numTabs)
       filetypes[noFiles] = filetype;
       filenames[noFiles++] = filename;
       entry.close();
-      if (noFiles>maxFiles)
+      if (noFiles>=maxFiles)
         return noFiles-1;
     }
   }
@@ -224,6 +226,7 @@ void PlayVideo(String name) {
           //curr_ms = millis();
 
           next_frame_ms = start_ms + (++next_frame * 1000 / FPS);
+          loopalwaysrun();
         }
 
         int time_used = millis() - start_ms;
@@ -259,26 +262,36 @@ void PlayRawVideo(String name, short filetype) {
   uint8_t *buffer = (uint8_t *)malloc(rawsize);
 
   while(myfile) {
+    unsigned long end_ms = millis()+40;  // play a little bit slower as real
+
     int nextread = myfile.read(buffer, rawsize);
     if (nextread < rawsize)  {
       break;
     }
 
     int counter=0, report=20;
-    int start_ms = millis();
+
     for (int yy=0; yy<32; yy++) 
       for (int xx=0; xx<128; xx++) {
         if (filetype == 2)
-          display->drawPixelRGB888(xx, yy, buffer[counter], buffer[counter+1], buffer[counter+2]);  / rgb
+          display->drawPixelRGB888(xx, yy, buffer[counter], buffer[counter+2], buffer[counter+1]);  // rgb  --  +0, +2, +1?
         else
           display->drawPixelRGB888(xx, yy, buffer[counter+2], buffer[counter+1], buffer[counter]);   // bgr     
         counter += 3;
       }     
 
-   int end_ms=millis();
-   if ((end_ms-start_ms) <33)
-      delay(33-(end_ms-start_ms));
-  }
+//display->setFont(NULL);
+//display->setCursor(1, 15);    // start at top left, with 8 pixel of spacing
+//unsigned long diff = millis()-end_ms;
+//  display->print(diff);
+
+  while (millis()<end_ms) 
+    loopalwaysrun();
+
+  // int wait_ms=millis()-start_ms;
+  // if (wait_ms <100)
+  //    vTaskDelay(100-wait_ms);
+  }  // loop through video file till finished
 
   myfile.close();
   if (buffer) free(buffer);
@@ -287,6 +300,32 @@ void PlayRawVideo(String name, short filetype) {
 void getFilesList(File dir) {
   noFiles = getNoFiles(dir,0);
 }  
+
+short getCacheList(String path) {
+  File card;
+  String filename;
+  short filetype=0;
+
+  noFiles=0;
+
+  card = SD.open(path);
+  if(card) {
+    while(card.available()) {
+      filename = card.readStringUntil('\n');
+
+      filetype=0;
+      if ((filename.endsWith(".mjpeg"))) filetype=1;
+      if ((filename.endsWith(".rgb"))) filetype=2;
+      if ((filename.endsWith(".bgr"))) filetype=3;
+
+      filetypes[noFiles] = filetype;
+      filenames[noFiles++] = filename;
+
+    }
+    card.close();
+  }
+  return noFiles;
+}
 
 void playRandomVideo() {
   short next = random(noFiles);

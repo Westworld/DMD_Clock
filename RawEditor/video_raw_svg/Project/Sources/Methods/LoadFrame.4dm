@@ -4,6 +4,7 @@
 $whichframe:=Form:C1466.frame
 
 $file:=Form:C1466.rgb
+$time:=Milliseconds:C459
 
 $frame:=128*32*3
 If (Count parameters:C259>0)
@@ -36,7 +37,7 @@ If (BLOB size:C605($input)=$frame)
 	Else 
 		ARRAY TEXT:C222(picturebuffer; 128*32)
 		For ($i; 1; 128*32)
-			picturebuffer{$i}:="black"
+			picturebuffer{$i}:=""
 		End for 
 		
 		svgRef:=SVG_New(128*($pixelsize+$pixeldistance)+100; 32*($pixelsize+$pixeldistance)+100; "DMD")
@@ -73,17 +74,29 @@ If (BLOB size:C605($input)=$frame)
 		$MyPicture:=SVG_Export_to_picture(svgRef; 2)
 		If (Count parameters:C259>0)
 			$1->:=$MyPicture
+			For ($i; 1; 128*32)
+				picturebuffer{$i}:=""
+			End for 
 		Else 
 			MyPicture:=$MyPicture
 		End if 
 	Else 
 		If (Count parameters:C259>0)
 			$MyPicture:=MyPicture
-			CONVERT PICTURE:C1002($MyPicture; ".png")
+			//CONVERT PICTURE($MyPicture; ".png")
 			$1->:=$MyPicture
+			For ($i; 1; 128*32)
+				picturebuffer{$i}:=""
+			End for 
+			
 		End if 
 	End if 
 	
 End if 
 
 Form:C1466.frame:=$whichframe+1
+$time2:=Milliseconds:C459
+$diff:=$time2-$time
+If ($diff<30)
+	DELAY PROCESS:C323(Current process:C322; 1)
+End if 
