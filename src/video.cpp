@@ -150,9 +150,17 @@ int getNoFiles(File dir, int numTabs)
       filenames[noFiles++] = filename;
       entry.close();
       if (noFiles>=maxFiles)
-        return noFiles-1;
+        { noFiles--; break;}
     }
   }
+
+  // create cache
+  File card;
+  card = SD.open("/cache.txt",FILE_WRITE);
+  for (short i=0; i<noFiles;i++) {
+    card.println(filenames[i]);
+  }
+  card.close();
   return noFiles;
 }
 
