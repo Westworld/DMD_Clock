@@ -26,6 +26,8 @@ short getCacheList(String path);
 void playRandomVideo() ;
 void PlayRawVideo(String name, short filetype);
 void drawmyframe();
+void DebugString (String message);
+
 #ifdef UseDMD
 
 void drawImg(int x, int y, int width, int height, uint16_t* bitmap) ;

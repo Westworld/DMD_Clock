@@ -8,10 +8,27 @@
 #include "SPI.h"
 #include <ArduinoOTA.h>
 //#include "SPIFFS.h"
-
+#include "video.h"
+#include "main.h"
+#include "web.h"
 
 //#define firsttimeinit 5
 // #define UseDMD true   // defined in platformio.ini
+
+    #define TFT_WHITE 0xFFFF
+    #define TFT_BLACK 0x0000
+    #define TFT_RED   0xF800      /* 255,   0,   0 */
+
+// flash variables
+u_int8_t Flash_version=1;
+bool twelveHourFormat = false;  
+bool displaySeconds = false;
+u_int8_t displayTime = 20;
+u_int16_t TimeColor = TFT_WHITE;  
+u_int16_t frameColor = TFT_RED;  
+
+
+int16_t timeCounter = 0;
 
 #ifdef firsttimeinit
 void setup(void)
@@ -25,11 +42,6 @@ void loop()
 }
 #else
 
-
-
-    #define TFT_WHITE 0xFFFF
-    #define TFT_BLACK 0x0000
-    #define TFT_RED   0xF800      /* 255,   0,   0 */
 
 #ifdef UseDMD
 #define PANEL_WIDTH 64 // width: number of LEDs for 1 pannel
@@ -94,8 +106,7 @@ WiFiManager wifiManager;
 #define MY_TZ "CET-1CEST,M3.5.0/02,M10.5.0/03" 
 const char* wifihostname = "DMD Clock";
 
-#include "video.h"
-#include "main.h"
+
 
 #ifdef UseDMD
 HUB75_I2S_CFG::i2s_pins _pins={PIN_R1, PIN_G1, PIN_B1, PIN_R2, PIN_G2, PIN_B2, PIN_A, PIN_B, PIN_C, PIN_D, PIN_E, PIN_LE, PIN_OE, PIN_CLK};
@@ -138,10 +149,8 @@ byte uhrzeit[6] = {1, 2, 3, 0, 0, 0};
   int16_t last_hour = -1;
   int16_t last_min  = -1;
   int16_t last_sec  = -1;
-const bool twelveHourFormat = false;  
-const bool displaySeconds = false;
-int16_t displayTime = 20;
-int16_t timeCounter = 0;
+
+
 
 void setup() {
   Serial.begin(115200);
@@ -223,10 +232,11 @@ void setup() {
   // display->setSwapBytes(true); // We need to swap the colour bytes (endianess)
 #endif
 
+  Flash_Read();
 
   root = SD.open("/clips");
   if (SD.exists("/cache.txt"))
-    getCacheList("/cache.txt");
+    { getCacheList("/cache.txt"); delay(1000);  }
   else
     getFilesList(root);
 
@@ -298,8 +308,8 @@ void DisplayTime() {
   if ((cur_min != last_min) | (timeCounter == 0)) {
     timeCounter++;
     display->fillRect(0, 0, 128, 32, TFT_BLACK);
-    display->setTextColor(TFT_WHITE, 0x0000);
-    display->drawRect(0, 0, 128, 32, TFT_RED);
+    display->setTextColor(TimeColor, 0x0000);
+    display->drawRect(0, 0, 128, 32, frameColor);
 
     char timeString [10];
 #ifndef UseDMD    
@@ -325,7 +335,7 @@ void DisplayTime() {
   if(cur_sec != last_sec) {
     timeCounter++;
     if ((cur_sec % 2) == 1) {
-        display->setTextColor(TFT_WHITE, 0x0000);
+        display->setTextColor(TimeColor, 0x0000);
         drawString(":", 60, 28);
     } 
     else 

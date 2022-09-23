@@ -110,6 +110,12 @@ static int drawMCU(JPEGDRAW *pDraw)
   return 1;
 }
 
+void DebugString (String message) {
+  display->setFont(NULL);
+  display->setCursor(1, 15);    // start at top left, with 8 pixel of spacing
+  display->print(message);
+}
+
 int getNoFiles(File dir, int numTabs)
 {  
   String dirchar = "/";
@@ -155,6 +161,7 @@ int getNoFiles(File dir, int numTabs)
   }
 
   // create cache
+  DebugString("create new cache");
   File card;
   card = SD.open("/cache.txt",FILE_WRITE);
   for (short i=0; i<noFiles;i++) {
@@ -263,14 +270,16 @@ void PlayRawVideo(String name, short filetype) {
   if (!myfile) {
    Serial.println("file not found");
    return;
- }
+  }
   size = myfile.size();
   Serial.println(size);
 
   uint8_t *buffer = (uint8_t *)malloc(rawsize);
+  unsigned long end_ms;
+  int framecounter=0;
 
   while(myfile) {
-    unsigned long end_ms = millis()+40;  // play a little bit slower as real
+    end_ms = millis()+45;  // play a little bit slower as real
 
     int nextread = myfile.read(buffer, rawsize);
     if (nextread < rawsize)  {
@@ -288,21 +297,25 @@ void PlayRawVideo(String name, short filetype) {
         counter += 3;
       }     
 
-//display->setFont(NULL);
-//display->setCursor(1, 15);    // start at top left, with 8 pixel of spacing
-//unsigned long diff = millis()-end_ms;
-//  display->print(diff);
+    while (millis()<end_ms) 
+      loopalwaysrun();
 
-  while (millis()<end_ms) 
-    loopalwaysrun();
+    // DebugString(  String( framecounter++)  );
+  }
+    myfile.close();
+    if (buffer) free(buffer);
 
-  // int wait_ms=millis()-start_ms;
-  // if (wait_ms <100)
-  //    vTaskDelay(100-wait_ms);
-  }  // loop through video file till finished
+    if (framecounter<50)  // for short videos, wait a second
+      while (framecounter++ < 200)
+        loopalwaysrun();
 
-  myfile.close();
-  if (buffer) free(buffer);
+   if (framecounter < 50)
+    end_ms = millis()+1000;  // short video - wait one second
+   else
+    end_ms = millis()+500;  // wait half a second
+
+   while (millis()<end_ms) 
+    loopalwaysrun();    
 }
 
 void getFilesList(File dir) {
@@ -320,7 +333,8 @@ short getCacheList(String path) {
   if(card) {
     while(card.available()) {
       filename = card.readStringUntil('\n');
-
+      if ((filename.endsWith("\r"))) filename.remove(filename.length()-1);
+      // remove \r
       filetype=0;
       if ((filename.endsWith(".mjpeg"))) filetype=1;
       if ((filename.endsWith(".rgb"))) filetype=2;
