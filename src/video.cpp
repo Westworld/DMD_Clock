@@ -301,6 +301,15 @@ void PlayRawVideo(String name, short filetype) {
   Serial.println(size);
 
   uint8_t *buffer = (uint8_t *)malloc(rawsize);
+#ifndef UseDMD
+  uint16_t *memory = (uint16_t *)malloc(128*32*2);
+    for (int yy=0; yy<32; yy++) 
+      for (int xx=0; xx<128; xx++) {
+         display->drawRect(xx*2, yy*2, 2, 2, BLACK);
+         memory[yy*128+xx]=BLACK;
+      }
+#endif
+
   unsigned long end_ms;
   int framecounter=0;
 
@@ -321,14 +330,10 @@ void PlayRawVideo(String name, short filetype) {
             display->drawPixelRGB888(xx, yy, buffer[counter], buffer[counter+2], buffer[counter+1]);  // rgb  --  +0, +2, +1?
           #else
             uint16_t color = color565( buffer[counter], buffer[counter+1], buffer[counter+2]);
-            short x=xx*2;
-            short y=yy*2;
-            display->drawRect(x, y, 2, 2, color);
-            /*
-            display->drawPixel(x, y, color);
-            display->drawPixel(x+1, y, color);
-            display->drawPixel(x, y+1, color);
-            display->drawPixel(x+1, y+2, color); */
+            if(memory[yy*128+xx] != color ) {
+              display->drawRect(xx*2, yy*2, 2, 2, color);
+              memory[yy*128+xx]=color;
+            }
           #endif  
         }
           
@@ -342,10 +347,6 @@ void PlayRawVideo(String name, short filetype) {
             short x=xx*2;
             short y=yy*2;
             display->drawRect(x, y, 2, 2, color);
-           /* display->drawPixel(x, y, color);
-            display->drawPixel(x+1, y, color);
-            display->drawPixel(x, y+1, color);
-            display->drawPixel(x+1, y+2, color); */
           #endif 
          }
         counter += 3;
@@ -358,6 +359,9 @@ void PlayRawVideo(String name, short filetype) {
   }
     myfile.close();
     if (buffer) free(buffer);
+  #ifndef UseDMD
+      if(memory) free(memory);
+  #endif  
 
     if (framecounter<50)  // for short videos, wait a second
       while (framecounter++ < 200)

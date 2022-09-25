@@ -13,13 +13,14 @@ extern int16_t timeCounter;
 
 #define webdebug 1
 
+#define EEPROM_SIZE 9
 
 void Flash_Read() {
   // check if our structure
-  bool writeall = false;
+  EEPROM.begin(EEPROM_SIZE);
   int8_t check = EEPROM.read(0);
   if (check != 0x4D) 
-    writeall = true;
+    Flash_Write(0x4D);
   else {
     int8_t version = EEPROM.read(1);
 
@@ -32,14 +33,16 @@ void Flash_Read() {
         frameColor = EEPROM.readShort(7);        
         break;
       default:
-        writeall = true;
+        Flash_Write(0x4D);
     }
-
   }
-  if (writeall) Flash_Write(255);
+  EEPROM.end();
 }
 
 void Flash_Write(int8_t what) {
+  EEPROM.begin(EEPROM_SIZE);
+  Serial.print("what: ");
+  Serial.println(what); 
  switch(what) {
    case 0x4D:  // all
     DebugString("Flash Init");
@@ -66,6 +69,7 @@ void Flash_Write(int8_t what) {
    } 
 
    EEPROM.commit();
+   EEPROM.end();
 }
 
 void color565to888(const uint16_t color, uint8_t &r, uint8_t &g, uint8_t &b){
@@ -88,11 +92,17 @@ uint16_t color565( uint32_t rgb)
   uint16_t G = (rgb >>  8) & 0xFF;
   uint16_t B = (rgb      ) & 0xFF;
 
+#ifdef UseDMD
   uint16_t ret  = (R & 0xF8) << 8;  // 5 bits
            ret |= (B & 0xFC) << 3;  // 6 bits
-           ret |= (G & 0xF8) >> 3;  // 5 bits
-       // green and blue reversed?
+           ret |= (G & 0xF8) >> 3;  // 5 bits     
   return( ret);
+#else
+  uint16_t ret  = (R & 0xF8) << 8;  // 5 bits
+           ret |= (G & 0xFC) << 3;  // 6 bits
+           ret |= (B & 0xF8) >> 3;  // 5 bits     
+  return( ret);
+#endif
 }
 
 String ConvertColor565to888hex(uint16_t color) {
