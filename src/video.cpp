@@ -59,11 +59,30 @@ void drawmyframe() {
       #else
         uint16_t color = color565(0xE6, 0, 0);
         display->drawPixel(xx, 0, color);
-        display->drawPixel(xx, 31, color);
+        display->drawPixel(xx+128, 31, color);
       #endif  
+      
   }
 }
 
+void drawMyRect(int16_t x, int16_t y, int16_t w, int16_t h,
+                           uint16_t color) {
+  #ifdef UseDMD
+    display->drawRect(x, y, w, h, color);
+  #else
+    display->drawRect(x*2, y*2, w*2, h*2, color);
+    display->drawRect(x*2+1, y*2+1, w*2-2, h*2-2, color);
+  #endif
+}
+
+void fillMyRect(int16_t x, int16_t y, int16_t w, int16_t h,
+                           uint16_t color) {
+  #ifdef UseDMD
+    display->fillRect(x, y, w, h, color);
+  #else
+    display->fillRect(x*2, y*2, w*2, h*2, color);
+  #endif
+}
 
 void drawImg(int x, int y, int width, int height, uint16_t* bitmap) 
 {
@@ -301,8 +320,15 @@ void PlayRawVideo(String name, short filetype) {
           #ifdef UseDMD
             display->drawPixelRGB888(xx, yy, buffer[counter], buffer[counter+2], buffer[counter+1]);  // rgb  --  +0, +2, +1?
           #else
-            uint16_t color = color565( buffer[counter], buffer[counter+2], buffer[counter+1]);
-            display->drawPixel(xx, yy, color);
+            uint16_t color = color565( buffer[counter], buffer[counter+1], buffer[counter+2]);
+            short x=xx*2;
+            short y=yy*2;
+            display->drawRect(x, y, 2, 2, color);
+            /*
+            display->drawPixel(x, y, color);
+            display->drawPixel(x+1, y, color);
+            display->drawPixel(x, y+1, color);
+            display->drawPixel(x+1, y+2, color); */
           #endif  
         }
           
@@ -312,7 +338,14 @@ void PlayRawVideo(String name, short filetype) {
             display->drawPixelRGB888(xx, yy,  buffer[counter+2], buffer[counter+1], buffer[counter]);  // rgb  --  +0, +2, +1?
           #else
             uint16_t color = color565(  buffer[counter+2], buffer[counter+1], buffer[counter]);
-            display->drawPixel(xx, yy, color);
+
+            short x=xx*2;
+            short y=yy*2;
+            display->drawRect(x, y, 2, 2, color);
+           /* display->drawPixel(x, y, color);
+            display->drawPixel(x+1, y, color);
+            display->drawPixel(x, y+1, color);
+            display->drawPixel(x+1, y+2, color); */
           #endif 
          }
         counter += 3;

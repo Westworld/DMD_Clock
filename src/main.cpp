@@ -78,11 +78,11 @@ void loop()
 #else
 //#include <TFT_eSPI.h>
 //#include "gfxfont.h" // Include the header file attached to this sketch
-#include "Adafruit_GFX.h"// Hardware-specific library
-#include "Adafruit_ILI9341.h"
+//#include "Adafruit_GFX.h"// Hardware-specific library
+//#include "Adafruit_ILI9341.h"
+#include <Arduino_GFX_Library.h>
 //#include <Fonts/FreeSansBold18pt7b.h>
 
-#include <Arduino_GFX_Library.h>
 /*
 GND
 VCC
@@ -120,21 +120,10 @@ HUB75_I2S_CFG mxconfig(
 MatrixPanel_I2S_DMA *display = nullptr;
 
 #else
-//TFT_eSPI tft = TFT_eSPI();       // Invoke custom library
-//TFT_eSPI * display = &tft;
-
-//Adafruit_ILI9341 tft;
- // Adafruit_ILI9341 tft = Adafruit_ILI9341(TFT_CS, TFT_DC, TFT_MOSI, TFT_SCK, TFT_RESET, TFT_MISO);
-
-// Adafruit_ILI9341  * display = nullptr;
-
-//Arduino_DataBus *bus = create_default_Arduino_DataBus();
 Arduino_DataBus *bus = new Arduino_SWSPI(TFT_DC, TFT_CS, TFT_SCK, TFT_MOSI, GFX_NOT_DEFINED /* MISO */);
 
 /* More display class: https://github.com/moononournation/Arduino_GFX/wiki/Display-Class */
 Arduino_GFX *display = new Arduino_ILI9341(bus, TFT_RESET, 3 /* rotation */, false /* IPS */);
-
-
 
 #endif
 
@@ -169,11 +158,11 @@ void setup() {
   #ifdef UseDMD
   display->setRotation(0); 
   #else
-    display->setRotation(1); 
+    display->setRotation(2); 
   #endif
-  display->setTextColor(TFT_WHITE, 0x0000);
-  display->fillScreen(TFT_RED);
-  display->drawRect(0, 0, 128, 32, TFT_RED);
+  display->setTextColor(TFT_WHITE);
+  display->fillScreen(TFT_BLACK);
+  drawMyRect(0, 0, 128, 32, TFT_RED);
 
  // display->setCursor(10, 10);
  // display->setTextSize(1);
@@ -312,9 +301,9 @@ void DisplayTime() {
 
   if ((cur_min != last_min) | (timeCounter == 0)) {
     timeCounter++;
-    display->fillRect(0, 0, 128, 32, TFT_BLACK);
+    fillMyRect(0, 0, 128, 32, TFT_BLACK);
     display->setTextColor(TimeColor, 0x0000);
-    display->drawRect(0, 0, 128, 32, frameColor);
+    drawMyRect(0, 0, 128, 32, frameColor);
 
     char timeString [10];
 #ifndef UseDMD    
@@ -323,7 +312,7 @@ void DisplayTime() {
     else 
       sprintf(timeString, "%d%d %d%d", uhrzeit[0], uhrzeit[1], uhrzeit[2], uhrzeit[3]);
       // display->setFreeFont(FSS9);
-      drawString(timeString, 8, 29);
+      drawString(timeString, 8, 3);
 #else
     display->setFont(&FreeSansBold18pt7b);
     if ((cur_sec % 2) == 1)

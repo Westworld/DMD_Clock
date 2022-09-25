@@ -5,7 +5,7 @@
 #ifdef UseDMD
 #include <ESP32-HUB75-MatrixPanel-I2S-DMA.h>
 #else
-#include "Adafruit_GFX.h"// Hardware-specific library
+//#include "Adafruit_GFX.h"// Hardware-specific library
 //#include "Adafruit_ILI9341.h"
 
 #include <Arduino_GFX_Library.h>
@@ -27,6 +27,8 @@ void playRandomVideo() ;
 void PlayRawVideo(String name, short filetype);
 void drawmyframe();
 void DebugString (String message);
+void drawMyRect(int16_t x, int16_t y, int16_t w, int16_t h, uint16_t color);
+void fillMyRect(int16_t x, int16_t y, int16_t w, int16_t h, uint16_t color);
 
 #ifdef UseDMD
 
