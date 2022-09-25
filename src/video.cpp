@@ -49,11 +49,18 @@ int32_t mySeek(JPEGFILE *handle, int32_t position) {
 }
 
 //
+uint16_t color565(uint8_t r, uint8_t g, uint8_t b);
 
 void drawmyframe() {
     for (int xx=0; xx<128; xx++) {
+      #ifdef UseDMD
         display->drawPixelRGB888(xx, 0, 0xE6, 0, 0);
         display->drawPixelRGB888(xx, 31, 0xE6, 0, 0);
+      #else
+        uint16_t color = color565(0xE6, 0, 0);
+        display->drawPixel(xx, 0, color);
+        display->drawPixel(xx, 31, color);
+      #endif  
   }
 }
 
@@ -290,10 +297,24 @@ void PlayRawVideo(String name, short filetype) {
 
     for (int yy=0; yy<32; yy++) 
       for (int xx=0; xx<128; xx++) {
-        if (filetype == 2)
-          display->drawPixelRGB888(xx, yy, buffer[counter], buffer[counter+2], buffer[counter+1]);  // rgb  --  +0, +2, +1?
+        if (filetype == 2) {
+          #ifdef UseDMD
+            display->drawPixelRGB888(xx, yy, buffer[counter], buffer[counter+2], buffer[counter+1]);  // rgb  --  +0, +2, +1?
+          #else
+            uint16_t color = color565( buffer[counter], buffer[counter+2], buffer[counter+1]);
+            display->drawPixel(xx, yy, color);
+          #endif  
+        }
+          
         else
-          display->drawPixelRGB888(xx, yy, buffer[counter+2], buffer[counter+1], buffer[counter]);   // bgr     
+          {
+          #ifdef UseDMD
+            display->drawPixelRGB888(xx, yy,  buffer[counter+2], buffer[counter+1], buffer[counter]);  // rgb  --  +0, +2, +1?
+          #else
+            uint16_t color = color565(  buffer[counter+2], buffer[counter+1], buffer[counter]);
+            display->drawPixel(xx, yy, color);
+          #endif 
+         }
         counter += 3;
       }     
 

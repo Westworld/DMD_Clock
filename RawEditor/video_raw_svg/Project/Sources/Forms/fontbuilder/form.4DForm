@@ -159,11 +159,23 @@
 						"onClick"
 					],
 					"method": "ObjectMethods/Schaltfläche1.4dm"
+				},
+				"Schaltfläche2": {
+					"type": "button",
+					"text": "Test Font",
+					"top": 481,
+					"left": 178,
+					"width": 88,
+					"height": 26,
+					"events": [
+						"onClick"
+					],
+					"method": "ObjectMethods/Schaltfläche2.4dm"
 				}
 			}
 		}
 	],
-	"geometryStamp": 140,
+	"geometryStamp": 144,
 	"editor": {
 		"activeView": "View 1",
 		"defaultView": "View 1",

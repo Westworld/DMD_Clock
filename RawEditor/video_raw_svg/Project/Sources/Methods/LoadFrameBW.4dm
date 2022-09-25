@@ -30,12 +30,13 @@ For ($y; 1; 32)
 		
 		If ($pixel)
 			$color:="white"
+			$objectRef:=SVG_New_rect(svgRef; ($x*($pixelsize+$pixeldistance)); ($y*($pixelsize+$pixeldistance)); \
+				$pixelsize; $pixelsize; -1; -1; $color; $color; 0)
 		Else 
 			$color:="black"
 		End if 
 		
-		$objectRef:=SVG_New_rect(svgRef; ($x*($pixelsize+$pixeldistance)); ($y*($pixelsize+$pixeldistance)); \
-			$pixelsize; $pixelsize; -1; -1; $color; $color; 0)
+		
 	End for 
 End for 
 //End if 

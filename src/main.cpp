@@ -79,7 +79,7 @@ void loop()
 //#include <TFT_eSPI.h>
 //#include "gfxfont.h" // Include the header file attached to this sketch
 #include "Adafruit_GFX.h"// Hardware-specific library
-//#include "Adafruit_ILI9341.h"
+#include "Adafruit_ILI9341.h"
 //#include <Fonts/FreeSansBold18pt7b.h>
 
 #include <Arduino_GFX_Library.h>
@@ -166,15 +166,20 @@ void setup() {
  #endif 
 
   display->begin();
+  #ifdef UseDMD
   display->setRotation(0); 
+  #else
+    display->setRotation(1); 
+  #endif
   display->setTextColor(TFT_WHITE, 0x0000);
-  display->fillScreen(TFT_BLACK);
+  display->fillScreen(TFT_RED);
   display->drawRect(0, 0, 128, 32, TFT_RED);
 
  // display->setCursor(10, 10);
  // display->setTextSize(1);
  // display->setFreeFont(FSS9);
   drawString("DMD Clock", 5, 5, 1);
+  
 
   wifiManager.setHostname(wifihostname);
   wifiManager.autoConnect(wifihostname);
