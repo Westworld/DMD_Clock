@@ -21,18 +21,19 @@ class Digits
 #endif    
     void SetFont(String namen);
     int8_t DrawChar(char thechar, int8_t x, int8_t y, int16_t color);
+    int8_t DrawDigit(int8_t digit, int8_t x, int8_t y, int16_t color) ;
     void DrawString(String text, int8_t x, int8_t y, int16_t color);
-    void DrawTime(  int16_t cur_hour, int16_t cur_min, int16_t cur_sec) ;
+    void DrawTime(  int16_t cur_hour, int16_t cur_min, int16_t cur_sec, int16_t& timeCounter) ;
 
     protected:
         char * fontbuffer = NULL;
-        char charwidths[11];
+        int8_t charwidths[11];
         int16_t charoffset[11];
         String fontname;
         int8_t height;
         int8_t count;
         int16_t fontsize; // length of fontbuffer;
-
+        int8_t lastcolon;
 };
 
 

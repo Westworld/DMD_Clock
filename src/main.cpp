@@ -24,8 +24,7 @@
 u_int8_t Flash_version=1;
 bool twelveHourFormat = false;  
 bool displaySeconds = false;
-u_int8_t displayTime = 20;
-u_int16_t TimeColor = TFT_WHITE;  
+u_int8_t displayTime = 20; 
 u_int16_t frameColor = TFT_RED;  
 
 extern String fontnames[];
@@ -190,6 +189,8 @@ void setup() {
   getLocalTime(&local, 10000);      // Versuche 10 s zu Synchronisieren
   Serial.println(&local, "%A, %B %d %Y %H:%M:%S");
 
+  clockdigits = new Digits(display);  // we need to do this early, used in Web_init
+
   Web_Init();
 
     ArduinoOTA
@@ -220,11 +221,6 @@ void setup() {
 
   ArduinoOTA.begin();
 
-
-#ifndef UseDMD
-  // display->setSwapBytes(true); // We need to swap the colour bytes (endianess)
-#endif
-
   Flash_Read();
 
   if (SD.exists("/cache.txt"))
@@ -245,18 +241,13 @@ void setup() {
       root.close();
     }
 
-
   display->fillScreen(TFT_BLACK);
-#ifndef UseDMD
-  //display->setFont(&FreeSansBold18pt7b);
-#endif
 
-clockdigits = new Digits(display);
-if (noFonts>0)
-  clockdigits->SetFont(fontnames[0]);
-  clockdigits->DrawString("12:34", 10, -1, WHITE);
-  delay(5000);
-
+if (noFonts>1) {
+  clockdigits->SetFont(fontnames[1]);
+  //clockdigits->DrawString("12:34", 10, -1, WHITE);
+  //delay(5000);
+  }
 }
 
 void loopalwaysrun() {
@@ -317,10 +308,13 @@ void DisplayTime() {
   int16_t cur_sec;
   GetTime( cur_hour,cur_min, cur_sec);
 
+  clockdigits->DrawTime(cur_hour,cur_min, cur_sec, timeCounter);
+
+/*
   if ((cur_min != last_min) | (timeCounter == 0)) {
     timeCounter++;
     fillMyRect(0, 0, 128, 32, TFT_BLACK);
-    display->setTextColor(TimeColor, 0x0000);
+    display->setTextColor(clockdigits->fontcolor, 0x0000);
     drawMyRect(0, 0, 128, 32, frameColor);
 
     char timeString [10];
@@ -347,7 +341,7 @@ void DisplayTime() {
   if(cur_sec != last_sec) {
     timeCounter++;
     if ((cur_sec % 2) == 1) {
-        display->setTextColor(TimeColor, 0x0000);
+        display->setTextColor(clockdigits->fontcolor, 0x0000);
         drawString(":", 60, 28);
     } 
     else 
@@ -360,7 +354,7 @@ void DisplayTime() {
   last_hour = cur_hour;
   last_min = cur_min;
   last_sec = cur_sec;
-
+*/
 }
 
 
