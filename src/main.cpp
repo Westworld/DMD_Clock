@@ -11,6 +11,7 @@
 #include "video.h"
 #include "main.h"
 #include "web.h"
+#include "digits.h"
 
 //#define firsttimeinit 5
 // #define UseDMD true   // defined in platformio.ini
@@ -27,6 +28,8 @@ u_int8_t displayTime = 20;
 u_int16_t TimeColor = TFT_WHITE;  
 u_int16_t frameColor = TFT_RED;  
 
+extern String fontnames[];
+extern int noFonts;
 
 int16_t timeCounter = 0;
 
@@ -76,12 +79,7 @@ void loop()
 #include <Fonts/FreeSansBold18pt7b.h>
 
 #else
-//#include <TFT_eSPI.h>
-//#include "gfxfont.h" // Include the header file attached to this sketch
-//#include "Adafruit_GFX.h"// Hardware-specific library
-//#include "Adafruit_ILI9341.h"
 #include <Arduino_GFX_Library.h>
-//#include <Fonts/FreeSansBold18pt7b.h>
 
 /*
 GND
@@ -139,6 +137,7 @@ byte uhrzeit[6] = {1, 2, 3, 0, 0, 0};
   int16_t last_min  = -1;
   int16_t last_sec  = -1;
 
+Digits  * clockdigits;
 
 
 void setup() {
@@ -228,16 +227,35 @@ void setup() {
 
   Flash_Read();
 
-  root = SD.open("/clips");
   if (SD.exists("/cache.txt"))
-    { getCacheList("/cache.txt"); delay(1000);  }
+    { getCacheList("/cache.txt"); }
   else
-    getFilesList(root);
+    {
+      root = SD.open("/clips");
+      getFilesList(root);
+      root.close();
+    }
+
+  if (SD.exists("/fontcache.txt"))
+    { getFontCache("/fontcache.txt"); delay(1000);  }
+  else
+    {
+      root = SD.open("/fonts");
+      getFontList(root);
+      root.close();
+    }
+
 
   display->fillScreen(TFT_BLACK);
 #ifndef UseDMD
   //display->setFont(&FreeSansBold18pt7b);
 #endif
+
+clockdigits = new Digits(display);
+if (noFonts>0)
+  clockdigits->SetFont(fontnames[0]);
+  clockdigits->DrawString("12:34", 10, -1, WHITE);
+  delay(5000);
 
 }
 

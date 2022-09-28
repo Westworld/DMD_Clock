@@ -171,11 +171,35 @@
 						"onClick"
 					],
 					"method": "ObjectMethods/Schaltfläche2.4dm"
+				},
+				"Schaltfläche3": {
+					"type": "button",
+					"text": "Ani Top->Down",
+					"top": 481,
+					"left": 314,
+					"width": 115,
+					"height": 26,
+					"events": [
+						"onClick"
+					],
+					"method": "ObjectMethods/Schaltfläche3.4dm"
+				},
+				"Schaltfläche4": {
+					"type": "button",
+					"text": "Ani Blink",
+					"top": 481,
+					"left": 449,
+					"width": 115,
+					"height": 26,
+					"events": [
+						"onClick"
+					],
+					"method": "ObjectMethods/Schaltfläche4.4dm"
 				}
 			}
 		}
 	],
-	"geometryStamp": 144,
+	"geometryStamp": 150,
 	"editor": {
 		"activeView": "View 1",
 		"defaultView": "View 1",

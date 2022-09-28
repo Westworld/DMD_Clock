@@ -12,6 +12,9 @@ int noFiles = 0; // Number of media files on SD Card in clips directory
 #define maxFiles 500
 String filenames[maxFiles];
 int filetypes[maxFiles];
+#define maxFontNames 100
+int noFonts = 0;
+String fontnames[maxFontNames];
 short nextclipid=-1;
 File myfile;
 JPEGDEC jpeg;
@@ -23,9 +26,6 @@ unsigned char buffer[12288];
 #ifdef UseDMD
 extern MatrixPanel_I2S_DMA *display;
 #else
-//extern Adafruit_ILI9341 tft;
-//extern Adafruit_ILI9341  * display;
-
 extern Arduino_GFX *display;
 #endif
 
@@ -65,8 +65,7 @@ void drawmyframe() {
   }
 }
 
-void drawMyRect(int16_t x, int16_t y, int16_t w, int16_t h,
-                           uint16_t color) {
+void drawMyRect(int16_t x, int16_t y, int16_t w, int16_t h, uint16_t color) {
   #ifdef UseDMD
     display->drawRect(x, y, w, h, color);
   #else
@@ -75,8 +74,7 @@ void drawMyRect(int16_t x, int16_t y, int16_t w, int16_t h,
   #endif
 }
 
-void fillMyRect(int16_t x, int16_t y, int16_t w, int16_t h,
-                           uint16_t color) {
+void fillMyRect(int16_t x, int16_t y, int16_t w, int16_t h, uint16_t color) {
   #ifdef UseDMD
     display->fillRect(x, y, w, h, color);
   #else
@@ -102,9 +100,20 @@ void drawImg(int x, int y, int width, int height, uint16_t* bitmap)
 #endif
 }
 
-// This next function will be called during decoding of the jpeg file to
-// render each block to the TFT.  If you use a different TFT library
-// you will need to adapt this function to suit.
+void drawMyString(int16_t x, int16_t y, char * text, char* fontbuffer, char* glyphs) {
+  if (fontbuffer == NULL) return;
+
+  // lieber klasse für Clock schreiben?
+  /*
+init mit Display
+setfont mit namen/index
+draw - text.
+
+Oder methode setfont, definiert fontbuffer und glpyphs. Freigabe bei exit oder neuaufruf
+
+  */
+}
+
 bool tft_output(int16_t x, int16_t y, uint16_t w, uint16_t h, uint16_t* bitmap)
 {
    // Stop further decoding as image is running off bottom of screen
@@ -142,7 +151,7 @@ void DebugString (String message) {
   display->print(message);
 }
 
-int getNoFiles(File dir, int numTabs)
+int getVideoFiles(File dir, int numTabs)
 {  
   String dirchar = "/";
   while (true)
@@ -195,6 +204,55 @@ int getNoFiles(File dir, int numTabs)
   }
   card.close();
   return noFiles;
+}
+
+
+int getFontFiles(File dir, int numTabs)
+{  
+  String dirchar = "/";
+  while (true)
+  {
+    File entry =  dir.openNextFile();
+    short filetype=0;
+    if (! entry)
+    {
+      // no more files
+      break;
+    }
+    
+    if (entry.isDirectory()) 
+    {
+      // Skip file if in subfolder
+       entry.close(); // Close folder entry
+    } 
+    else
+    {
+      //Serial.println(entry.name());
+      String dirname = dir.name();
+      String filename = entry.name();
+
+      if (filename.startsWith(".")) continue;
+      if (!filename.endsWith(".font")) continue;
+     
+      filename = dirchar + dirname + dirchar + filename;
+      Serial.println("filename: "+filename);
+
+      fontnames[noFonts++] = filename;
+      entry.close();
+      if (noFonts>=maxFontNames)
+        { noFonts--; break;}
+    }
+  }
+
+  // create cache
+  DebugString("create new font cache");
+  File card;
+  card = SD.open("/fontcache.txt",FILE_WRITE);
+  for (short i=0; i<noFonts;i++) {
+    card.println(fontnames[i]);
+  }
+  card.close();
+  return noFonts;
 }
 
 void drawimage(char * name) {
@@ -377,7 +435,11 @@ void PlayRawVideo(String name, short filetype) {
 }
 
 void getFilesList(File dir) {
-  noFiles = getNoFiles(dir,0);
+  noFiles = getVideoFiles(dir,0);
+}  
+
+void getFontList(File dir) {
+  noFonts = getFontFiles(dir,0);
 }  
 
 short getCacheList(String path) {
@@ -405,6 +467,27 @@ short getCacheList(String path) {
     card.close();
   }
   return noFiles;
+}
+
+short getFontCache(String path) {
+  File card;
+  String filename;
+
+  noFonts=0;
+
+  card = SD.open(path);
+  if(card) {
+    while(card.available()) {
+      filename = card.readStringUntil('\n');
+      if ((filename.endsWith("\r"))) filename.remove(filename.length()-1);
+      // remove \r
+
+      fontnames[noFonts++] = filename;
+
+    }
+    card.close();
+  }
+  return noFonts;
 }
 
 void playRandomVideo() {

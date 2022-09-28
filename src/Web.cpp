@@ -1,13 +1,15 @@
 #include "Web.h"
 #include "Video.h"
 #include "EEPROM.h"
+#include "digits.h"
 
 extern u_int8_t Flash_version;
 extern bool twelveHourFormat;  
 extern bool displaySeconds ;
-extern u_int8_t displayTime ;
-extern u_int16_t TimeColor;  
+extern u_int8_t displayTime ; 
 extern u_int16_t frameColor; 
+
+extern Digits  * clockdigits;
 
 extern int16_t timeCounter;
 
@@ -29,7 +31,7 @@ void Flash_Read() {
         displayTime = EEPROM.read(2);
         twelveHourFormat = EEPROM.read(3);
         displaySeconds = EEPROM.read(4);
-        TimeColor = EEPROM.readShort(5);
+        clockdigits->fontcolor = EEPROM.readShort(5);
         frameColor = EEPROM.readShort(7);        
         break;
       default:
@@ -52,7 +54,7 @@ void Flash_Write(int8_t what) {
     EEPROM.write(2, displayTime);
     EEPROM.write(3, twelveHourFormat);
     EEPROM.write(4, displaySeconds);
-    EEPROM.writeShort(5, TimeColor);
+    EEPROM.writeShort(5, clockdigits->fontcolor);
     EEPROM.writeShort(7, frameColor);
     break;
 
@@ -63,7 +65,7 @@ void Flash_Write(int8_t what) {
    case 4:
     EEPROM.write(4, displaySeconds); break;
    case 5:
-    EEPROM.writeShort(5, TimeColor); break;   
+    EEPROM.writeShort(5, clockdigits->fontcolor); break;   
    case 7:
     EEPROM.writeShort(7, frameColor); break;
    } 
@@ -134,7 +136,7 @@ void Web_timecolorCall(Control* sender, int type)
 
   String message = sender->value.substring(1);
   long color = strtol(message.c_str(), 0, 16); 
-  TimeColor= color565(color);
+  clockdigits->fontcolor= color565(color);
   timeCounter = 0;
   Flash_Write(5);
 }
@@ -154,7 +156,7 @@ void Web_timeframeCall(Control* sender, int type)
 
 void Web_Init() {
   ESPUI.number("Time display in seconds:", &Web_timedisplayCall, ControlColor::Alizarin, displayTime);
-  String colorstring = ConvertColor565to888hex(TimeColor);
+  String colorstring = ConvertColor565to888hex(clockdigits->fontcolor);
   uint16_t text_colour = ESPUI.text("Time display color:", &Web_timecolorCall, ControlColor::Alizarin, colorstring);
   ESPUI.setInputType(text_colour, "color");
 
