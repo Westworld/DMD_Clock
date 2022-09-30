@@ -9,31 +9,50 @@ extern bool displaySeconds ;
 extern u_int8_t displayTime ; 
 extern u_int16_t frameColor; 
 
+extern String fontnames[];
+extern int noFonts;
+
 extern Digits  * clockdigits;
 
 extern int16_t timeCounter;
 
 #define webdebug 1
 
-#define EEPROM_SIZE 9
+#define EEPROM_SIZE 10
 
 void Flash_Read() {
+  int8_t font;
   // check if our structure
   EEPROM.begin(EEPROM_SIZE);
   int8_t check = EEPROM.read(0);
+
   if (check != 0x4D) 
     Flash_Write(0x4D);
   else {
     int8_t version = EEPROM.read(1);
-
+ 
     switch (version) {
       case 1:
         displayTime = EEPROM.read(2);
         twelveHourFormat = EEPROM.read(3);
         displaySeconds = EEPROM.read(4);
         clockdigits->fontcolor = EEPROM.readShort(5);
-        frameColor = EEPROM.readShort(7);        
+        frameColor = EEPROM.readShort(7);     
+        clockdigits->SetFontNumber(0);  
+        Flash_Write(0x4D); 
         break;
+
+      case 2:
+        displayTime = EEPROM.read(2);
+        twelveHourFormat = EEPROM.read(3);
+        displaySeconds = EEPROM.read(4);
+        clockdigits->fontcolor = EEPROM.readShort(5);
+        frameColor = EEPROM.readShort(7);  
+        font = EEPROM.read(9);  
+Serial.println("Fontnummer read: "+String(font));          
+        clockdigits->SetFontNumber(font);   
+        break;     
+
       default:
         Flash_Write(0x4D);
     }
@@ -50,12 +69,13 @@ void Flash_Write(int8_t what) {
     DebugString("Flash Init");
     delay(2000);
     EEPROM.write(0, 0x4D);
-    EEPROM.write(1, Flash_version);
+    EEPROM.write(1, 2);  // version
     EEPROM.write(2, displayTime);
     EEPROM.write(3, twelveHourFormat);
     EEPROM.write(4, displaySeconds);
     EEPROM.writeShort(5, clockdigits->fontcolor);
     EEPROM.writeShort(7, frameColor);
+    EEPROM.write(9, clockdigits->fontnumber);    
     break;
 
    case 2:
@@ -68,7 +88,10 @@ void Flash_Write(int8_t what) {
     EEPROM.writeShort(5, clockdigits->fontcolor); break;   
    case 7:
     EEPROM.writeShort(7, frameColor); break;
-   } 
+   case 9:
+    EEPROM.write(9, clockdigits->fontnumber);
+    Serial.println("Fontnummer write: "+String(clockdigits->fontnumber));  break;   
+} 
 
    EEPROM.commit();
    EEPROM.end();
@@ -154,6 +177,64 @@ void Web_timeframeCall(Control* sender, int type)
   Flash_Write(7);
 }
 
+void Web_FontCall(Control* sender, int type)
+{
+  #ifdef webdebug
+    DebugString("Font Call: "+sender->value);
+    Serial.println("Font Call: "+sender->value);
+  #endif
+
+  String message = sender->value;
+  long font = strtol(message.c_str(), 0, 10); 
+  clockdigits->SetFontNumber(font);
+  timeCounter = 0;
+  Flash_Write(9);
+}
+
+void WebSwitchSeconds(Control* sender, int value)
+{
+    switch (value)
+    {
+    case S_ACTIVE:
+        Serial.print("Seconds Active:");
+        displaySeconds = true;
+        break;
+
+    case S_INACTIVE:
+        Serial.print("Seconds Inactive");
+        displaySeconds = false;
+        break;
+    }
+
+    Serial.print(" ");
+    Serial.println(sender->id);
+
+    timeCounter = 0;
+    Flash_Write(4);
+}
+
+void WebSwitchAMPM(Control* sender, int value)
+{
+    switch (value)
+    {
+    case S_ACTIVE:
+        Serial.print("12 Hour Active:");
+        twelveHourFormat = true;
+        break;
+
+    case S_INACTIVE:
+        Serial.print("12 Hour Inactive");
+        twelveHourFormat = false;
+        break;
+    }
+
+    Serial.print(" ");
+    Serial.println(sender->id);
+
+    timeCounter = 0;
+    Flash_Write(3);
+}
+
 void Web_Init() {
   ESPUI.number("Time display in seconds:", &Web_timedisplayCall, ControlColor::Alizarin, displayTime);
   String colorstring = ConvertColor565to888hex(clockdigits->fontcolor);
@@ -163,6 +244,18 @@ void Web_Init() {
   colorstring = ConvertColor565to888hex(frameColor);
   text_colour = ESPUI.text("Time frame color:", &Web_timeframeCall, ControlColor::Alizarin, colorstring);
   ESPUI.setInputType(text_colour, "color");
+
+  uint16_t select1
+        = ESPUI.addControl(ControlType::Select, "Font:", "", ControlColor::Alizarin, -1, &Web_FontCall);
+  ESPUI.addControl(ControlType::Option, "Random", "0", ControlColor::Alizarin, select1);
+  for (int i=0; i<noFonts; i++)    
+      ESPUI.addControl(ControlType::Option, fontnames[i].c_str(), String(i+1), ControlColor::Alizarin, select1);
+
+  ESPUI.updateSelect(select1, fontnames[clockdigits->fontnumber], -1);
+
+  ESPUI.switcher("Show Seconds", &WebSwitchSeconds, ControlColor::Alizarin, displaySeconds);
+  ESPUI.switcher("12 hour format", &WebSwitchAMPM, ControlColor::Alizarin, twelveHourFormat);
+
 
   ESPUI.begin("DMD Clock");
   

@@ -4,8 +4,11 @@
 
 
 #ifdef UseDMD
-    Digits::Digits( MatrixPanel_I2S_DMA *thedisplay);
-            display = display;
+    Digits::Digits( MatrixPanel_I2S_DMA *thedisplay){
+    display = thedisplay;
+    }
+
+    #define BLACK 0x0000        
 #else
     Digits::Digits(Arduino_GFX *thedisplay){
        display = thedisplay;
@@ -13,7 +16,9 @@
 #endif   
 
 extern u_int16_t frameColor;
-
+extern String fontnames[];
+extern bool displaySeconds;
+extern bool twelveHourFormat;
 
 void Digits::SetFont(String name) {
     fontname = name;
@@ -42,6 +47,14 @@ void Digits::SetFont(String name) {
     wordbuffer=root.read((uint8_t *) fontbuffer, wordbuffer);
     fontsize = wordbuffer;
     root.close();
+}
+
+void Digits::SetFontNumber(int8_t number) {
+    if (number == 0)
+        fontnumber = 0;
+    else    
+        fontnumber = number-1;
+    SetFont(fontnames[number]);
 }
 
 #define CHECK_BIT(var,pos) ((var) & (1<<(pos)))
@@ -92,7 +105,7 @@ int8_t Digits::DrawChar(char thechar, int8_t x, int8_t y, int16_t color) {
     return DrawDigit(digit, x, y, color);
 }
 
- void Digits::DrawString(String text, int8_t x, int8_t y, int16_t color) {
+void Digits::DrawString(String text, int8_t x, int8_t y, int16_t color) {
      int8_t pos=x;
      int8_t width;
 
@@ -102,32 +115,71 @@ int8_t Digits::DrawChar(char thechar, int8_t x, int8_t y, int16_t color) {
     }
 }
 
+int8_t Digits::CalcDigitWidth(int8_t digit) {
+    if ((digit<0)|(digit>9))
+        digit = 10;
+    return charwidths[digit];
+}
+
+int16_t Digits::CalcTimeWidth( int16_t cur_hour, int16_t cur_min, int16_t cur_sec, int8_t distance) {
+    int16_t width = 0;
+
+    if (cur_hour>9)
+        width = CalcDigitWidth(cur_hour/10) + distance;
+    width += CalcDigitWidth(cur_hour%10) + distance;
+    width += charwidths[10] + distance;
+    width += CalcDigitWidth(cur_min/10) + distance;
+    width += CalcDigitWidth(cur_min%10) + distance; 
+    if (displaySeconds) {
+        width += charwidths[10] + distance;
+        width += CalcDigitWidth(cur_sec/10) + distance;
+        width += CalcDigitWidth(cur_sec%10) + distance;        
+    }
+    return width;
+}
+
  void Digits::DrawTime(  int16_t cur_hour, int16_t cur_min, int16_t cur_sec, int16_t& timeCounter) {
   static int16_t last_hour = -1;
   static int16_t last_min  = -1;
   static int16_t last_sec  = -1;
 
 #ifndef UseDMD    
-    int8_t x=8, y = -1, width=0, distance=2;
+    int8_t y = -1, width=0, distance=2;
 #else
-    int8_t x=28, y = -1, width=0, distance=2;
+    int8_t y = -1, width=0, distance=2;
 #endif
+
+  if (twelveHourFormat)
+    if (cur_hour>12)
+        cur_hour-=12;
+
+  int8_t x = 64 - (CalcTimeWidth( cur_hour, cur_min, cur_sec, distance) / 2);
+  if (x<0) x = 1;
 
   if ((cur_min != last_min) | (timeCounter == 0)) {
     timeCounter++;
     fillMyRect(0, 0, 128, 32, BLACK);
     drawMyRect(0, 0, 128, 32, frameColor);
 
-    width = DrawDigit(cur_hour/10, x, y, fontcolor) + distance;
+    if (cur_hour>9)
+        width = DrawDigit(cur_hour/10, x, y, fontcolor) + distance;
     width += DrawDigit(cur_hour%10, x+width, y, fontcolor) + distance;
     lastcolon = x+width;
     if ((cur_sec % 2) == 1)
       width += DrawDigit(10, x+width, y, fontcolor) + distance;
     else 
       width += charwidths[10] + distance;
-
-   width += DrawDigit(cur_min/10, x+width, y, fontcolor) + distance;
-   width += DrawDigit(cur_min%10, x+width, y, fontcolor) + distance; 
+    width += DrawDigit(cur_min/10, x+width, y, fontcolor) + distance;
+    width += DrawDigit(cur_min%10, x+width, y, fontcolor) + distance; 
+    if (displaySeconds) {
+        lastseccolon = x+width;
+        if ((cur_sec % 2) == 1)
+            width += DrawDigit(10, x+width, y, fontcolor) + distance;
+        else 
+        width += charwidths[10] + distance;
+        width += DrawDigit(cur_sec/10, x+width, y, fontcolor) + distance;
+        width += DrawDigit(cur_sec%10, x+width, y, fontcolor) + distance; 
+    }
 
   }
   else
@@ -135,11 +187,15 @@ int8_t Digits::DrawChar(char thechar, int8_t x, int8_t y, int16_t color) {
     timeCounter++;
     if ((cur_sec % 2) == 1) {
         DrawDigit(10, lastcolon, y, fontcolor);
+        if (displaySeconds)
+            DrawDigit(10, lastseccolon, y, fontcolor);
     } 
     else 
     {
       //fillMyRect(lastcolon, 2, charwidths[10], 30, BLACK);
       DrawDigit(10, lastcolon, y, BLACK);
+      if (displaySeconds)
+        DrawDigit(10, lastseccolon, y, BLACK);
     }
   }
 

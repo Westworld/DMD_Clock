@@ -5,9 +5,6 @@
 #ifdef UseDMD
 #include <ESP32-HUB75-MatrixPanel-I2S-DMA.h>
 #else
-//#include "Adafruit_GFX.h"// Hardware-specific library
-//#include "Adafruit_ILI9341.h"
-
 #include <Arduino_GFX_Library.h>
 #endif
 

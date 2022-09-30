@@ -21,7 +21,6 @@
     #define TFT_RED   0xF800      /* 255,   0,   0 */
 
 // flash variables
-u_int8_t Flash_version=1;
 bool twelveHourFormat = false;  
 bool displaySeconds = false;
 u_int8_t displayTime = 20; 
@@ -60,7 +59,7 @@ void loop()
     #define PIN_B1  27
     #define PIN_R2  18  
     #define PIN_G2  21 
-    #define PIN_B2  33 //2  ++++
+    #define PIN_B2  33 
 
     #define PIN_A   23
     #define PIN_B   19
@@ -68,14 +67,14 @@ void loop()
     #define PIN_D   22
     #define PIN_E   -1 
               
-    #define PIN_LE 4 // LAT 4
-    #define PIN_OE  32 //15++++
-    #define PIN_CLK 0 //16
+    #define PIN_LE 4 // LAT 
+    #define PIN_OE  32 
+    #define PIN_CLK 0 
 
     
 #include <ESP32-HUB75-MatrixPanel-I2S-DMA.h>
 #include <Adafruit_GFX.h>
-#include <Fonts/FreeSansBold18pt7b.h>
+//#include <Fonts/FreeSansBold18pt7b.h>
 
 #else
 #include <Arduino_GFX_Library.h>
@@ -137,6 +136,7 @@ byte uhrzeit[6] = {1, 2, 3, 0, 0, 0};
   int16_t last_sec  = -1;
 
 Digits  * clockdigits;
+int8_t RandomFontcounter = 0;
 
 
 void setup() {
@@ -161,10 +161,6 @@ void setup() {
   display->setTextColor(TFT_WHITE);
   display->fillScreen(TFT_BLACK);
   drawMyRect(0, 0, 128, 32, TFT_RED);
-
- // display->setCursor(10, 10);
- // display->setTextSize(1);
- // display->setFreeFont(FSS9);
   drawString("DMD Clock", 5, 5, 1);
   
 
@@ -173,7 +169,7 @@ void setup() {
 
   String ipaddress = WiFi.localIP().toString();
   drawString(ipaddress.c_str(), 5, 15, 1);
-
+  Serial.println("vor spisd");
   SPISD.begin(14, 2, 15, 13);//SCK MISO MOSI SS
   if (!SD.begin(13, SPISD))  {
     Serial.println("SD Card initialization failed!");
@@ -183,15 +179,11 @@ void setup() {
   Serial.println("SD Card initialization done.");
 
   randomSeed(analogRead(39));
-
+  Serial.println("vor ota");
   struct tm local;
   configTzTime(MY_TZ, NTP_SERVER); // ESP32 Systemzeit mit NTP Synchronisieren
   getLocalTime(&local, 10000);      // Versuche 10 s zu Synchronisieren
   Serial.println(&local, "%A, %B %d %Y %H:%M:%S");
-
-  clockdigits = new Digits(display);  // we need to do this early, used in Web_init
-
-  Web_Init();
 
     ArduinoOTA
     .onStart([]() {
@@ -221,7 +213,9 @@ void setup() {
 
   ArduinoOTA.begin();
 
-  Flash_Read();
+clockdigits = new Digits(display);  // we need to do this early, used in Web_init
+
+  Serial.println("vor cache");
 
   if (SD.exists("/cache.txt"))
     { getCacheList("/cache.txt"); }
@@ -231,9 +225,12 @@ void setup() {
       getFilesList(root);
       root.close();
     }
+  Serial.println("vor font");
 
   if (SD.exists("/fontcache.txt"))
-    { getFontCache("/fontcache.txt"); delay(1000);  }
+    { getFontCache("/fontcache.txt"); 
+      clockdigits->fontnumber=0;
+      delay(1000);  }
   else
     {
       root = SD.open("/fonts");
@@ -241,13 +238,19 @@ void setup() {
       root.close();
     }
 
+  Flash_Read();
+
+  if (noFonts>0) {
+    clockdigits->SetFontNumber(clockdigits->fontnumber);
+  }
+
+  Serial.println("vor webinit");
+
+  Web_Init();
+
   display->fillScreen(TFT_BLACK);
 
-if (noFonts>1) {
-  clockdigits->SetFont(fontnames[1]);
-  //clockdigits->DrawString("12:34", 10, -1, WHITE);
-  //delay(5000);
-  }
+    Serial.println("setup done");
 }
 
 void loopalwaysrun() {
@@ -262,9 +265,15 @@ void loop() {
      DisplayTime();
   }
   else {
-    //display->fillScreen(TFT_BLACK);
     playRandomVideo(); 
     timeCounter = 0;
+    if (RandomFontcounter++ > 20) {
+      RandomFontcounter=0;
+      if (clockdigits->fontnumber == 0) {
+        int8_t font = random(noFonts)+1;
+        clockdigits->SetFontNumber(font); 
+      }  
+    }
   }  
 }
 
@@ -309,52 +318,6 @@ void DisplayTime() {
   GetTime( cur_hour,cur_min, cur_sec);
 
   clockdigits->DrawTime(cur_hour,cur_min, cur_sec, timeCounter);
-
-/*
-  if ((cur_min != last_min) | (timeCounter == 0)) {
-    timeCounter++;
-    fillMyRect(0, 0, 128, 32, TFT_BLACK);
-    display->setTextColor(clockdigits->fontcolor, 0x0000);
-    drawMyRect(0, 0, 128, 32, frameColor);
-
-    char timeString [10];
-#ifndef UseDMD    
-    if ((cur_sec % 2) == 1)
-      sprintf(timeString, "%d%d:%d%d", uhrzeit[0], uhrzeit[1], uhrzeit[2], uhrzeit[3]);
-    else 
-      sprintf(timeString, "%d%d %d%d", uhrzeit[0], uhrzeit[1], uhrzeit[2], uhrzeit[3]);
-      // display->setFreeFont(FSS9);
-      drawString(timeString, 8, 3);
-#else
-    display->setFont(&FreeSansBold18pt7b);
-    if ((cur_sec % 2) == 1)
-      sprintf(timeString, "%d%d:", uhrzeit[0], uhrzeit[1]);
-    else 
-      sprintf(timeString, "%d%d", uhrzeit[0], uhrzeit[1]);  
-    drawString(timeString, 22, 28);
-    sprintf(timeString, "%d%d", uhrzeit[2], uhrzeit[3]);
-    drawString(timeString, 70, 28);   
-#endif   
-
-  }
-  else
-  if(cur_sec != last_sec) {
-    timeCounter++;
-    if ((cur_sec % 2) == 1) {
-        display->setTextColor(clockdigits->fontcolor, 0x0000);
-        drawString(":", 60, 28);
-    } 
-    else 
-    {
-      display->fillRect(60, 5, 10, 24, TFT_BLACK);
-    }
-  }
-
-
-  last_hour = cur_hour;
-  last_min = cur_min;
-  last_sec = cur_sec;
-*/
 }
 
 
