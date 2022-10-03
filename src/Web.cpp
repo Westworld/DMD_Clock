@@ -8,9 +8,17 @@ extern bool twelveHourFormat;
 extern bool displaySeconds ;
 extern u_int8_t displayTime ; 
 extern u_int16_t frameColor; 
+u_int8_t timezonearea=8;  // Europe
+u_int8_t timezoneid=0; // first entry
 
 extern String fontnames[];
 extern int noFonts;
+
+#define TFT_WHITE 0xFFFF
+
+#define maxtimezonenames 15
+String timezonenames[maxtimezonenames];
+int8_t notimezonenames = 0;
 
 extern Digits  * clockdigits;
 
@@ -18,7 +26,7 @@ extern int16_t timeCounter;
 
 #define webdebug 1
 
-#define EEPROM_SIZE 10
+#define EEPROM_SIZE 12
 
 void Flash_Read() {
   int8_t font;
@@ -48,16 +56,34 @@ void Flash_Read() {
         displaySeconds = EEPROM.read(4);
         clockdigits->fontcolor = EEPROM.readShort(5);
         frameColor = EEPROM.readShort(7);  
-        font = EEPROM.read(9);  
-Serial.println("Fontnummer read: "+String(font));          
+        font = EEPROM.read(9);           
         clockdigits->SetFontNumber(font);   
-        break;     
+        Flash_Write(0x4D); 
+       break;     
+
+      case 3:
+        displayTime = EEPROM.read(2);
+        twelveHourFormat = EEPROM.read(3);
+        displaySeconds = EEPROM.read(4);
+        clockdigits->fontcolor = EEPROM.readShort(5);
+        frameColor = EEPROM.readShort(7);  
+        font = EEPROM.read(9);           
+        clockdigits->SetFontNumber(font);  
+        timezonearea = EEPROM.read(10);
+        timezoneid = EEPROM.read(11);
+        break;   
 
       default:
         Flash_Write(0x4D);
     }
   }
   EEPROM.end();
+
+  Serial.println("FlashRead displayTime="+String(displayTime)+" font="+String(clockdigits->fontnumber)+" fontcolor="+String(clockdigits->fontcolor));
+  if (clockdigits->fontcolor == 0)
+    clockdigits->fontcolor = TFT_WHITE;
+
+
 }
 
 void Flash_Write(int8_t what) {
@@ -69,13 +95,15 @@ void Flash_Write(int8_t what) {
     DebugString("Flash Init");
     delay(2000);
     EEPROM.write(0, 0x4D);
-    EEPROM.write(1, 2);  // version
+    EEPROM.write(1, 3);  // version
     EEPROM.write(2, displayTime);
     EEPROM.write(3, twelveHourFormat);
     EEPROM.write(4, displaySeconds);
     EEPROM.writeShort(5, clockdigits->fontcolor);
     EEPROM.writeShort(7, frameColor);
-    EEPROM.write(9, clockdigits->fontnumber);    
+    EEPROM.write(9, clockdigits->fontnumber);  
+    EEPROM.write(10, timezonearea);  
+    EEPROM.write(11, timezoneid);  
     break;
 
    case 2:
@@ -90,7 +118,11 @@ void Flash_Write(int8_t what) {
     EEPROM.writeShort(7, frameColor); break;
    case 9:
     EEPROM.write(9, clockdigits->fontnumber);
-    Serial.println("Fontnummer write: "+String(clockdigits->fontnumber));  break;   
+    break;  
+   case 10:
+    EEPROM.write(10, timezonearea);  
+    EEPROM.write(11, timezoneid);    
+    break;
 } 
 
    EEPROM.commit();
@@ -235,6 +267,29 @@ void WebSwitchAMPM(Control* sender, int value)
     Flash_Write(3);
 }
 
+void Web_TimeZoneArea(Control* sender, int type)
+{
+  #ifdef webdebug
+    DebugString("Web_TimeZoneArea Call: "+sender->value);
+    Serial.println("Web_TimeZoneArea Call: "+sender->value);
+  #endif
+
+  String message = sender->value;
+  long font = strtol(message.c_str(), 0, 10); 
+}
+
+void Web_TimeZoneSelect(Control* sender, int type)
+{
+  #ifdef webdebug
+    DebugString("Web_TimeZoneSelect Call: "+sender->value);
+    Serial.println("Web_TimeZoneSelect Call: "+sender->value);
+  #endif
+
+  String message = sender->value;
+  long font = strtol(message.c_str(), 0, 10); 
+}
+
+
 void Web_Init() {
   ESPUI.number("Time display in seconds:", &Web_timedisplayCall, ControlColor::Alizarin, displayTime);
   String colorstring = ConvertColor565to888hex(clockdigits->fontcolor);
@@ -256,7 +311,79 @@ void Web_Init() {
   ESPUI.switcher("Show Seconds", &WebSwitchSeconds, ControlColor::Alizarin, displaySeconds);
   ESPUI.switcher("12 hour format", &WebSwitchAMPM, ControlColor::Alizarin, twelveHourFormat);
 
+  select1 = ESPUI.addControl(ControlType::Select, "Time Zone Continent:", "", ControlColor::Alizarin, -1, &Web_TimeZoneArea);
+  Web_AddTimeZoneAreas(select1);
+  ESPUI.updateSelect(select1, timezonenames[timezonearea], -1);
 
+  select1 = ESPUI.addControl(ControlType::Select, "Time Zone:", "", ControlColor::Alizarin, -1, &Web_TimeZoneSelect);
+  Web_AddTimeZoneNames(select1, timezonenames[timezonearea]);
+ 
   ESPUI.begin("DMD Clock");
   
+}
+
+
+void Web_AddTimeZoneAreas(uint16_t select) {
+  // find all areas on flash disk, read list, select right one
+  String dirchar = "/";
+  File dir = SD.open("/TimeZones");
+  while (true)
+  {
+    File entry =  dir.openNextFile();
+    short filetype=0;
+    if (! entry)
+    {
+      // no more files
+      break;
+    }
+    
+    if (entry.isDirectory()) 
+    {
+      // Skip file if in subfolder
+       entry.close(); // Close folder entry
+    } 
+    else
+    {
+      //Serial.println(entry.name());
+      String dirname = dir.name();
+      String filename = entry.name();
+
+      if (filename.startsWith(".")) continue;
+      if (!filename.endsWith(".txt")) continue;
+     
+      filename = dirchar + dirname + dirchar + filename;
+      Serial.println("filename: "+filename);
+
+      timezonenames[notimezonenames++] = filename;
+      ESPUI.addControl(ControlType::Option, filename.c_str(), String(notimezonenames-1), ControlColor::Alizarin, select);
+      entry.close();
+      if (notimezonenames>=maxtimezonenames)
+        { notimezonenames--; break;}
+    }
+  }
+  dir.close();  
+}
+
+void Web_AddTimeZoneNames(uint16_t select, String path) {
+
+  File card;
+  String zonename;
+
+  int8_t noZone=0;
+
+  card = SD.open(path);
+  if(card) {
+    while(card.available()) {
+      zonename = card.readStringUntil('\n');
+      if ((zonename.endsWith("\r"))) zonename.remove(zonename.length()-1);
+
+      ESPUI.addControl(ControlType::Option, zonename.c_str(), String(noZone), ControlColor::Alizarin, select);
+      if (noZone == timezoneid)
+        ESPUI.updateSelect(select, zonename.c_str(), -1);
+      noZone++;      
+
+    }
+    card.close();
+  }
+
 }

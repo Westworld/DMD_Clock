@@ -27,6 +27,7 @@ void playRandomVideo() ;
 void PlayRawVideo(String name, short filetype);
 void drawmyframe();
 void DebugString (String message);
+String readTimeZone(String path);
 void drawMyRect(int16_t x, int16_t y, int16_t w, int16_t h, uint16_t color);
 void fillMyRect(int16_t x, int16_t y, int16_t w, int16_t h, uint16_t color);
 

@@ -27,6 +27,7 @@ unsigned char buffer[12288];
 extern MatrixPanel_I2S_DMA *display;
 #else
 extern Arduino_GFX *display;
+#define BLACK 0x0000
 #endif
 
 extern void loopalwaysrun();
@@ -95,8 +96,13 @@ void drawImg(int x, int y, int width, int height, uint16_t* bitmap)
     }
   }  
 #else
-//  display->pushImage(x, y, w, h, bitmap);
-    display->draw16bitRGBBitmap(x, y, bitmap, width, height);  // draw16bitBeRGBBitmap
+    //display->draw16bitRGBBitmap(x, y, bitmap, width, height);  // draw16bitBeRGBBitmap
+      for (int yy=0; yy<height; yy++) {
+    for (int xx=0; xx<width; xx++) {
+        display->drawPixel(xx+x, yy+y, bitmap[(yy*width+xx)]);
+       // Serial.print("p: ");Serial.print(x);Serial.print(" ");Serial.print(y); Serial.print(" ");Serial.println(bitmap[(yy*width+xx)]);
+    }
+  }  
 #endif
 }
 
@@ -146,7 +152,7 @@ static int drawMCU(JPEGDRAW *pDraw)
 }
 
 void DebugString (String message) {
-  display->setFont(NULL);
+  //display->setFont(NULL);
   display->setCursor(1, 15);    // start at top left, with 8 pixel of spacing
   display->print(message);
 }
@@ -488,6 +494,16 @@ short getFontCache(String path) {
     card.close();
   }
   return noFonts;
+}
+
+String readTimeZone(String path) {
+  File card;
+  String zone = "CET-1CEST,M3.5.0/02,M10.5.0/03" ; // default if file does not exists
+  card = SD.open(path);
+  if(card) {
+      zone = card.readStringUntil('\n');
+  }
+  return zone;
 }
 
 void playRandomVideo() {

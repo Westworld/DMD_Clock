@@ -60,13 +60,14 @@ void Digits::SetFontNumber(int8_t number) {
 #define CHECK_BIT(var,pos) ((var) & (1<<(pos)))
 
 // x=left, y = top
-int8_t Digits::DrawDigit(int8_t digit, int8_t x, int8_t y, int16_t color) {
+int8_t Digits::DrawDigit(int8_t digit, int8_t x, int8_t y, int16_t color) {    
     if (y < 0)
         y = ((32-height)/2);
 
     if ((digit < 0) || (digit>10)) return 0;  
 
     int8_t width = charwidths[digit];
+
     int8_t width_round = ((width/8)+1)*8;  
     int16_t offset = charoffset[digit];
     uint8_t byte = 0, pos=0;
@@ -76,10 +77,15 @@ int8_t Digits::DrawDigit(int8_t digit, int8_t x, int8_t y, int16_t color) {
     for (int8_t yy = 0; yy < height; yy++) {
         bit = 7;
         byte = fontbuffer[offset+pos];      
-
+//Serial.println("byte="+String(byte));
         for (int8_t xx = 0; xx < width_round; xx++) {
             if (CHECK_BIT(byte, bit)) {
-                display->drawRect((xx+x)*2, (yy+y)*2, 2, 2, color);
+                #ifdef UseDMD
+                    display->drawPixel(xx+x, yy+y, color); 
+                #else
+                //Serial.println("bevor drawrect x="+String((xx+x)*2)+" y="+String((yy+y)*2)+" color="+String(color));
+                    display->drawRect((xx+x)*2, (yy+y)*2, 3, 3, color);
+                #endif    
             }
             bit--;
             if (bit<0) {
@@ -87,6 +93,7 @@ int8_t Digits::DrawDigit(int8_t digit, int8_t x, int8_t y, int16_t color) {
                 if ((pos+offset+1) < maxsize) {
                     pos++;
                     byte = fontbuffer[pos + offset];
+//Serial.println("bytexx="+String(byte));                    
                 }
             }
         }
@@ -160,6 +167,8 @@ int16_t Digits::CalcTimeWidth( int16_t cur_hour, int16_t cur_min, int16_t cur_se
     timeCounter++;
     fillMyRect(0, 0, 128, 32, BLACK);
     drawMyRect(0, 0, 128, 32, frameColor);
+
+//Serial.println("in loop drawtime");
 
     if (cur_hour>9)
         width = DrawDigit(cur_hour/10, x, y, fontcolor) + distance;

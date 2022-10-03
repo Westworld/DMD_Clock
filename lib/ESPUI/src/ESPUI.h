@@ -220,7 +220,7 @@ class ESPUIClass
 public:
     ESPUIClass()
     {
-        verbosity = Verbosity::Quiet;
+        verbosity = Verbosity::Verbose;
         jsonUpdateDocumentSize = 2000;
         jsonInitialDocumentSize = 8000;
         sliderContinuous = false;

@@ -15,6 +15,8 @@
 
 uint16_t Control::idCounter = 1;
 
+#define DEBUG_ESPUI true
+
 // ################# LITTLEFS functions
 #if defined(ESP32)
 void listDir(const char* dirname, uint8_t levels)

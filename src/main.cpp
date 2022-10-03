@@ -1,5 +1,6 @@
-#include <WiFiManager.h> 
 #include <Arduino.h>
+#include <WiFiManager.h> 
+
 
 #include <time.h>  
 //#include "FS.h"
@@ -13,7 +14,7 @@
 #include "web.h"
 #include "digits.h"
 
-//#define firsttimeinit 5
+//#define firsttimeinit 5  // don't use that, not compatible with esp32 littlefs
 // #define UseDMD true   // defined in platformio.ini
 
     #define TFT_WHITE 0xFFFF
@@ -44,6 +45,11 @@ void loop()
 #else
 
 
+WiFiManager wifiManager;
+#define NTP_SERVER "de.pool.ntp.org"
+String MY_TZ = "CET-1CEST,M3.5.0/02,M10.5.0/03" ;
+const char* wifihostname = "DMD Clock";
+
 #ifdef UseDMD
 #define PANEL_WIDTH 64 // width: number of LEDs for 1 pannel
 #define PANEL_HEIGHT 32 // height: number of LEDs
@@ -53,6 +59,7 @@ void loop()
 #define PANE_HEIGHT PANEL_HEIGHT
 
 // pins for SD Card: 14, 2, 15, 13
+// 14, 2, 15, 13);//SCK MISO MOSI SS
 
     #define PIN_R1  25
     #define PIN_G1  26
@@ -71,40 +78,15 @@ void loop()
     #define PIN_OE  32 
     #define PIN_CLK 0 
 
+#define SD_SCK 14
+#define SD_MISO 2
+#define SD_MOSI 15
+#define SD_SS 13
     
 #include <ESP32-HUB75-MatrixPanel-I2S-DMA.h>
 #include <Adafruit_GFX.h>
 //#include <Fonts/FreeSansBold18pt7b.h>
 
-#else
-#include <Arduino_GFX_Library.h>
-
-/*
-GND
-VCC
-SCK   18
-SDA   MOSI  23
-RST 22
-DC  21
-CS  5
-*/
-
-#define TFT_SCK    18
-#define TFT_MOSI   23
-#define TFT_MISO   19
-#define TFT_CS     5
-#define TFT_DC     21
-#define TFT_RESET  22
-#endif
-
-WiFiManager wifiManager;
-#define NTP_SERVER "de.pool.ntp.org"
-#define MY_TZ "CET-1CEST,M3.5.0/02,M10.5.0/03" 
-const char* wifihostname = "DMD Clock";
-
-
-
-#ifdef UseDMD
 HUB75_I2S_CFG::i2s_pins _pins={PIN_R1, PIN_G1, PIN_B1, PIN_R2, PIN_G2, PIN_B2, PIN_A, PIN_B, PIN_C, PIN_D, PIN_E, PIN_LE, PIN_OE, PIN_CLK};
 HUB75_I2S_CFG mxconfig(
           PANEL_WIDTH,   // width
@@ -116,10 +98,47 @@ HUB75_I2S_CFG mxconfig(
 MatrixPanel_I2S_DMA *display = nullptr;
 
 #else
+
+#define SD_SCK  14   //grün
+#define SD_MISO 27   //blau
+#define SD_MOSI 13   //gelb
+#define SD_SS   15   //orange
+
+#define TFT_SCK    18  // braun
+#define TFT_MOSI   23  // rot  sda
+//#define TFT_MISO   19  // leer
+#define TFT_CS     33 // 5   // grün
+#define TFT_DC     21  // gelb
+#define TFT_RESET  22  // orange
+
+/*
+GND
+VCC
+SCK   18
+SDA   MOSI  23
+RST 22
+DC  21
+CS  5
+*/
+
+/* More display class: https://github.com/moononournation/Arduino_GFX/wiki/Display-Class */
+
+#include <Arduino_GFX_Library.h>
 Arduino_DataBus *bus = new Arduino_SWSPI(TFT_DC, TFT_CS, TFT_SCK, TFT_MOSI, GFX_NOT_DEFINED /* MISO */);
 
 /* More display class: https://github.com/moononournation/Arduino_GFX/wiki/Display-Class */
 Arduino_GFX *display = new Arduino_ILI9341(bus, TFT_RESET, 3 /* rotation */, false /* IPS */);
+
+// Assign human-readable names to some common 16-bit color values:
+#define BLACK   0x0000
+#define BLUE    0x001F
+#define RED     0xF800
+#define GREEN   0x07E0
+#define CYAN    0x07FF
+#define MAGENTA 0xF81F
+#define YELLOW  0xFFE0
+#define WHITE   0xFFFF
+#define GRAY    0x8410
 
 #endif
 
@@ -141,47 +160,43 @@ int8_t RandomFontcounter = 0;
 
 void setup() {
   Serial.begin(115200);
-  //ESPUI.prepareFileSystem();
-
-  delay(1000);
   Serial.println("start");
 
 #ifdef UseDMD
   display = new MatrixPanel_I2S_DMA(mxconfig);
-#else
-  //display = &tft;
- #endif 
-
   display->begin();
-  #ifdef UseDMD
   display->setRotation(0); 
-  #else
-    display->setRotation(2); 
-  #endif
+#else  
+  display->begin();
+#endif 
+
   display->setTextColor(TFT_WHITE);
   display->fillScreen(TFT_BLACK);
   drawMyRect(0, 0, 128, 32, TFT_RED);
   drawString("DMD Clock", 5, 5, 1);
   
-
   wifiManager.setHostname(wifihostname);
-  wifiManager.autoConnect(wifihostname);
+  wifiManager.autoConnect(wifihostname); 
 
   String ipaddress = WiFi.localIP().toString();
   drawString(ipaddress.c_str(), 5, 15, 1);
   Serial.println("vor spisd");
-  SPISD.begin(14, 2, 15, 13);//SCK MISO MOSI SS
-  if (!SD.begin(13, SPISD))  {
+
+  SPISD.begin(SD_SCK, SD_MISO, SD_MOSI, SD_SS);//SCK MISO MOSI SS
+  if (!SD.begin(SD_SS, SPISD))  {
     Serial.println("SD Card initialization failed!");
     drawString("SD Card error", 5, 5, 1);
-    //while (1);
   }
-  Serial.println("SD Card initialization done.");
 
+  Serial.println("SD Card initialization done.");
   randomSeed(analogRead(39));
-  Serial.println("vor ota");
   struct tm local;
-  configTzTime(MY_TZ, NTP_SERVER); // ESP32 Systemzeit mit NTP Synchronisieren
+
+  if (SD.exists("/timezone.txt"))
+    { MY_TZ = readTimeZone("/timezone.txt"); }
+
+  Serial.println("TimeZone: "+MY_TZ);
+  configTzTime(MY_TZ.c_str(), NTP_SERVER); // ESP32 Systemzeit mit NTP Synchronisieren
   getLocalTime(&local, 10000);      // Versuche 10 s zu Synchronisieren
   Serial.println(&local, "%A, %B %d %Y %H:%M:%S");
 
@@ -213,7 +228,7 @@ void setup() {
 
   ArduinoOTA.begin();
 
-clockdigits = new Digits(display);  // we need to do this early, used in Web_init
+  clockdigits = new Digits(display);  // we need to do this early, used in Web_init
 
   Serial.println("vor cache");
 
@@ -244,28 +259,25 @@ clockdigits = new Digits(display);  // we need to do this early, used in Web_ini
     clockdigits->SetFontNumber(clockdigits->fontnumber);
   }
 
-  Serial.println("vor webinit");
-
   Web_Init();
-
   display->fillScreen(TFT_BLACK);
-
-    Serial.println("setup done");
-}
+  Serial.println("setup done");
+}  
 
 void loopalwaysrun() {
-    ArduinoOTA.handle();
+      ArduinoOTA.handle();
+
 }
 
 void loop() {
   loopalwaysrun();  // also called from Video player
 
-
   if (timeCounter < displayTime) {
      DisplayTime();
   }
   else {
-    playRandomVideo(); 
+    playRandomVideo();    
+
     timeCounter = 0;
     if (RandomFontcounter++ > 20) {
       RandomFontcounter=0;
@@ -275,6 +287,7 @@ void loop() {
       }  
     }
   }  
+  
 }
 
 
@@ -315,6 +328,7 @@ void DisplayTime() {
   int16_t cur_hour;
   int16_t cur_min;
   int16_t cur_sec;
+
   GetTime( cur_hour,cur_min, cur_sec);
 
   clockdigits->DrawTime(cur_hour,cur_min, cur_sec, timeCounter);

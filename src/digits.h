@@ -2,6 +2,8 @@
 #include <ESP32-HUB75-MatrixPanel-I2S-DMA.h>
 #else
 #include <Arduino_GFX_Library.h>
+
+#define BLACK 0x0000
 #endif
 
 #ifndef Digits_h
@@ -10,7 +12,7 @@
 class Digits
 {
   public:  
-    uint16_t fontcolor;
+    uint16_t fontcolor=0xFFFF;
     int8_t fontnumber;    
 
 #ifdef UseDMD
@@ -18,7 +20,7 @@ class Digits
     Digits( MatrixPanel_I2S_DMA *thedisplay);
 #else
     Arduino_GFX *display;
-    Digits(Arduino_GFX *display);
+    Digits(Arduino_GFX *thedisplay);
 #endif    
     void SetFont(String namen);
     void SetFontNumber(int8_t number);
