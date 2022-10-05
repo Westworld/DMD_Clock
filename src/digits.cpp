@@ -10,7 +10,7 @@
 
     #define BLACK 0x0000        
 #else
-    Digits::Digits(Arduino_GFX *thedisplay){
+    Digits::Digits(TFT_eSPI *thedisplay){
        display = thedisplay;
     }
 #endif   

@@ -5,7 +5,7 @@
 #ifdef UseDMD
 #include <ESP32-HUB75-MatrixPanel-I2S-DMA.h>
 #else
-#include <Arduino_GFX_Library.h>
+#include <TFT_eSPI.h>
 #endif
 
 void * myOpen(const char *filename, int32_t *size);

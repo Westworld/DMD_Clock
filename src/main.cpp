@@ -100,18 +100,55 @@ MatrixPanel_I2S_DMA *display = nullptr;
 #else
 
 #define SD_SCK  14   //grün
-#define SD_MISO 27   //blau
+#define SD_MISO 33   //blau
 #define SD_MOSI 13   //gelb
 #define SD_SS   15   //orange
 
-#define TFT_SCK    18  // braun
-#define TFT_MOSI   23  // rot  sda
-//#define TFT_MISO   19  // leer
-#define TFT_CS     4 // 33 // 5   // grün
-#define TFT_DC     21  // gelb
-#define TFT_RESET  22  // orange
+/*
+braun
+blau
+grün
+gelb
+orange
+rot
+
+*/
+
+
+
+// See SetupX_Template.h for all options available
+/*
+#define USER_SETUP_ID 21
+
+
+#define TFT_MISO 19 //   blau (leave TFT SDO disconnected if other SPI devices share MISO)
+#define TFT_MOSI 23   //rot sda
+#define TFT_SCLK 18   //braun
+#define TFT_CS    0 //15  //  grün  Chip select control pin
+#define TFT_DC    2  // gelb   Data Command control pin
+#define TFT_RST   4  // orange  Reset pin (could connect to RST pin)
+*/
+
+// von ILI9488
+/*
+VCC unten neben J2     weiß
+GND schwarz
+CS   braun   18
+Reset  rot   23
+DC    orange 4
+MOSI blau    19
+SCK   gelb   2
+LED          3v
+MISO   grün  15
+-
+-
+-
+-
+-
+*/
 
 /*
+// ILI9341
 GND
 VCC
 SCK   18
@@ -123,11 +160,16 @@ CS  5
 
 /* More display class: https://github.com/moononournation/Arduino_GFX/wiki/Display-Class */
 
-#include <Arduino_GFX_Library.h>
-Arduino_DataBus *bus = new Arduino_SWSPI(TFT_DC, TFT_CS, TFT_SCK, TFT_MOSI, GFX_NOT_DEFINED /* MISO */);
+//#include <Arduino_GFX_Library.h>
+//Arduino_DataBus *bus = new Arduino_SWSPI(TFT_DC, TFT_CS, TFT_SCK, TFT_MOSI, TFT_MISO /* MISO */);
 
 /* More display class: https://github.com/moononournation/Arduino_GFX/wiki/Display-Class */
-Arduino_GFX *display = new Arduino_ILI9341(bus, TFT_RESET, 3 /* rotation */, false /* IPS */);
+//Arduino_GFX *display = new Arduino_ILI9341(bus, TFT_RESET, 3 /* rotation */, false /* IPS */);
+//Arduino_GFX *display = new Arduino_ILI9488(bus, TFT_RESET, 3 /* rotation */, false /* IPS */);
+
+#include "TFT_eSPI.h"
+TFT_eSPI tft = TFT_eSPI();  
+TFT_eSPI * display = &tft;
 
 // Assign human-readable names to some common 16-bit color values:
 #define BLACK   0x0000
@@ -168,7 +210,7 @@ void setup() {
   display->setRotation(0); 
 #else  
   display->begin();
-    display->setRotation(0); 
+    display->setRotation(1); 
 #endif 
 
   display->setTextColor(TFT_WHITE);

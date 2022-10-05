@@ -1,7 +1,7 @@
 #ifdef UseDMD
 #include <ESP32-HUB75-MatrixPanel-I2S-DMA.h>
 #else
-#include <Arduino_GFX_Library.h>
+#include <TFT_eSPI.h>
 
 #define BLACK 0x0000
 #endif
@@ -19,8 +19,8 @@ class Digits
     MatrixPanel_I2S_DMA *display;
     Digits( MatrixPanel_I2S_DMA *thedisplay);
 #else
-    Arduino_GFX *display;
-    Digits(Arduino_GFX *thedisplay);
+    TFT_eSPI *display;
+    Digits(TFT_eSPI *thedisplay);
 #endif    
     void SetFont(String namen);
     void SetFontNumber(int8_t number);

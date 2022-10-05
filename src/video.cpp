@@ -26,7 +26,7 @@ unsigned char buffer[12288];
 #ifdef UseDMD
 extern MatrixPanel_I2S_DMA *display;
 #else
-extern Arduino_GFX *display;
+extern TFT_eSPI *display;
 #define BLACK 0x0000
 #endif
 
