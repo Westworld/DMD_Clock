@@ -408,9 +408,10 @@ void PlayRawVideo(String name, short filetype) {
           #else
             uint16_t color = color565(  buffer[counter+2], buffer[counter+1], buffer[counter]);
 
-            short x=xx*2;
-            short y=yy*2;
-            display->drawRect(x, y, 2, 2, color);
+            if(memory[yy*128+xx] != color ) {
+              display->drawRect(xx*2, yy*2, 2, 2, color);
+              memory[yy*128+xx]=color;
+            }
           #endif 
          }
         counter += 3;

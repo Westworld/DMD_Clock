@@ -2,6 +2,7 @@
 #include "Video.h"
 #include "EEPROM.h"
 #include "digits.h"
+#include <ArduinoSort.h>
 
 extern u_int8_t Flash_version;
 extern bool twelveHourFormat;  
@@ -16,7 +17,7 @@ extern int noFonts;
 
 #define TFT_WHITE 0xFFFF
 
-#define maxtimezonenames 15
+
 String timezonenames[maxtimezonenames];
 int8_t notimezonenames = 0;
 
@@ -312,7 +313,9 @@ void Web_Init() {
   ESPUI.switcher("12 hour format", &WebSwitchAMPM, ControlColor::Alizarin, twelveHourFormat);
 
   select1 = ESPUI.addControl(ControlType::Select, "Time Zone Continent:", "", ControlColor::Alizarin, -1, &Web_TimeZoneArea);
-  Web_AddTimeZoneAreas(select1);
+  for (int i=0; i<notimezonenames; i++)    
+      ESPUI.addControl(ControlType::Option, timezonenames[i].c_str(), String(i), ControlColor::Alizarin, select1);
+  Serial.println( timezonenames[timezonearea])   ; 
   ESPUI.updateSelect(select1, timezonenames[timezonearea], -1);
 
   select1 = ESPUI.addControl(ControlType::Select, "Time Zone:", "", ControlColor::Alizarin, -1, &Web_TimeZoneSelect);
@@ -322,11 +325,39 @@ void Web_Init() {
   
 }
 
+void Web_AddTimeZoneNames(uint16_t select, String path) {
 
-void Web_AddTimeZoneAreas(uint16_t select) {
-  // find all areas on flash disk, read list, select right one
+  File card;
+  String zonename, zoneTZ;
+
+  path = "/TimeZones/"+path+".txt";
+
+  int8_t noZone=0;
+
+  card = SD.open(path);
+  if(card) {
+    while(card.available()) {
+      zonename = card.readStringUntil('\t');
+      zoneTZ = card.readStringUntil('\n');
+      if ((zoneTZ.endsWith("\r"))) zoneTZ.remove(zoneTZ.length()-1);
+  Serial.println( "add: "+zonename)   ; 
+  Serial.println( "add: "+zoneTZ)   ; 
+
+      ESPUI.addControl(ControlType::Option, zonename.c_str(), zoneTZ, ControlColor::Alizarin, select);
+      //if (noZone == timezoneid)
+        //ESPUI.updateSelect(select, zonename.c_str(), -1);
+      noZone++;      
+
+    }
+    card.close();
+  }
+
+}
+
+
+ void ReadTimeZones(String path) {
+  File dir = SD.open(path);
   String dirchar = "/";
-  File dir = SD.open("/TimeZones");
   while (true)
   {
     File entry =  dir.openNextFile();
@@ -349,41 +380,18 @@ void Web_AddTimeZoneAreas(uint16_t select) {
       String filename = entry.name();
 
       if (filename.startsWith(".")) continue;
-      if (!filename.endsWith(".txt")) continue;
-     
-      filename = dirchar + dirname + dirchar + filename;
-      Serial.println("filename: "+filename);
+      if (!(filename.endsWith(".txt"))) continue;
+      filename = filename.substring(0,filename.length()-4);
 
       timezonenames[notimezonenames++] = filename;
-      ESPUI.addControl(ControlType::Option, filename.c_str(), String(notimezonenames-1), ControlColor::Alizarin, select);
+
+//Serial.println("TZ "+filename+" nr: "+String(notimezonenames));
+
       entry.close();
       if (notimezonenames>=maxtimezonenames)
         { notimezonenames--; break;}
     }
+    sortArray(timezonenames, notimezonenames);
   }
-  dir.close();  
-}
-
-void Web_AddTimeZoneNames(uint16_t select, String path) {
-
-  File card;
-  String zonename;
-
-  int8_t noZone=0;
-
-  card = SD.open(path);
-  if(card) {
-    while(card.available()) {
-      zonename = card.readStringUntil('\n');
-      if ((zonename.endsWith("\r"))) zonename.remove(zonename.length()-1);
-
-      ESPUI.addControl(ControlType::Option, zonename.c_str(), String(noZone), ControlColor::Alizarin, select);
-      if (noZone == timezoneid)
-        ESPUI.updateSelect(select, zonename.c_str(), -1);
-      noZone++;      
-
-    }
-    card.close();
-  }
-
-}
+  dir.close();
+ }

@@ -107,7 +107,7 @@ MatrixPanel_I2S_DMA *display = nullptr;
 #define TFT_SCK    18  // braun
 #define TFT_MOSI   23  // rot  sda
 //#define TFT_MISO   19  // leer
-#define TFT_CS     33 // 5   // grün
+#define TFT_CS     4 // 33 // 5   // grün
 #define TFT_DC     21  // gelb
 #define TFT_RESET  22  // orange
 
@@ -168,6 +168,7 @@ void setup() {
   display->setRotation(0); 
 #else  
   display->begin();
+    display->setRotation(0); 
 #endif 
 
   display->setTextColor(TFT_WHITE);
@@ -244,14 +245,15 @@ void setup() {
 
   if (SD.exists("/fontcache.txt"))
     { getFontCache("/fontcache.txt"); 
-      clockdigits->fontnumber=0;
-      delay(1000);  }
+      clockdigits->fontnumber=0; }
   else
     {
       root = SD.open("/fonts");
       getFontList(root);
       root.close();
     }
+  Serial.println("vor timezones");
+  ReadTimeZones("/TimeZones");  
 
   Flash_Read();
 
