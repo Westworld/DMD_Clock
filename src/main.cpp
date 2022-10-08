@@ -47,7 +47,8 @@ void loop()
 
 WiFiManager wifiManager;
 #define NTP_SERVER "de.pool.ntp.org"
-String MY_TZ = "CET-1CEST,M3.5.0/02,M10.5.0/03" ;
+#define DefaultTimeZone "CET-1CEST,M3.5.0/02,M10.5.0/03"  
+String MY_TZ = DefaultTimeZone ;
 const char* wifihostname = "DMD Clock";
 
 #ifdef UseDMD
@@ -102,7 +103,7 @@ MatrixPanel_I2S_DMA *display = nullptr;
 #define SD_SCK  14   //grün
 #define SD_MISO 33   //blau
 #define SD_MOSI 13   //gelb
-#define SD_SS   15   //orange
+#define SD_SS   15   //orange cs
 
 /*
 braun
@@ -200,9 +201,22 @@ Digits  * clockdigits;
 int8_t RandomFontcounter = 0;
 
 
+void setTimeZone(String TimeZone) {
+  struct tm local;
+  configTzTime(TimeZone.c_str(), NTP_SERVER); // ESP32 Systemzeit mit NTP Synchronisieren
+  getLocalTime(&local, 10000);      // Versuche 10 s zu Synchronisieren
+  #ifdef webdebug  
+    Serial.println("TimeZone: "+TimeZone);
+    Serial.println(&local, "%A, %B %d %Y %H:%M:%S");
+  #endif  
+ 
+}
+
 void setup() {
   Serial.begin(115200);
-  Serial.println("start");
+  #ifdef webdebug 
+    Serial.println("start");
+  #endif  
 
 #ifdef UseDMD
   display = new MatrixPanel_I2S_DMA(mxconfig);
@@ -210,7 +224,7 @@ void setup() {
   display->setRotation(0); 
 #else  
   display->begin();
-    display->setRotation(1); 
+    display->setRotation(2); 
 #endif 
 
   display->setTextColor(TFT_WHITE);
@@ -223,25 +237,19 @@ void setup() {
 
   String ipaddress = WiFi.localIP().toString();
   drawString(ipaddress.c_str(), 5, 15, 1);
-  Serial.println("vor spisd");
+  #ifdef webdebug 
+    Serial.println("vor spisd");
+  #endif  
 
   SPISD.begin(SD_SCK, SD_MISO, SD_MOSI, SD_SS);//SCK MISO MOSI SS
   if (!SD.begin(SD_SS, SPISD))  {
     Serial.println("SD Card initialization failed!");
     drawString("SD Card error", 5, 5, 1);
   }
-
-  Serial.println("SD Card initialization done.");
+  #ifdef webdebug 
+    Serial.println("SD Card initialization done.");
+  #endif  
   randomSeed(analogRead(39));
-  struct tm local;
-
-  if (SD.exists("/timezone.txt"))
-    { MY_TZ = readTimeZone("/timezone.txt"); }
-
-  Serial.println("TimeZone: "+MY_TZ);
-  configTzTime(MY_TZ.c_str(), NTP_SERVER); // ESP32 Systemzeit mit NTP Synchronisieren
-  getLocalTime(&local, 10000);      // Versuche 10 s zu Synchronisieren
-  Serial.println(&local, "%A, %B %d %Y %H:%M:%S");
 
     ArduinoOTA
     .onStart([]() {
@@ -272,8 +280,9 @@ void setup() {
   ArduinoOTA.begin();
 
   clockdigits = new Digits(display);  // we need to do this early, used in Web_init
-
-  Serial.println("vor cache");
+  #ifdef webdebug 
+    Serial.println("vor cache");
+  #endif  
 
   if (SD.exists("/cache.txt"))
     { getCacheList("/cache.txt"); }
@@ -283,7 +292,9 @@ void setup() {
       getFilesList(root);
       root.close();
     }
+  #ifdef webdebug 
   Serial.println("vor font");
+  #endif
 
   if (SD.exists("/fontcache.txt"))
     { getFontCache("/fontcache.txt"); 
@@ -294,18 +305,29 @@ void setup() {
       getFontList(root);
       root.close();
     }
+  #ifdef webdebug   
   Serial.println("vor timezones");
+  #endif
   ReadTimeZones("/TimeZones");  
 
   Flash_Read();
+
+  Web_Init();  
+
+  MY_TZ = GetCurrentTimeZone(); 
+  #ifdef webdebug  
+    Serial.println("Loaded TimeZone: "+MY_TZ);  
+  #endif  
+  setTimeZone(MY_TZ);
 
   if (noFonts>0) {
     clockdigits->SetFontNumber(clockdigits->fontnumber);
   }
 
-  Web_Init();
   display->fillScreen(TFT_BLACK);
-  Serial.println("setup done");
+  #ifdef webdebug 
+    Serial.println("setup done");
+  #endif  
 }  
 
 void loopalwaysrun() {
@@ -349,7 +371,7 @@ void drawString(const char * thetext, int16_t x, int16_t y, int16_t font) {
 
 void GetTime( int16_t &hour, int16_t &min, int16_t &sec) {
   struct tm timeinfo;
-  if(!getLocalTime(&timeinfo)){
+  if(!getLocalTime(&timeinfo, 2000)){
     display->setTextColor(TFT_WHITE, 0x0000);
     drawString("Failed to obtain time",0,0);
     timeinfo.tm_hour=12;

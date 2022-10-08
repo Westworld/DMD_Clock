@@ -4,6 +4,8 @@
 #include "digits.h"
 #include <ArduinoSort.h>
 
+void setTimeZone(String TimeZone);
+
 extern u_int8_t Flash_version;
 extern bool twelveHourFormat;  
 extern bool displaySeconds ;
@@ -19,13 +21,17 @@ extern int noFonts;
 
 
 String timezonenames[maxtimezonenames];
-int8_t notimezonenames = 0;
+uint8_t notimezonenames = 0;
+String timezonencityvalues[maxtimezonecitynames];
+String timezonencitynames[maxtimezonecitynames];
+uint16_t timezonencityids[maxtimezonecitynames];
+uint8_t notimezonecitynames = 0;
+uint16_t SelectIDTimeZoneCity = 0;
+extern String MY_TZ;
 
 extern Digits  * clockdigits;
 
 extern int16_t timeCounter;
-
-#define webdebug 1
 
 #define EEPROM_SIZE 12
 
@@ -80,7 +86,7 @@ void Flash_Read() {
   }
   EEPROM.end();
 
-  Serial.println("FlashRead displayTime="+String(displayTime)+" font="+String(clockdigits->fontnumber)+" fontcolor="+String(clockdigits->fontcolor));
+  Serial.println("FlashRead TZ="+String(timezonearea)+"/"+String(timezoneid)+" displayTime="+String(displayTime)+" font="+String(clockdigits->fontnumber)+" fontcolor="+String(clockdigits->fontcolor));
   if (clockdigits->fontcolor == 0)
     clockdigits->fontcolor = TFT_WHITE;
 
@@ -139,10 +145,6 @@ void color565to888(const uint16_t color, uint8_t &r, uint8_t &g, uint8_t &b){
 uint16_t color565(uint8_t r, uint8_t g, uint8_t b) {
   return ((r & 0xF8) << 8) | ((g & 0xFC) << 3) | (b >> 3);
 }
-
-//uint16_t color565(uint32_t rgb32) {
-//  return (rgb32>>8&0xf800)|(rgb32>>5&0x07e0)|(rgb32>>3&0x001f);
-// }
 
 uint16_t color565( uint32_t rgb)
 {
@@ -276,7 +278,15 @@ void Web_TimeZoneArea(Control* sender, int type)
   #endif
 
   String message = sender->value;
-  long font = strtol(message.c_str(), 0, 10); 
+  timezonearea = strtol(message.c_str(), 0, 10); 
+  timezoneid = 0;
+  Flash_Write(10);
+  timeCounter = 0;
+  // delete all entries
+  for (int i=0; i<notimezonecitynames; i++) {
+      ESPUI.removeControl(timezonencityids[i], true);
+  }
+  Web_AddTimeZoneNames(SelectIDTimeZoneCity, timezonenames[timezonearea]);
 }
 
 void Web_TimeZoneSelect(Control* sender, int type)
@@ -287,7 +297,11 @@ void Web_TimeZoneSelect(Control* sender, int type)
   #endif
 
   String message = sender->value;
-  long font = strtol(message.c_str(), 0, 10); 
+  timezoneid = strtol(message.c_str(), 0, 10);
+  timeCounter = 0;
+  Flash_Write(10);
+  MY_TZ = timezonencityvalues[timezoneid];
+  setTimeZone(timezonencityvalues[timezoneid]);
 }
 
 
@@ -307,7 +321,7 @@ void Web_Init() {
   for (int i=0; i<noFonts; i++)    
       ESPUI.addControl(ControlType::Option, fontnames[i].c_str(), String(i+1), ControlColor::Alizarin, select1);
 
-  ESPUI.updateSelect(select1, fontnames[clockdigits->fontnumber], -1);
+  ESPUI.updateSelect(select1, String(clockdigits->fontnumber), -1);
 
   ESPUI.switcher("Show Seconds", &WebSwitchSeconds, ControlColor::Alizarin, displaySeconds);
   ESPUI.switcher("12 hour format", &WebSwitchAMPM, ControlColor::Alizarin, twelveHourFormat);
@@ -315,45 +329,48 @@ void Web_Init() {
   select1 = ESPUI.addControl(ControlType::Select, "Time Zone Continent:", "", ControlColor::Alizarin, -1, &Web_TimeZoneArea);
   for (int i=0; i<notimezonenames; i++)    
       ESPUI.addControl(ControlType::Option, timezonenames[i].c_str(), String(i), ControlColor::Alizarin, select1);
-  Serial.println( timezonenames[timezonearea])   ; 
-  ESPUI.updateSelect(select1, timezonenames[timezonearea], -1);
+  //Serial.println("TZ select: " + timezonenames[timezonearea])   ; 
+  ESPUI.updateSelect(select1, String(timezonearea), -1);
 
-  select1 = ESPUI.addControl(ControlType::Select, "Time Zone:", "", ControlColor::Alizarin, -1, &Web_TimeZoneSelect);
-  Web_AddTimeZoneNames(select1, timezonenames[timezonearea]);
- 
+  SelectIDTimeZoneCity = ESPUI.addControl(ControlType::Select, "Time Zone:", "", ControlColor::Alizarin, -1, &Web_TimeZoneSelect);
+  Web_AddTimeZoneNames(SelectIDTimeZoneCity, timezonenames[timezonearea]);
+
   ESPUI.begin("DMD Clock");
-  
 }
 
 void Web_AddTimeZoneNames(uint16_t select, String path) {
-
   File card;
   String zonename, zoneTZ;
 
+#ifdef webdebug
+  Serial.println(path);
+#endif
+
   path = "/TimeZones/"+path+".txt";
-
-  int8_t noZone=0;
-
+  notimezonecitynames = 0;
   card = SD.open(path);
   if(card) {
     while(card.available()) {
       zonename = card.readStringUntil('\t');
       zoneTZ = card.readStringUntil('\n');
       if ((zoneTZ.endsWith("\r"))) zoneTZ.remove(zoneTZ.length()-1);
-  Serial.println( "add: "+zonename)   ; 
-  Serial.println( "add: "+zoneTZ)   ; 
 
-      ESPUI.addControl(ControlType::Option, zonename.c_str(), zoneTZ, ControlColor::Alizarin, select);
-      //if (noZone == timezoneid)
-        //ESPUI.updateSelect(select, zonename.c_str(), -1);
-      noZone++;      
+      #ifdef webdebug
+      Serial.println("Add city ("+String(notimezonecitynames)+") "+zonename);
+      #endif 
 
+      timezonencityvalues[notimezonecitynames] = zoneTZ;
+      timezonencitynames[notimezonecitynames] = zonename;
+
+      timezonencityids[notimezonecitynames] = ESPUI.addControl(ControlType::Option, timezonencitynames[notimezonecitynames].c_str(), String(notimezonecitynames), ControlColor::Alizarin, select);
+      notimezonecitynames++;      
     }
+    if (notimezonecitynames >= timezoneid)
+        ESPUI.updateSelect(select, String(timezoneid), -1);
     card.close();
   }
 
 }
-
 
  void ReadTimeZones(String path) {
   File dir = SD.open(path);
@@ -385,7 +402,9 @@ void Web_AddTimeZoneNames(uint16_t select, String path) {
 
       timezonenames[notimezonenames++] = filename;
 
+//#ifdef webdebug
 //Serial.println("TZ "+filename+" nr: "+String(notimezonenames));
+//#endif
 
       entry.close();
       if (notimezonenames>=maxtimezonenames)
@@ -395,3 +414,10 @@ void Web_AddTimeZoneNames(uint16_t select, String path) {
   }
   dir.close();
  }
+
+String GetCurrentTimeZone() {
+  if (timezoneid >= notimezonecitynames) 
+    timezoneid = 0;
+
+  return timezonencityvalues[timezoneid];
+}

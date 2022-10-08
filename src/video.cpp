@@ -19,6 +19,8 @@ short nextclipid=-1;
 File myfile;
 JPEGDEC jpeg;
 
+extern int16_t timeCounter;
+
 #ifdef ImageTest
 unsigned char buffer[12288];
 #endif
@@ -191,7 +193,9 @@ int getVideoFiles(File dir, int numTabs)
       if (filetype == 0) continue;
 
       filename = dirchar + dirname + dirchar + filename;
+      #ifdef webdebug 
       Serial.println("filename: "+filename);
+      #endif
 
       filetypes[noFiles] = filetype;
       filenames[noFiles++] = filename;
@@ -241,7 +245,9 @@ int getFontFiles(File dir, int numTabs)
       if (!filename.endsWith(".font")) continue;
      
       filename = dirchar + dirname + dirchar + filename;
+      #ifdef webdebug 
       Serial.println("filename: "+filename);
+      #endif
 
       fontnames[noFonts++] = filename;
       entry.close();
@@ -280,7 +286,9 @@ void PlayVideo(String name) {
     unsigned long total_decode_video = 0;
     unsigned long start_ms, curr_ms, next_frame_ms;
 
+#ifdef webdebug 
     Serial.println("Play: "+name);
+#endif    
     File vFile = SD.open(name);
     //Serial.println("Created vFile!");
 
@@ -350,10 +358,12 @@ void PlayVideo(String name) {
 
 void PlayRawVideo(String name, short filetype) {
   #define rawsize 12288
-
+#ifdef webdebug 
   Serial.println("Play: "+name);
   Serial.print("Filetype: ");
   Serial.println(filetype);
+#endif
+  uint32_t starttime = millis();
 
   int32_t size;
   myfile = SD.open(name);
@@ -362,10 +372,10 @@ void PlayRawVideo(String name, short filetype) {
    return;
   }
   size = myfile.size();
-  Serial.println(size);
 
   uint8_t *buffer = (uint8_t *)malloc(rawsize);
 #ifndef UseDMD
+  //uint16_t *memory = (uint16_t *)malloc(256*64*2);
   uint16_t *memory = (uint16_t *)malloc(128*32*2);
     for (int yy=0; yy<32; yy++) 
       for (int xx=0; xx<128; xx++) {
@@ -378,49 +388,71 @@ void PlayRawVideo(String name, short filetype) {
   int framecounter=0;
 
   while(myfile) {
-    end_ms = millis()+45;  // play a little bit slower as real
+    framecounter++;
+    if (timeCounter == 0)
+      break; 
+
+    end_ms = millis()+35;  // play a little bit slower as real
 
     int nextread = myfile.read(buffer, rawsize);
-    if (nextread < rawsize)  {
-      break;
-    }
+    if (nextread < rawsize)  break;
 
+
+#ifndef UseDMD
+/*
+    uint16_t color, counter=0;
+    for (int yy=0; yy<32; yy++) 
+      for (int xx=0; xx<128; xx++) {
+        if (filetype == 2) 
+          color = color565( buffer[counter], buffer[counter+1], buffer[counter+2]);
+        else 
+          color = color565( buffer[counter+2], buffer[counter+1], buffer[counter]);
+        memory[(yy*2)*256+(xx*2)]=color;
+        memory[((yy*2)+1)*256+(xx*2)]=color;       
+        memory[(yy*2)*256+(xx*2)+1]=color;
+        memory[((yy*2)+1)*256+(xx*2)+1]=color;         
+        counter += 3;
+      }
+    display->pushImage(0, 0, 256, 64, memory);
+ */  
+
+
+    uint16_t color, counter=0;
+    for (int yy=0; yy<32; yy++) 
+      for (int xx=0; xx<128; xx++) {
+        if (filetype == 2) 
+          color = color565( buffer[counter], buffer[counter+1], buffer[counter+2]);
+        else 
+          color = color565( buffer[counter+2], buffer[counter+1], buffer[counter]);
+          
+        if(memory[yy*128+xx] != color ) {
+              display->drawRect(xx*2, yy*2, 2, 2, color);
+              memory[yy*128+xx]=color;
+          }
+       
+        counter += 3;
+      }
+
+
+#else
     int counter=0, report=20;
 
     for (int yy=0; yy<32; yy++) 
       for (int xx=0; xx<128; xx++) {
         if (filetype == 2) {
-          #ifdef UseDMD
-            display->drawPixelRGB888(xx, yy, buffer[counter], buffer[counter+2], buffer[counter+1]);  // rgb  --  +0, +2, +1?
-          #else
-            uint16_t color = color565( buffer[counter], buffer[counter+1], buffer[counter+2]);
-            if(memory[yy*128+xx] != color ) {
-              display->drawRect(xx*2, yy*2, 2, 2, color);
-              memory[yy*128+xx]=color;
-            }
-          #endif  
-        }
-          
+            display->drawPixelRGB888(xx, yy, buffer[counter], buffer[counter+2], buffer[counter+1]);  // rgb  --  +0, +2, +1? 
+        }         
         else
           {
-          #ifdef UseDMD
-            display->drawPixelRGB888(xx, yy,  buffer[counter+2], buffer[counter+1], buffer[counter]);  // rgb  --  +0, +2, +1?
-          #else
-            uint16_t color = color565(  buffer[counter+2], buffer[counter+1], buffer[counter]);
-
-            if(memory[yy*128+xx] != color ) {
-              display->drawRect(xx*2, yy*2, 2, 2, color);
-              memory[yy*128+xx]=color;
-            }
-          #endif 
+              display->drawPixelRGB888(xx, yy,  buffer[counter+2], buffer[counter+1], buffer[counter]);  // rgb  --  +0, +2, +1?
          }
         counter += 3;
       }     
+#endif
 
     while (millis()<end_ms) 
       loopalwaysrun();
 
-    // DebugString(  String( framecounter++)  );
   }
     myfile.close();
     if (buffer) free(buffer);
@@ -428,6 +460,10 @@ void PlayRawVideo(String name, short filetype) {
       if(memory) free(memory);
   #endif  
 
+   uint32_t finalendtime = millis();
+#ifdef webdebug    
+Serial.println("Video run time: "+String(finalendtime-starttime)+"ms, frames: "+String(framecounter)+" fps: "+ String(framecounter/((finalendtime-starttime)/1000)));
+#endif
     if (framecounter<50)  // for short videos, wait a second
       while (framecounter++ < 200)
         loopalwaysrun();
@@ -438,7 +474,9 @@ void PlayRawVideo(String name, short filetype) {
     end_ms = millis()+500;  // wait half a second
 
    while (millis()<end_ms) 
-    loopalwaysrun();    
+    loopalwaysrun();  
+
+   
 }
 
 void getFilesList(File dir) {

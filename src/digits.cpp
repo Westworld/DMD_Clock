@@ -163,7 +163,7 @@ int16_t Digits::CalcTimeWidth( int16_t cur_hour, int16_t cur_min, int16_t cur_se
   int8_t x = 64 - (CalcTimeWidth( cur_hour, cur_min, cur_sec, distance) / 2);
   if (x<0) x = 1;
 
-  if ((cur_min != last_min) | (timeCounter == 0)) {
+  if ((cur_hour != last_hour) | (cur_min != last_min) | (timeCounter == 0)) {
     timeCounter++;
     fillMyRect(0, 0, 128, 32, BLACK);
     drawMyRect(0, 0, 128, 32, frameColor);
