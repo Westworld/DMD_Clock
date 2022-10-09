@@ -27,7 +27,6 @@ short getCacheList(String path);
 short getFontCache(String path);
 void playRandomVideo() ;
 void PlayRawVideo(String name, short filetype);
-String readTimeZone(String path);
 
 #ifdef UseDMD
 

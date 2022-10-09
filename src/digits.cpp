@@ -2,15 +2,12 @@
 #include "SD.h"
 #include "video.h"
 
-
-Digits::Digits(Display *thedisplay){
-       display = thedisplay;
-    }
-
-extern u_int16_t frameColor;
 extern String fontnames[];
-extern bool displaySeconds;
-extern bool twelveHourFormat;
+
+Digits::Digits(Display *thedisplay, Settings *thesettings){
+       display = thedisplay;
+       settings = thesettings;
+    }
 
 void Digits::SetFont(String name) {
     fontname = name;
@@ -47,6 +44,13 @@ void Digits::SetFontNumber(int8_t number) {
     else    
         fontnumber = number-1;
     SetFont(fontnames[number]);
+}
+
+void Digits::CheckFont(void) {
+    int8_t font = settings->getFontNumber();
+    if (fontnumber != font) {
+        SetFontNumber(font);
+    }
 }
 
 #define CHECK_BIT(var,pos) ((var) & (1<<(pos)))
@@ -101,6 +105,8 @@ void Digits::DrawString(String text, int8_t x, int8_t y, int16_t color) {
      int8_t pos=x;
      int8_t width;
 
+     CheckFont();
+
     for (int i=0; i<text.length(); i++) {
         width = DrawChar(text.charAt(i), pos, y, color);
         pos += (width+2);
@@ -122,7 +128,7 @@ int16_t Digits::CalcTimeWidth( int16_t cur_hour, int16_t cur_min, int16_t cur_se
     width += charwidths[10] + distance;
     width += CalcDigitWidth(cur_min/10) + distance;
     width += CalcDigitWidth(cur_min%10) + distance; 
-    if (displaySeconds) {
+    if (settings->getDisplaySeconds()) {
         width += charwidths[10] + distance;
         width += CalcDigitWidth(cur_sec/10) + distance;
         width += CalcDigitWidth(cur_sec%10) + distance;        
@@ -136,17 +142,22 @@ int16_t Digits::CalcTimeWidth( int16_t cur_hour, int16_t cur_min, int16_t cur_se
   static int16_t last_sec  = -1;  
   int8_t y = -1, width=0, distance=2;
 
-  if (twelveHourFormat)
+  CheckFont();
+  uint16_t fontcolor = settings->getFontColor();
+
+  if (settings->getTwelveHourFormat())
     if (cur_hour>12)
         cur_hour-=12;
 
   int8_t x = 64 - (CalcTimeWidth( cur_hour, cur_min, cur_sec, distance) / 2);
   if (x<0) x = 1;
 
-  if ((cur_hour != last_hour) | (cur_min != last_min) | (timeCounter == 0)) {
+  if ((cur_hour != last_hour) | (cur_min != last_min) | (settings->needRefresh())) {
     timeCounter++;
+
     display->FillRect(0, 0, 128, 32, BLACK);
-    display->DrawRect(0, 0, 128, 32, frameColor);
+    display->DrawRect(0, 0, 128, 32, settings->getFrameColor());
+
 
     if (cur_hour>9)
         width = DrawDigit(cur_hour/10, x, y, fontcolor) + distance;
@@ -158,7 +169,7 @@ int16_t Digits::CalcTimeWidth( int16_t cur_hour, int16_t cur_min, int16_t cur_se
       width += charwidths[10] + distance;
     width += DrawDigit(cur_min/10, x+width, y, fontcolor) + distance;
     width += DrawDigit(cur_min%10, x+width, y, fontcolor) + distance; 
-    if (displaySeconds) {
+    if (settings->getDisplaySeconds()) {
         lastseccolon = x+width;
         if ((cur_sec % 2) == 1)
             width += DrawDigit(10, x+width, y, fontcolor) + distance;
@@ -174,13 +185,13 @@ int16_t Digits::CalcTimeWidth( int16_t cur_hour, int16_t cur_min, int16_t cur_se
     timeCounter++;
     if ((cur_sec % 2) == 1) {
         DrawDigit(10, lastcolon, y, fontcolor);
-        if (displaySeconds)
+        if (settings->getDisplaySeconds())
             DrawDigit(10, lastseccolon, y, fontcolor);
     } 
     else 
     {
       DrawDigit(10, lastcolon, y, BLACK);
-      if (displaySeconds)
+      if (settings->getDisplaySeconds())
         DrawDigit(10, lastseccolon, y, BLACK);
     }
   }

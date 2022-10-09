@@ -14,14 +14,10 @@
 #include "web.h"
 #include "digits.h"
 #include "display.h"
+#include "settings.h"
 
 //#define firsttimeinit 5  // don't use that, not compatible with esp32 littlefs
 
-// flash variables
-bool twelveHourFormat = false;  
-bool displaySeconds = false;
-u_int8_t displayTime = 20; 
-u_int16_t frameColor = TFT_RED;  
 
 extern String fontnames[];
 extern int noFonts;
@@ -71,7 +67,7 @@ byte uhrzeit[6] = {1, 2, 3, 0, 0, 0};
 Digits  * clockdigits;
 int8_t RandomFontcounter = 0;
 Display * thedisplay;
-
+Settings * settings;
 
 void setTimeZone(String TimeZone) {
   struct tm local;
@@ -90,8 +86,8 @@ void setup() {
     Serial.println("start");
   #endif  
 
+  settings = new Settings();
   thedisplay = new Display();
-  thedisplay->Init();
   thedisplay->StartScreen();
   
   wifiManager.setHostname(wifihostname);
@@ -141,7 +137,7 @@ void setup() {
 
   ArduinoOTA.begin();
 
-  clockdigits = new Digits(thedisplay);  // we need to do this early, used in Web_init
+  clockdigits = new Digits(thedisplay, settings);  // we need to do this early, used in Web_init
   #ifdef webdebug 
     Serial.println("vor cache");
   #endif  
@@ -160,7 +156,7 @@ void setup() {
 
   if (SD.exists("/fontcache.txt"))
     { getFontCache("/fontcache.txt"); 
-      clockdigits->fontnumber=0; }
+     }
   else
     {
       root = SD.open("/fonts");
@@ -172,8 +168,6 @@ void setup() {
   #endif
   ReadTimeZones("/TimeZones");  
 
-  Flash_Read();
-
   Web_Init();  
 
   MY_TZ = GetCurrentTimeZone(); 
@@ -181,10 +175,6 @@ void setup() {
     Serial.println("Loaded TimeZone: "+MY_TZ);  
   #endif  
   setTimeZone(MY_TZ);
-
-  if (noFonts>0) {
-    clockdigits->SetFontNumber(clockdigits->fontnumber);
-  }
 
   thedisplay->Clear();
   #ifdef webdebug 
@@ -200,18 +190,19 @@ void loopalwaysrun() {
 void loop() {
   loopalwaysrun();  // also called from Video player
 
-  if (timeCounter < displayTime) {
+  if (timeCounter < settings->getDisplayTime()) {
      DisplayTime();
   }
   else {
-    playRandomVideo();    
+    playRandomVideo();   
+    settings->doRefresh(); 
 
     timeCounter = 0;
     if (RandomFontcounter++ > 20) {
       RandomFontcounter=0;
-      if (clockdigits->fontnumber == 0) {
+      if (settings->getFontNumber() == 0) {
         int8_t font = random(noFonts)+1;
-        clockdigits->SetFontNumber(font); 
+        settings->setFontNumber(font); 
       }  
     }
   }  
@@ -246,7 +237,6 @@ void DisplayTime() {
   int16_t cur_sec;
 
   GetTime( cur_hour,cur_min, cur_sec);
-
   clockdigits->DrawTime(cur_hour,cur_min, cur_sec, timeCounter);
 }
 

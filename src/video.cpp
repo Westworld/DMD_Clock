@@ -3,6 +3,7 @@
 
 #include "video.h"
 #include "display.h"
+#include "settings.h"
 
 /* MJPEG Video */
 #define FPS 30
@@ -20,13 +21,13 @@ short nextclipid=-1;
 File myfile;
 JPEGDEC jpeg;
 
-extern int16_t timeCounter;
 
 #ifdef ImageTest
 unsigned char buffer[12288];
 #endif
 
 extern Display * thedisplay;
+extern Settings * settings;
 extern void loopalwaysrun();
 
 void * myOpen(const char *filename, int32_t *size) {
@@ -327,8 +328,10 @@ void PlayRawVideo(String name, short filetype) {
 
   while(myfile) {
     framecounter++;
-    if (timeCounter == 0)
+    if (settings->needRefresh()) {
+      settings->doRefresh();
       break; 
+    }  
 
     end_ms = millis()+35;  // play a little bit slower as real
 
@@ -425,25 +428,12 @@ short getFontCache(String path) {
   if(card) {
     while(card.available()) {
       filename = card.readStringUntil('\n');
-      if ((filename.endsWith("\r"))) filename.remove(filename.length()-1);
-      // remove \r
-
+      if ((filename.endsWith("\r"))) filename.remove(filename.length()-1); // remove \r
       fontnames[noFonts++] = filename;
-
     }
     card.close();
   }
   return noFonts;
-}
-
-String readTimeZone(String path) {
-  File card;
-  String zone = "CET-1CEST,M3.5.0/02,M10.5.0/03" ; // default if file does not exists
-  card = SD.open(path);
-  if(card) {
-      zone = card.readStringUntil('\n');
-  }
-  return zone;
 }
 
 void playRandomVideo() {

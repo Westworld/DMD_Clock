@@ -1,16 +1,18 @@
 #include "display.h"
 
-HUB75_I2S_CFG::i2s_pins _pins={PIN_R1, PIN_G1, PIN_B1, PIN_R2, PIN_G2, PIN_B2, PIN_A, PIN_B, PIN_C, PIN_D, PIN_E, PIN_LE, PIN_OE, PIN_CLK};
-HUB75_I2S_CFG mxconfig(
+#ifdef UseDMD
+  HUB75_I2S_CFG::i2s_pins _pins={PIN_R1, PIN_G1, PIN_B1, PIN_R2, PIN_G2, PIN_B2, PIN_A, PIN_B, PIN_C, PIN_D, PIN_E, PIN_LE, PIN_OE, PIN_CLK};
+  HUB75_I2S_CFG mxconfig(
           PANEL_WIDTH,   // width
           PANEL_HEIGHT,   // height
            PANELS_NUMBER,   // chain length
          _pins//,   // pin mapping
          //HUB75_I2S_CFG::FM6126A      // driver chip
 );
+#endif
 
     Display::Display() {
-
+        Init();
     };
 
     void Display::Init() {
