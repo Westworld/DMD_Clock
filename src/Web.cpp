@@ -3,6 +3,7 @@
 #include "EEPROM.h"
 #include "digits.h"
 #include <ArduinoSort.h>
+#include "display.h"
 
 void setTimeZone(String TimeZone);
 
@@ -30,6 +31,7 @@ uint16_t SelectIDTimeZoneCity = 0;
 extern String MY_TZ;
 
 extern Digits  * clockdigits;
+extern Display * thedisplay;
 
 extern int16_t timeCounter;
 
@@ -99,7 +101,7 @@ void Flash_Write(int8_t what) {
   Serial.println(what); 
  switch(what) {
    case 0x4D:  // all
-    DebugString("Flash Init");
+    thedisplay->DrawString("Flash Init",0);
     delay(2000);
     EEPROM.write(0, 0x4D);
     EEPROM.write(1, 3);  // version
@@ -136,49 +138,10 @@ void Flash_Write(int8_t what) {
    EEPROM.end();
 }
 
-void color565to888(const uint16_t color, uint8_t &r, uint8_t &g, uint8_t &b){
-  r = ((((color >> 11) & 0x1F) * 527) + 23) >> 6;
-  g = ((((color >> 5) & 0x3F) * 259) + 33) >> 6;
-  b = (((color & 0x1F) * 527) + 23) >> 6;
-}
-
-uint16_t color565(uint8_t r, uint8_t g, uint8_t b) {
-  return ((r & 0xF8) << 8) | ((g & 0xFC) << 3) | (b >> 3);
-}
-
-uint16_t color565( uint32_t rgb)
-{
-  uint16_t R = (rgb >> 16) & 0xFF;
-  uint16_t G = (rgb >>  8) & 0xFF;
-  uint16_t B = (rgb      ) & 0xFF;
-
-#ifdef UseDMD
-  uint16_t ret  = (R & 0xF8) << 8;  // 5 bits
-           ret |= (B & 0xFC) << 3;  // 6 bits
-           ret |= (G & 0xF8) >> 3;  // 5 bits     
-  return( ret);
-#else
-  uint16_t ret  = (R & 0xF8) << 8;  // 5 bits
-           ret |= (G & 0xFC) << 3;  // 6 bits
-           ret |= (B & 0xF8) >> 3;  // 5 bits     
-  return( ret);
-#endif
-}
-
-String ConvertColor565to888hex(uint16_t color) {
-  uint8_t r, g, b;
-  color565to888(color, r, g, b);
-  char hexout[8];
-  sprintf(hexout,"#%02x%02x%02x",r,g,b);
-  String result = hexout;
-  return result;
-}  
-
-
 void Web_timedisplayCall(Control* sender, int type)
 {
   #ifdef webdebug
-    DebugString("Time Display: "+sender->value);
+    thedisplay->DrawString("Time Display: "+sender->value, 0);
   #endif
 
   displayTime = sender->value.toInt();
@@ -189,12 +152,12 @@ void Web_timedisplayCall(Control* sender, int type)
 void Web_timecolorCall(Control* sender, int type)
 {
   #ifdef webdebug
-    DebugString("Time Color: "+sender->value);
+    thedisplay->DrawString("Time Color: "+sender->value, 0);
   #endif
 
   String message = sender->value.substring(1);
   long color = strtol(message.c_str(), 0, 16); 
-  clockdigits->fontcolor= color565(color);
+  clockdigits->fontcolor= thedisplay->color565(color);
   timeCounter = 0;
   Flash_Write(5);
 }
@@ -202,12 +165,12 @@ void Web_timecolorCall(Control* sender, int type)
 void Web_timeframeCall(Control* sender, int type)
 {
   #ifdef webdebug
-    DebugString("Frame Color: "+sender->value);
+    thedisplay->DrawString("Frame Color: "+sender->value, 0);
   #endif
 
   String message = sender->value.substring(1);
   long color = strtol(message.c_str(), 0, 16); 
-  frameColor= color565(color);
+  frameColor= thedisplay->color565(color);
   timeCounter = 0;
   Flash_Write(7);
 }
@@ -215,7 +178,7 @@ void Web_timeframeCall(Control* sender, int type)
 void Web_FontCall(Control* sender, int type)
 {
   #ifdef webdebug
-    DebugString("Font Call: "+sender->value);
+    thedisplay->DrawString("Font Call: "+sender->value, 0);
     Serial.println("Font Call: "+sender->value);
   #endif
 
@@ -273,7 +236,7 @@ void WebSwitchAMPM(Control* sender, int value)
 void Web_TimeZoneArea(Control* sender, int type)
 {
   #ifdef webdebug
-    DebugString("Web_TimeZoneArea Call: "+sender->value);
+    thedisplay->DrawString("Web_TimeZoneArea Call: "+sender->value, 0);
     Serial.println("Web_TimeZoneArea Call: "+sender->value);
   #endif
 
@@ -292,7 +255,7 @@ void Web_TimeZoneArea(Control* sender, int type)
 void Web_TimeZoneSelect(Control* sender, int type)
 {
   #ifdef webdebug
-    DebugString("Web_TimeZoneSelect Call: "+sender->value);
+    thedisplay->DrawString("Web_TimeZoneSelect Call: "+sender->value, 0);
     Serial.println("Web_TimeZoneSelect Call: "+sender->value);
   #endif
 
@@ -307,11 +270,11 @@ void Web_TimeZoneSelect(Control* sender, int type)
 
 void Web_Init() {
   ESPUI.number("Time display in seconds:", &Web_timedisplayCall, ControlColor::Alizarin, displayTime);
-  String colorstring = ConvertColor565to888hex(clockdigits->fontcolor);
+  String colorstring = thedisplay->ConvertColor565to888hex(clockdigits->fontcolor);
   uint16_t text_colour = ESPUI.text("Time display color:", &Web_timecolorCall, ControlColor::Alizarin, colorstring);
   ESPUI.setInputType(text_colour, "color");
 
-  colorstring = ConvertColor565to888hex(frameColor);
+  colorstring = thedisplay->ConvertColor565to888hex(frameColor);
   text_colour = ESPUI.text("Time frame color:", &Web_timeframeCall, ControlColor::Alizarin, colorstring);
   ESPUI.setInputType(text_colour, "color");
 

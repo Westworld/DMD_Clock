@@ -1,27 +1,19 @@
-#ifdef UseDMD
-#include <ESP32-HUB75-MatrixPanel-I2S-DMA.h>
-#else
-#include <TFT_eSPI.h>
-
-#define BLACK 0x0000
-#endif
+#include "display.h"
 
 #ifndef Digits_h
 #define Digits_h 
+
+
+#define BLACK 0x0000
 
 class Digits
 {
   public:  
     uint16_t fontcolor=0xFFFF;
     int8_t fontnumber;    
+    Display *display;
 
-#ifdef UseDMD
-    MatrixPanel_I2S_DMA *display;
-    Digits( MatrixPanel_I2S_DMA *thedisplay);
-#else
-    TFT_eSPI *display;
-    Digits(TFT_eSPI *thedisplay);
-#endif    
+    Digits( Display * thedisplay);
     void SetFont(String namen);
     void SetFontNumber(int8_t number);
     int8_t DrawChar(char thechar, int8_t x, int8_t y, int16_t color);

@@ -2,6 +2,7 @@
 #define ImageTest true
 
 #include "video.h"
+#include "display.h"
 
 /* MJPEG Video */
 #define FPS 30
@@ -25,13 +26,7 @@ extern int16_t timeCounter;
 unsigned char buffer[12288];
 #endif
 
-#ifdef UseDMD
-extern MatrixPanel_I2S_DMA *display;
-#else
-extern TFT_eSPI *display;
-#define BLACK 0x0000
-#endif
-
+extern Display * thedisplay;
 extern void loopalwaysrun();
 
 void * myOpen(const char *filename, int32_t *size) {
@@ -51,61 +46,13 @@ int32_t mySeek(JPEGFILE *handle, int32_t position) {
   return myfile.seek(position);
 }
 
-//
-uint16_t color565(uint8_t r, uint8_t g, uint8_t b);
-
-void drawmyframe() {
-    for (int xx=0; xx<128; xx++) {
-      #ifdef UseDMD
-        display->drawPixelRGB888(xx, 0, 0xE6, 0, 0);
-        display->drawPixelRGB888(xx, 31, 0xE6, 0, 0);
-      #else
-        uint16_t color = color565(0xE6, 0, 0);
-        display->drawPixel(xx, 0, color);
-        display->drawPixel(xx+128, 31, color);
-      #endif  
-      
-  }
-}
-
-void drawMyRect(int16_t x, int16_t y, int16_t w, int16_t h, uint16_t color) {
-  #ifdef UseDMD
-    display->drawRect(x, y, w, h, color);
-  #else
-    display->drawRect(x*2, y*2, w*2, h*2, color);
-    display->drawRect(x*2+1, y*2+1, w*2-2, h*2-2, color);
-  #endif
-}
-
-void fillMyRect(int16_t x, int16_t y, int16_t w, int16_t h, uint16_t color) {
-  #ifdef UseDMD
-    display->fillRect(x, y, w, h, color);
-  #else
-    display->fillRect(x*2, y*2, w*2, h*2, color);
-  #endif
-}
-
 void drawImg(int x, int y, int width, int height, uint16_t* bitmap) 
 {
-
- // Serial.print("x ");Serial.print(x);Serial.print(" ");Serial.println(width);
- // Serial.print("y ");Serial.print(y);Serial.print(" ");  Serial.println(height);
- #ifdef UseDMD
   for (int yy=0; yy<height; yy++) {
     for (int xx=0; xx<width; xx++) {
-        display->drawPixel(xx+x, yy+y, bitmap[(yy*width+xx)]);
-       // Serial.print("p: ");Serial.print(x);Serial.print(" ");Serial.print(y); Serial.print(" ");Serial.println(bitmap[(yy*width+xx)]);
+        thedisplay->DrawPixel(xx+x, yy+y, bitmap[(yy*width+xx)]);
     }
   }  
-#else
-    //display->draw16bitRGBBitmap(x, y, bitmap, width, height);  // draw16bitBeRGBBitmap
-      for (int yy=0; yy<height; yy++) {
-    for (int xx=0; xx<width; xx++) {
-        display->drawPixel(xx+x, yy+y, bitmap[(yy*width+xx)]);
-       // Serial.print("p: ");Serial.print(x);Serial.print(" ");Serial.print(y); Serial.print(" ");Serial.println(bitmap[(yy*width+xx)]);
-    }
-  }  
-#endif
 }
 
 void drawMyString(int16_t x, int16_t y, char * text, char* fontbuffer, char* glyphs) {
@@ -125,7 +72,7 @@ Oder methode setfont, definiert fontbuffer und glpyphs. Freigabe bei exit oder n
 bool tft_output(int16_t x, int16_t y, uint16_t w, uint16_t h, uint16_t* bitmap)
 {
    // Stop further decoding as image is running off bottom of screen
-  if ( y >= display->height() ) return 0;
+  if ( y >= thedisplay->height() ) return 0;
 
   // This function will clip the image block rendering automatically at the TFT boundaries
  drawImg(x, y, w, h, bitmap);
@@ -151,12 +98,6 @@ static int drawMCU(JPEGDRAW *pDraw)
   //gfx->draw16bitBeRGBBitmap(pDraw->x, pDraw->y, pDraw->pPixels, pDraw->iWidth, pDraw->iHeight);
   drawImg(pDraw->x, pDraw->y, pDraw->iWidth, pDraw->iHeight, pDraw->pPixels);
   return 1;
-}
-
-void DebugString (String message) {
-  //display->setFont(NULL);
-  display->setCursor(1, 15);    // start at top left, with 8 pixel of spacing
-  display->print(message);
 }
 
 int getVideoFiles(File dir, int numTabs)
@@ -206,7 +147,7 @@ int getVideoFiles(File dir, int numTabs)
   }
 
   // create cache
-  DebugString("create new cache");
+  thedisplay->DrawString("create new cache", 0);
   File card;
   card = SD.open("/cache.txt",FILE_WRITE);
   for (short i=0; i<noFiles;i++) {
@@ -257,7 +198,7 @@ int getFontFiles(File dir, int numTabs)
   }
 
   // create cache
-  DebugString("create new font cache");
+  thedisplay->DrawString("create new font cache", 0);
   File card;
   card = SD.open("/fontcache.txt",FILE_WRITE);
   for (short i=0; i<noFonts;i++) {
@@ -374,15 +315,12 @@ void PlayRawVideo(String name, short filetype) {
   size = myfile.size();
 
   uint8_t *buffer = (uint8_t *)malloc(rawsize);
-#ifndef UseDMD
-  //uint16_t *memory = (uint16_t *)malloc(256*64*2);
   uint16_t *memory = (uint16_t *)malloc(128*32*2);
     for (int yy=0; yy<32; yy++) 
       for (int xx=0; xx<128; xx++) {
-         display->drawRect(xx*2, yy*2, 2, 2, BLACK);
          memory[yy*128+xx]=BLACK;
       }
-#endif
+  thedisplay->Clear();
 
   unsigned long end_ms;
   int framecounter=0;
@@ -397,58 +335,21 @@ void PlayRawVideo(String name, short filetype) {
     int nextread = myfile.read(buffer, rawsize);
     if (nextread < rawsize)  break;
 
-
-#ifndef UseDMD
-/*
     uint16_t color, counter=0;
     for (int yy=0; yy<32; yy++) 
       for (int xx=0; xx<128; xx++) {
         if (filetype == 2) 
-          color = color565( buffer[counter], buffer[counter+1], buffer[counter+2]);
+          color = thedisplay->color565( buffer[counter], buffer[counter+1], buffer[counter+2]);
         else 
-          color = color565( buffer[counter+2], buffer[counter+1], buffer[counter]);
-        memory[(yy*2)*256+(xx*2)]=color;
-        memory[((yy*2)+1)*256+(xx*2)]=color;       
-        memory[(yy*2)*256+(xx*2)+1]=color;
-        memory[((yy*2)+1)*256+(xx*2)+1]=color;         
-        counter += 3;
-      }
-    display->pushImage(0, 0, 256, 64, memory);
- */  
-
-
-    uint16_t color, counter=0;
-    for (int yy=0; yy<32; yy++) 
-      for (int xx=0; xx<128; xx++) {
-        if (filetype == 2) 
-          color = color565( buffer[counter], buffer[counter+1], buffer[counter+2]);
-        else 
-          color = color565( buffer[counter+2], buffer[counter+1], buffer[counter]);
+          color = thedisplay->color565( buffer[counter+2], buffer[counter+1], buffer[counter]);
           
         if(memory[yy*128+xx] != color ) {
-              display->drawRect(xx*2, yy*2, 2, 2, color);
+              thedisplay->DrawPixel(xx, yy, color);
               memory[yy*128+xx]=color;
           }
        
         counter += 3;
       }
-
-
-#else
-    int counter=0, report=20;
-
-    for (int yy=0; yy<32; yy++) 
-      for (int xx=0; xx<128; xx++) {
-        if (filetype == 2) {
-            display->drawPixelRGB888(xx, yy, buffer[counter], buffer[counter+2], buffer[counter+1]);  // rgb  --  +0, +2, +1? 
-        }         
-        else
-          {
-              display->drawPixelRGB888(xx, yy,  buffer[counter+2], buffer[counter+1], buffer[counter]);  // rgb  --  +0, +2, +1?
-         }
-        counter += 3;
-      }     
-#endif
 
     while (millis()<end_ms) 
       loopalwaysrun();

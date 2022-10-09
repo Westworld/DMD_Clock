@@ -8,6 +8,8 @@
 #include <TFT_eSPI.h>
 #endif
 
+#define BLACK 0x0000
+
 void * myOpen(const char *filename, int32_t *size);
 void myClose(void *handle);
 int32_t myRead(JPEGFILE *handle, uint8_t *buffer, int32_t length);
@@ -25,11 +27,7 @@ short getCacheList(String path);
 short getFontCache(String path);
 void playRandomVideo() ;
 void PlayRawVideo(String name, short filetype);
-void drawmyframe();
-void DebugString (String message);
 String readTimeZone(String path);
-void drawMyRect(int16_t x, int16_t y, int16_t w, int16_t h, uint16_t color);
-void fillMyRect(int16_t x, int16_t y, int16_t w, int16_t h, uint16_t color);
 
 #ifdef UseDMD
 

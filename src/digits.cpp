@@ -3,17 +3,9 @@
 #include "video.h"
 
 
-#ifdef UseDMD
-    Digits::Digits( MatrixPanel_I2S_DMA *thedisplay){
-    display = thedisplay;
-    }
-
-    #define BLACK 0x0000        
-#else
-    Digits::Digits(TFT_eSPI *thedisplay){
+Digits::Digits(Display *thedisplay){
        display = thedisplay;
     }
-#endif   
 
 extern u_int16_t frameColor;
 extern String fontnames[];
@@ -77,23 +69,16 @@ int8_t Digits::DrawDigit(int8_t digit, int8_t x, int8_t y, int16_t color) {
     for (int8_t yy = 0; yy < height; yy++) {
         bit = 7;
         byte = fontbuffer[offset+pos];      
-//Serial.println("byte="+String(byte));
         for (int8_t xx = 0; xx < width_round; xx++) {
             if (CHECK_BIT(byte, bit)) {
-                #ifdef UseDMD
-                    display->drawPixel(xx+x, yy+y, color); 
-                #else
-                //Serial.println("bevor drawrect x="+String((xx+x)*2)+" y="+String((yy+y)*2)+" color="+String(color));
-                    display->drawRect((xx+x)*2, (yy+y)*2, 3, 3, color);
-                #endif    
+                display->DrawPixel(xx+x, yy+y, color);   
             }
             bit--;
             if (bit<0) {
                 bit = 7;
                 if ((pos+offset+1) < maxsize) {
                     pos++;
-                    byte = fontbuffer[pos + offset];
-//Serial.println("bytexx="+String(byte));                    
+                    byte = fontbuffer[pos + offset];                   
                 }
             }
         }
@@ -148,13 +133,8 @@ int16_t Digits::CalcTimeWidth( int16_t cur_hour, int16_t cur_min, int16_t cur_se
  void Digits::DrawTime(  int16_t cur_hour, int16_t cur_min, int16_t cur_sec, int16_t& timeCounter) {
   static int16_t last_hour = -1;
   static int16_t last_min  = -1;
-  static int16_t last_sec  = -1;
-
-#ifndef UseDMD    
-    int8_t y = -1, width=0, distance=2;
-#else
-    int8_t y = -1, width=0, distance=2;
-#endif
+  static int16_t last_sec  = -1;  
+  int8_t y = -1, width=0, distance=2;
 
   if (twelveHourFormat)
     if (cur_hour>12)
@@ -165,10 +145,8 @@ int16_t Digits::CalcTimeWidth( int16_t cur_hour, int16_t cur_min, int16_t cur_se
 
   if ((cur_hour != last_hour) | (cur_min != last_min) | (timeCounter == 0)) {
     timeCounter++;
-    fillMyRect(0, 0, 128, 32, BLACK);
-    drawMyRect(0, 0, 128, 32, frameColor);
-
-//Serial.println("in loop drawtime");
+    display->FillRect(0, 0, 128, 32, BLACK);
+    display->DrawRect(0, 0, 128, 32, frameColor);
 
     if (cur_hour>9)
         width = DrawDigit(cur_hour/10, x, y, fontcolor) + distance;
@@ -201,7 +179,6 @@ int16_t Digits::CalcTimeWidth( int16_t cur_hour, int16_t cur_min, int16_t cur_se
     } 
     else 
     {
-      //fillMyRect(lastcolon, 2, charwidths[10], 30, BLACK);
       DrawDigit(10, lastcolon, y, BLACK);
       if (displaySeconds)
         DrawDigit(10, lastseccolon, y, BLACK);
