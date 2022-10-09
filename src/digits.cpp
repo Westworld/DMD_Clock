@@ -70,7 +70,12 @@ int8_t Digits::DrawDigit(int8_t digit, int8_t x, int8_t y, int16_t color) {
     int8_t bit = 7;
     int16_t maxsize = fontsize; 
 
-    for (int8_t yy = 0; yy < height; yy++) {
+    int8_t theheight = height;
+    if (upDownCounter > 0) 
+        if (upDownCounter < height)
+            theheight = upDownCounter;
+
+    for (int8_t yy = 0; yy < theheight; yy++) {
         bit = 7;
         byte = fontbuffer[offset+pos];      
         for (int8_t xx = 0; xx < width_round; xx++) {
@@ -152,12 +157,21 @@ int16_t Digits::CalcTimeWidth( int16_t cur_hour, int16_t cur_min, int16_t cur_se
   int8_t x = 64 - (CalcTimeWidth( cur_hour, cur_min, cur_sec, distance) / 2);
   if (x<0) x = 1;
 
-  if ((cur_hour != last_hour) | (cur_min != last_min) | (settings->needRefresh())) {
-    timeCounter++;
+  if (upDownCounter > 30) upDownCounter = 0;
 
-    display->FillRect(0, 0, 128, 32, BLACK);
-    display->DrawRect(0, 0, 128, 32, settings->getFrameColor());
+  if ((cur_hour != last_hour) | (cur_min != last_min) | (upDownCounter > 0) | (settings->needRefresh()) |
+        (settings->getDisplaySeconds() & (cur_sec != last_sec))) {
+    if (upDownCounter == 0) 
+    {   timeCounter++;
 
+        display->FillRect(0, 0, 128, 32, BLACK);
+        display->DrawRect(0, 0, 128, 32, settings->getFrameColor());
+    }
+    else   
+        upDownCounter++;
+
+    if ((upDownCounter == 0) && (settings->getClockUpDown() && ((cur_min != last_min)|(settings->needRefresh()))))
+        upDownCounter = 1;
 
     if (cur_hour>9)
         width = DrawDigit(cur_hour/10, x, y, fontcolor) + distance;
@@ -181,20 +195,25 @@ int16_t Digits::CalcTimeWidth( int16_t cur_hour, int16_t cur_min, int16_t cur_se
 
   }
   else
-  if(cur_sec != last_sec) {
-    timeCounter++;
-    if ((cur_sec % 2) == 1) {
-        DrawDigit(10, lastcolon, y, fontcolor);
-        if (settings->getDisplaySeconds())
-            DrawDigit(10, lastseccolon, y, fontcolor);
-    } 
-    else 
-    {
-      DrawDigit(10, lastcolon, y, BLACK);
-      if (settings->getDisplaySeconds())
-        DrawDigit(10, lastseccolon, y, BLACK);
+    if(cur_sec != last_sec) {
+        timeCounter++;
+        if (settings->getDisplaySeconds()) {
+
+        }
+        else {
+            if ((cur_sec % 2) == 1) {
+                DrawDigit(10, lastcolon, y, fontcolor);
+                if (settings->getDisplaySeconds())
+                    DrawDigit(10, lastseccolon, y, fontcolor);
+            } 
+            else 
+            {
+            DrawDigit(10, lastcolon, y, BLACK);
+            if (settings->getDisplaySeconds())
+                DrawDigit(10, lastseccolon, y, BLACK);
+            }
+        }
     }
-  }
 
 
   last_hour = cur_hour;

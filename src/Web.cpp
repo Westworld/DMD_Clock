@@ -42,6 +42,17 @@ void Web_timecolorCall(Control* sender, int type)
   settings->setFontColor(thedisplay->color565(color));
 }
 
+void Web_timeSparklecolorCall(Control* sender, int type)
+{
+  #ifdef webdebug
+    thedisplay->DrawString("Time Sparkle Color: "+sender->value, 0);
+  #endif
+
+  String message = sender->value.substring(1);
+  long color = strtol(message.c_str(), 0, 16); 
+  settings->setFontSparkleColor(thedisplay->color565(color));
+}
+
 void Web_timeframeCall(Control* sender, int type)
 {
   #ifdef webdebug
@@ -92,6 +103,34 @@ void WebSwitchAMPM(Control* sender, int value)
     }
 }
 
+void WebSwitchUpDown(Control* sender, int value)
+{
+    switch (value)
+    {
+    case S_ACTIVE:
+        settings->setClockUpDown(true);
+        break;
+
+    case S_INACTIVE:
+        settings->setClockUpDown(false);
+        break;
+    }
+}
+
+void WebSwitchSparkle(Control* sender, int value)
+{
+    switch (value)
+    {
+    case S_ACTIVE:
+        settings->setClockSparkle(true);
+        break;
+
+    case S_INACTIVE:
+        settings->setClockSparkle(false);
+        break;
+    }
+}
+
 void Web_TimeZoneArea(Control* sender, int type)
 {
   #ifdef webdebug
@@ -125,9 +164,13 @@ void Web_TimeZoneSelect(Control* sender, int type)
 
 
 void Web_Init() {
+  //ESPUI.sliderContinuous = true;
   ESPUI.number("Time display in seconds:", &Web_timedisplayCall, ControlColor::Alizarin, settings->getDisplayTime());
   String colorstring = thedisplay->ConvertColor565to888hex(settings->getFontColor());
   uint16_t text_colour = ESPUI.text("Time display color:", &Web_timecolorCall, ControlColor::Alizarin, colorstring);
+  ESPUI.setInputType(text_colour, "color");
+  String sparklecolorstring = thedisplay->ConvertColor565to888hex(settings->getFontSparkleColor());
+  text_colour = ESPUI.text("Time display color sparkle:", &Web_timecolorCall, ControlColor::Alizarin, sparklecolorstring);
   ESPUI.setInputType(text_colour, "color");
 
   colorstring = thedisplay->ConvertColor565to888hex(settings->getFrameColor());
@@ -144,6 +187,8 @@ void Web_Init() {
 
   ESPUI.switcher("Show Seconds", &WebSwitchSeconds, ControlColor::Alizarin, settings->getDisplaySeconds());
   ESPUI.switcher("12 hour format", &WebSwitchAMPM, ControlColor::Alizarin, settings->getTwelveHourFormat());
+  ESPUI.switcher("Clock display up>down", &WebSwitchUpDown, ControlColor::Alizarin, settings->getClockUpDown());
+  ESPUI.switcher("Clock sparkle", &WebSwitchSparkle, ControlColor::Alizarin, settings->getClockSparkle());
 
   select1 = ESPUI.addControl(ControlType::Select, "Time Zone Continent:", "", ControlColor::Alizarin, -1, &Web_TimeZoneArea);
   for (int i=0; i<notimezonenames; i++)    
