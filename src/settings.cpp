@@ -31,15 +31,15 @@ uint16_t Settings::getFontSparkleColor(void){
     return fontSparkleColor;
 }; 
 
-u_int8_t Settings::getDisplayTime(void) {
+uint8_t Settings::getDisplayTime(void) {
     return displayTime;
 }
 
-u_int8_t Settings::getTimeZoneArea(void) {
+uint8_t Settings::getTimeZoneArea(void) {
     return timezonearea;
 }
 
-u_int8_t Settings::getTimeZoneID(void) {
+uint8_t Settings::getTimeZoneID(void) {
     return timezoneid;
 }
 
@@ -51,14 +51,14 @@ bool Settings::getClockSparkle(void) {
     return ClockSparkle;
 }
 
-void Settings::setDisplayTime(u_int8_t newTime) {
+void Settings::setDisplayTime(uint8_t newTime) {
     if (newTime != displayTime) {
         displayTime = newTime;
         Flash_Write(2);
     }
 }
 
-void Settings::setFontColor(u_int16_t color) {
+void Settings::setFontColor(uint16_t color) {
     if (color != fontColor) {
         fontColor = color;
         Flash_Write(5);
@@ -66,14 +66,14 @@ void Settings::setFontColor(u_int16_t color) {
     }
 }
 
-void Settings::setFontSparkleColor(u_int16_t color) {
+void Settings::setFontSparkleColor(uint16_t color) {
     if (color != fontSparkleColor) {
         fontSparkleColor = color;
         Flash_Write(14);
         doRefresh();
     }
 }
-void Settings::setFrameColor(u_int16_t color) {
+void Settings::setFrameColor(uint16_t color) {
     if (color != frameColor) {
         frameColor = color;
         Flash_Write(7);
@@ -81,7 +81,7 @@ void Settings::setFrameColor(u_int16_t color) {
     }
 }
 
-void Settings::setFontNumber(u_int8_t font) {
+void Settings::setFontNumber(uint8_t font) {
     if (font != fontnumber) {
         fontnumber = font;
         Flash_Write(9);
@@ -105,12 +105,12 @@ void Settings::setTwelveHourFormat(bool display) {
     }
 }
 
-void Settings::setTimeZone(u_int8_t ID) {
+void Settings::setTimeZone(uint8_t ID) {
     timezoneid = ID;
     Flash_Write(10);
     doRefresh();
 }
-void Settings::setTimeZone(u_int8_t Area, u_int8_t ID) {
+void Settings::setTimeZone(uint8_t Area, uint8_t ID) {
     timezonearea = Area;
     timezoneid = ID;
     Flash_Write(10);
@@ -201,7 +201,7 @@ void Settings::Flash_Read() {
         timezoneid = EEPROM.read(11);
         ClockUpDown = EEPROM.read(12);
         ClockSparkle = EEPROM.read(13);
-        fontSparkleColor = EEPROM.read(14);
+        fontSparkleColor = EEPROM.readShort(14);
         break;   
 
       default:

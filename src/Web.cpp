@@ -170,7 +170,7 @@ void Web_Init() {
   uint16_t text_colour = ESPUI.text("Time display color:", &Web_timecolorCall, ControlColor::Alizarin, colorstring);
   ESPUI.setInputType(text_colour, "color");
   String sparklecolorstring = thedisplay->ConvertColor565to888hex(settings->getFontSparkleColor());
-  text_colour = ESPUI.text("Time display color sparkle:", &Web_timecolorCall, ControlColor::Alizarin, sparklecolorstring);
+  text_colour = ESPUI.text("Time display color sparkle:", &Web_timeSparklecolorCall, ControlColor::Alizarin, sparklecolorstring);
   ESPUI.setInputType(text_colour, "color");
 
   colorstring = thedisplay->ConvertColor565to888hex(settings->getFrameColor());

@@ -4,6 +4,8 @@
 
 extern String fontnames[];
 
+const int sparkleRandom=4;
+
 Digits::Digits(Display *thedisplay, Settings *thesettings){
        display = thedisplay;
        settings = thesettings;
@@ -56,7 +58,7 @@ void Digits::CheckFont(void) {
 #define CHECK_BIT(var,pos) ((var) & (1<<(pos)))
 
 
-int8_t Digits::DrawDigit(int8_t digit, int8_t x, int8_t y, int16_t color) {    
+int8_t Digits::DrawDigit(int8_t digit, int8_t x, int8_t y, uint16_t color) {    
     if (y < 0)
         y = ((32-height)/2);
 
@@ -69,18 +71,27 @@ int8_t Digits::DrawDigit(int8_t digit, int8_t x, int8_t y, int16_t color) {
     uint8_t byte = 0, pos=0;
     int8_t bit = 7;
     int16_t maxsize = fontsize; 
+    uint16_t thecolor;
 
     int8_t theheight = height;
     if (upDownCounter > 0) 
         if (upDownCounter < height)
             theheight = upDownCounter;
 
+    bool doSparkle = settings->getClockSparkle();  
+    uint16_t SparkleColor = settings->getFontSparkleColor();
+
     for (int8_t yy = 0; yy < theheight; yy++) {
         bit = 7;
         byte = fontbuffer[offset+pos];      
         for (int8_t xx = 0; xx < width_round; xx++) {
             if (CHECK_BIT(byte, bit)) {
-                display->DrawPixel(xx+x, yy+y, color);   
+                thecolor = color;
+                if ((color != BLACK) & (doSparkle)) {
+                    int8_t ran = random(sparkleRandom);  // 0-(sparkleRandom-1)
+                    if (ran == 0) thecolor=SparkleColor; 
+                }
+                display->DrawPixel(xx+x, yy+y, thecolor);   
             }
             bit--;
             if (bit<0) {
@@ -109,7 +120,7 @@ int8_t Digits::DrawDigitCheck(int8_t digit, int8_t x, int8_t y, int8_t type ) {
     }
 }
 
-int8_t Digits::DrawChar(char thechar, int8_t x, int8_t y, int16_t color) {
+int8_t Digits::DrawChar(char thechar, int8_t x, int8_t y, uint16_t color) {
 
     int8_t digit = thechar-48;
     if ((digit<0)|(digit>9))
@@ -118,7 +129,7 @@ int8_t Digits::DrawChar(char thechar, int8_t x, int8_t y, int16_t color) {
     return DrawDigit(digit, x, y, color);
 }
 
-void Digits::DrawString(String text, int8_t x, int8_t y, int16_t color) {
+void Digits::DrawString(String text, int8_t x, int8_t y, uint16_t color) {
      int8_t pos=x;
      int8_t width;
 
@@ -196,7 +207,7 @@ int8_t Digits::DrawTime (int16_t cur_hour, int16_t cur_min, int16_t cur_sec, int
   // wenn min/hour update, needrefresh oder updowncounter, alles malen, vor her löschen
   // wenn sekunden update und display seconds, erst black, dann white malen
   // sonst dots blinken
-  // nichts - sparkle
+  // nichts - sparkle#######
 
   if ((cur_hour != last_hour) | (cur_min != last_min) | (upDownCounter > 0) | (settings->needRefresh())) {
     if (upDownCounter == 0) 
@@ -247,7 +258,7 @@ int8_t Digits::DrawTime (int16_t cur_hour, int16_t cur_min, int16_t cur_sec, int
     if(cur_sec != last_sec) {
         timeCounter++;
         if (settings->getDisplaySeconds()) {
-
+            // we already did everything...
         }
         else {
             draw1=0, draw2=0,  draw3=0,  draw4=0,  draw5=0,  draw6=0,  draw7=0,  draw8=0;
@@ -264,7 +275,22 @@ int8_t Digits::DrawTime (int16_t cur_hour, int16_t cur_min, int16_t cur_sec, int
                 }
             DrawTime (cur_hour, cur_min, cur_sec, draw1, draw2, draw3, draw4, draw5, draw6, draw7, draw8);
         }
-    }        
+    }  
+    else {
+        // anything else, only display if sparkle, run this once per loops (delay??)
+        if(settings->getClockSparkle()) {
+            draw1=1, draw2=1,  draw3=0,  draw4=1,  draw5=1,  draw6=0,  draw7=0,  draw8=0;
+            if ((cur_sec % 2) == 1) {
+                draw3=1;
+                if (settings->getDisplaySeconds())
+                   draw6=1;
+            } 
+            if (settings->getDisplaySeconds())
+                draw7=draw8=1;
+            DrawTime (cur_hour, cur_min, cur_sec, draw1, draw2, draw3, draw4, draw5, draw6, draw7, draw8);  
+            delay(10);    
+        }
+    }      
     
 
 

@@ -16,10 +16,10 @@ class Digits
     void SetFont(String namen);
     void SetFontNumber(int8_t number);
     void CheckFont();
-    int8_t DrawChar(char thechar, int8_t x, int8_t y, int16_t color);
-    int8_t DrawDigit(int8_t digit, int8_t x, int8_t y, int16_t color) ;
+    int8_t DrawChar(char thechar, int8_t x, int8_t y, uint16_t color);
+    int8_t DrawDigit(int8_t digit, int8_t x, int8_t y, uint16_t color) ;
     int8_t DrawDigitCheck(int8_t digit, int8_t x, int8_t y, int8_t type );
-    void DrawString(String text, int8_t x, int8_t y, int16_t color);
+    void DrawString(String text, int8_t x, int8_t y, uint16_t color);
     int8_t CalcDigitWidth(int8_t digit);
     int16_t CalcTimeWidth( int16_t cur_hour, int16_t cur_min, int16_t cur_sec, int8_t distance);
     void DrawTime(  int16_t cur_hour, int16_t cur_min, int16_t cur_sec, int16_t& timeCounter) ;
