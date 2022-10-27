@@ -56,6 +56,7 @@ class Display
     void DrawRect(int16_t x, int16_t y, int16_t w, int16_t h, uint16_t color);
     void FillRect(int16_t x, int16_t y, int16_t w, int16_t h, uint16_t color);
     void DrawPixel(int16_t x, int16_t y, uint16_t color);
+    void DrawPixel(int16_t x, int16_t y, uint8_t r, uint8_t g, uint8_t b ) ;
     void DrawString(String text, int8_t line);
     void Clear(void);
     uint16_t color565(uint8_t r, uint8_t g, uint8_t b);

@@ -81,10 +81,11 @@ void Settings::setFrameColor(uint16_t color) {
     }
 }
 
-void Settings::setFontNumber(uint8_t font) {
+void Settings::setFontNumber(uint8_t font, bool noFlash) {
     if (font != fontnumber) {
         fontnumber = font;
-        Flash_Write(9);
+        if (!noFlash)
+            Flash_Write(9);
         doRefresh();
     }
 }

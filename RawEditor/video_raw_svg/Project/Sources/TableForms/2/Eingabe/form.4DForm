@@ -1,0 +1,99 @@
+{
+	"$4d": {
+		"version": "1",
+		"kind": "form"
+	},
+	"windowSizingX": "variable",
+	"windowSizingY": "variable",
+	"windowMinWidth": 0,
+	"windowMinHeight": 0,
+	"windowMaxWidth": 32767,
+	"windowMaxHeight": 32767,
+	"rightMargin": 20,
+	"bottomMargin": 20,
+	"events": [
+		"onLoad",
+		"onPageChange",
+		"onValidate",
+		"onClick",
+		"onDoubleClick",
+		"onOutsideCall",
+		"onBeginDragOver",
+		"onDragOver",
+		"onDrop",
+		"onAfterKeystroke",
+		"onMenuSelect",
+		"onPluginArea",
+		"onAfterEdit",
+		"onTimer",
+		"onBoundVariableChange"
+	],
+	"windowTitle": "window title",
+	"destination": "detailScreen",
+	"pages": [
+		{
+			"objects": {}
+		},
+		{
+			"objects": {
+				"label_ID": {
+					"type": "text",
+					"text": "ID:",
+					"top": 10,
+					"left": 10,
+					"width": 100,
+					"height": 17
+				},
+				"field_ID": {
+					"type": "input",
+					"dataSource": "[Settings:2]ID:1",
+					"top": 10,
+					"left": 120,
+					"width": 250,
+					"height": 17
+				},
+				"label_root": {
+					"type": "text",
+					"text": "root:",
+					"top": 47,
+					"left": 10,
+					"width": 100,
+					"height": 17
+				},
+				"field_root": {
+					"type": "input",
+					"dataSource": "[Settings:2]root:2",
+					"top": 47,
+					"left": 120,
+					"width": 250,
+					"height": 17
+				},
+				"Schaltfläche": {
+					"type": "button",
+					"text": "Set",
+					"top": 82,
+					"left": 241,
+					"width": 137,
+					"height": 27,
+					"events": [
+						"onClick"
+					],
+					"method": "ObjectMethods/Schaltfläche.4dm"
+				},
+				"Schaltfläche1": {
+					"type": "button",
+					"text": "save",
+					"top": 142,
+					"left": 224,
+					"width": 154,
+					"height": 41,
+					"events": [
+						"onClick"
+					],
+					"action": "accept"
+				}
+			}
+		}
+	],
+	"geometryStamp": 5
+}

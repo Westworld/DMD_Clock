@@ -60,6 +60,16 @@ void Display::DrawPixel(int16_t x, int16_t y, uint16_t color) {
     #endif      
 };
 
+
+void Display::DrawPixel(int16_t x, int16_t y, uint8_t r, uint8_t g, uint8_t b ) {
+    #ifdef UseDMD
+      display->drawPixelRGB888(x, y, r, g, b); 
+    #else
+        uint16_t color = color565( r, g,b);
+        display->drawRect(x*2, y*2, 2, 2, color);
+    #endif      
+};
+
 void Display::DrawString(String thetext, int8_t line = 0) {
     display->setTextColor(TFT_WHITE, 0x0000);
     display->setCursor(5, 5+(line*12));   

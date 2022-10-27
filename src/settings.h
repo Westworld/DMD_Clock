@@ -26,7 +26,7 @@ class Settings
     void setFontColor(uint16_t color);
     void setFontSparkleColor(uint16_t color);
     void setFrameColor(uint16_t color);
-    void setFontNumber(uint8_t font);
+    void setFontNumber(uint8_t font, bool noFlash=false);
     void setDisplaySeconds(bool display);
     void setTwelveHourFormat(bool display);
     void setTimeZone(uint8_t ID);

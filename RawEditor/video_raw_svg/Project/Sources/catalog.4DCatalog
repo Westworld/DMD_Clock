@@ -22,7 +22,7 @@
 		<field name="ID" uuid="B52ADB81A80A46C0A92CE3E5F026DD04" type="10" unique="true" autogenerate="true" store_as_UUID="true" not_null="true" id="1"/>
 		<field name="root" uuid="5EBC72645F484A6EB331E40024D02795" type="10" limiting_length="255" id="2"/>
 		<primary_key field_name="ID" field_uuid="B52ADB81A80A46C0A92CE3E5F026DD04"/>
-		<table_extra>
+		<table_extra output_form="Formular1" input_form="Eingabe">
 			<editor_table_info displayable_fields_count="6">
 				<color red="255" green="255" blue="255" alpha="0"/>
 				<coordinates left="430.58203125" top="96.7265625" width="120" height="167.33203125"/>

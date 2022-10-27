@@ -16,7 +16,8 @@ String timezonencitynames[maxtimezonecitynames];
 uint16_t timezonencityids[maxtimezonecitynames];
 uint8_t notimezonecitynames = 0;
 uint16_t SelectIDTimeZoneCity = 0;
-extern String MY_TZ;
+extern String MY_TZ; 
+uint16_t web_sparklecolor;
 
 extern Digits  * clockdigits;
 extern Display * thedisplay;
@@ -123,10 +124,12 @@ void WebSwitchSparkle(Control* sender, int value)
     {
     case S_ACTIVE:
         settings->setClockSparkle(true);
+        ESPUI.updateVisibility(web_sparklecolor, true);
         break;
 
     case S_INACTIVE:
         settings->setClockSparkle(false);
+        ESPUI.updateVisibility(web_sparklecolor, false);
         break;
     }
 }
@@ -169,10 +172,7 @@ void Web_Init() {
   String colorstring = thedisplay->ConvertColor565to888hex(settings->getFontColor());
   uint16_t text_colour = ESPUI.text("Time display color:", &Web_timecolorCall, ControlColor::Alizarin, colorstring);
   ESPUI.setInputType(text_colour, "color");
-  String sparklecolorstring = thedisplay->ConvertColor565to888hex(settings->getFontSparkleColor());
-  text_colour = ESPUI.text("Time display color sparkle:", &Web_timeSparklecolorCall, ControlColor::Alizarin, sparklecolorstring);
-  ESPUI.setInputType(text_colour, "color");
-
+  
   colorstring = thedisplay->ConvertColor565to888hex(settings->getFrameColor());
   text_colour = ESPUI.text("Time frame color:", &Web_timeframeCall, ControlColor::Alizarin, colorstring);
   ESPUI.setInputType(text_colour, "color");
@@ -189,6 +189,10 @@ void Web_Init() {
   ESPUI.switcher("12 hour format", &WebSwitchAMPM, ControlColor::Alizarin, settings->getTwelveHourFormat());
   ESPUI.switcher("Clock display up>down", &WebSwitchUpDown, ControlColor::Alizarin, settings->getClockUpDown());
   ESPUI.switcher("Clock sparkle", &WebSwitchSparkle, ControlColor::Alizarin, settings->getClockSparkle());
+  String sparklecolorstring = thedisplay->ConvertColor565to888hex(settings->getFontSparkleColor());
+  web_sparklecolor = ESPUI.text("Time display color sparkle:", &Web_timeSparklecolorCall, ControlColor::Alizarin, sparklecolorstring);
+  ESPUI.setInputType(web_sparklecolor, "color");
+  if (!settings->getClockSparkle()) ESPUI.updateVisibility(web_sparklecolor, false);
 
   select1 = ESPUI.addControl(ControlType::Select, "Time Zone Continent:", "", ControlColor::Alizarin, -1, &Web_TimeZoneArea);
   for (int i=0; i<notimezonenames; i++)    

@@ -4,7 +4,7 @@
 
 extern String fontnames[];
 
-const int sparkleRandom=4;
+const int sparkleRandom=3;
 
 Digits::Digits(Display *thedisplay, Settings *thesettings){
        display = thedisplay;
@@ -168,21 +168,19 @@ int16_t Digits::CalcTimeWidth( int16_t cur_hour, int16_t cur_min, int16_t cur_se
 int8_t Digits::DrawTime (int16_t cur_hour, int16_t cur_min, int16_t cur_sec, int8_t draw1, int8_t draw2, int8_t draw3, int8_t draw4, int8_t draw5, int8_t draw6, int8_t draw7, int8_t draw8) {
      int8_t y = -1, width=0, distance=2;
      uint16_t fontcolor = settings->getFontColor();
-     int8_t x = 64 - (CalcTimeWidth( cur_hour, cur_min, cur_sec, distance) / 2);
-     if (x<0) x = 1;
 
    if (cur_hour>9)
-        width = DrawDigitCheck(cur_hour/10, x, y, draw1) + distance;
-    width += DrawDigitCheck(cur_hour%10, x+width, y, draw2) + distance;
-    lastcolon = x+width;
-    width += DrawDigitCheck(10, x+width, y, draw3) + distance;
-    width += DrawDigitCheck(cur_min/10, x+width, y, draw4) + distance;
-    width += DrawDigitCheck(cur_min%10, x+width, y, draw5) + distance; 
+        width = DrawDigitCheck(cur_hour/10, start_x, y, draw1) + distance;
+    width += DrawDigitCheck(cur_hour%10, start_x+width, y, draw2) + distance;
+    lastcolon = start_x+width;
+    width += DrawDigitCheck(10, start_x+width, y, draw3) + distance;
+    width += DrawDigitCheck(cur_min/10, start_x+width, y, draw4) + distance;
+    width += DrawDigitCheck(cur_min%10, start_x+width, y, draw5) + distance; 
     if (settings->getDisplaySeconds()) {
-        lastseccolon = x+width;
-        width += DrawDigitCheck(10, x+width, y, draw6) + distance;
-        width += DrawDigitCheck(cur_sec/10, x+width, y, draw7) + distance;
-        width += DrawDigitCheck(cur_sec%10, x+width, y, draw8) + distance; 
+        lastseccolon = start_x+width;
+        width += DrawDigitCheck(10, start_x+width, y, draw6) + distance;
+        width += DrawDigitCheck(cur_sec/10, start_x+width, y, draw7) + distance;
+        width += DrawDigitCheck(cur_sec%10, start_x+width, y, draw8) + distance; 
     }   
     return width;  
  }
@@ -197,8 +195,8 @@ int8_t Digits::DrawTime (int16_t cur_hour, int16_t cur_min, int16_t cur_sec, int
     if (cur_hour>12)
         cur_hour-=12;
 
-  int8_t x = 64 - (CalcTimeWidth( cur_hour, cur_min, cur_sec, distance) / 2);
-  if (x<0) x = 1;
+  if ((upDownCounter>0) & (!settings->getClockUpDown())) // reset
+      upDownCounter = 0;
 
   int8_t draw1=0, draw2=0,  draw3=0,  draw4=0,  draw5=0,  draw6=0,  draw7=0,  draw8=0;
 
@@ -209,21 +207,23 @@ int8_t Digits::DrawTime (int16_t cur_hour, int16_t cur_min, int16_t cur_sec, int
   // sonst dots blinken
   // nichts - sparkle#######
 
-  if ((cur_hour != last_hour) | (cur_min != last_min) | (upDownCounter > 0) | (settings->needRefresh())) {
-    if (upDownCounter == 0) 
+  if ( (cur_hour != last_hour) | (cur_min != last_min) | (settings->needRefresh()) ) 
+  { if (upDownCounter == 0)
     {   timeCounter++;
-
         display->FillRect(0, 0, 128, 32, BLACK);
         display->DrawRect(0, 0, 128, 32, settings->getFrameColor());
-    }
-    else   
-        upDownCounter++;     
-    if ((upDownCounter == 0) && (settings->getClockUpDown() && ((cur_min != last_min)|(settings->needRefresh()))))
-        upDownCounter = 1;    
+        start_x = 64 - (CalcTimeWidth( cur_hour, cur_min, cur_sec, distance) / 2);
+        if (start_x<0) {
+            start_x = 1;
+        }
+        if (settings->getClockUpDown())
+            upDownCounter = 1; 
+    }       
+
     if (cur_hour>9)
         draw1=1;
     draw2=1;
-    lastcolon = x+width;
+    lastcolon = start_x+width;
     if ((cur_sec % 2) == 1)
         draw3=1;
     else 
@@ -231,7 +231,7 @@ int8_t Digits::DrawTime (int16_t cur_hour, int16_t cur_min, int16_t cur_sec, int
     draw4=1;
     draw5=1; 
     if (settings->getDisplaySeconds()) {
-        lastseccolon = x+width;
+        lastseccolon = start_x+width;
         if ((cur_sec % 2) == 1)
             draw6=1;
         else 
@@ -244,6 +244,7 @@ int8_t Digits::DrawTime (int16_t cur_hour, int16_t cur_min, int16_t cur_sec, int
   }
   else
     if ((settings->getDisplaySeconds() & (cur_sec != last_sec)))  {
+        timeCounter++;
         draw1=draw2=draw4=draw5=0;
         draw3=draw6=draw7=draw8=-1;
         DrawTime (cur_hour, cur_min, last_sec, draw1, draw2, draw3, draw4, draw5, draw6, draw7, draw8);
@@ -278,7 +279,7 @@ int8_t Digits::DrawTime (int16_t cur_hour, int16_t cur_min, int16_t cur_sec, int
     }  
     else {
         // anything else, only display if sparkle, run this once per loops (delay??)
-        if(settings->getClockSparkle()) {
+        if ((settings->getClockSparkle())| (upDownCounter>0))  {
             draw1=1, draw2=1,  draw3=0,  draw4=1,  draw5=1,  draw6=0,  draw7=0,  draw8=0;
             if ((cur_sec % 2) == 1) {
                 draw3=1;
@@ -288,7 +289,10 @@ int8_t Digits::DrawTime (int16_t cur_hour, int16_t cur_min, int16_t cur_sec, int
             if (settings->getDisplaySeconds())
                 draw7=draw8=1;
             DrawTime (cur_hour, cur_min, cur_sec, draw1, draw2, draw3, draw4, draw5, draw6, draw7, draw8);  
-            delay(10);    
+            if (upDownCounter>0)
+                upDownCounter++;
+            else    
+                delay(10);    
         }
     }      
     
@@ -300,85 +304,3 @@ int8_t Digits::DrawTime (int16_t cur_hour, int16_t cur_min, int16_t cur_sec, int
 
  }
 
-
- void Digits::DrawTimeOrig(  int16_t cur_hour, int16_t cur_min, int16_t cur_sec, int16_t& timeCounter) {
-  /*
-  static int16_t last_hour = -1;
-  static int16_t last_min  = -1;
-  static int16_t last_sec  = -1;  */
-  int8_t y = -1, width=0, distance=2;
-
-  CheckFont();
-  uint16_t fontcolor = settings->getFontColor();
-
-  if (settings->getTwelveHourFormat())
-    if (cur_hour>12)
-        cur_hour-=12;
-
-  int8_t x = 64 - (CalcTimeWidth( cur_hour, cur_min, cur_sec, distance) / 2);
-  if (x<0) x = 1;
-
-  if (upDownCounter > 30) upDownCounter = 0;
-
-  if ((cur_hour != last_hour) | (cur_min != last_min) | (upDownCounter > 0) | (settings->needRefresh()) |
-        (settings->getDisplaySeconds() & (cur_sec != last_sec))) {
-    if (upDownCounter == 0) 
-    {   timeCounter++;
-
-        display->FillRect(0, 0, 128, 32, BLACK);
-        display->DrawRect(0, 0, 128, 32, settings->getFrameColor());
-    }
-    else   
-        upDownCounter++;
-
-    if ((upDownCounter == 0) && (settings->getClockUpDown() && ((cur_min != last_min)|(settings->needRefresh()))))
-        upDownCounter = 1;
-
-    if (cur_hour>9)
-        width = DrawDigit(cur_hour/10, x, y, fontcolor) + distance;
-    width += DrawDigit(cur_hour%10, x+width, y, fontcolor) + distance;
-    lastcolon = x+width;
-    if ((cur_sec % 2) == 1)
-      width += DrawDigit(10, x+width, y, fontcolor) + distance;
-    else 
-      width += charwidths[10] + distance;
-    width += DrawDigit(cur_min/10, x+width, y, fontcolor) + distance;
-    width += DrawDigit(cur_min%10, x+width, y, fontcolor) + distance; 
-    if (settings->getDisplaySeconds()) {
-        lastseccolon = x+width;
-        if ((cur_sec % 2) == 1)
-            width += DrawDigit(10, x+width, y, fontcolor) + distance;
-        else 
-        width += charwidths[10] + distance;
-        width += DrawDigit(cur_sec/10, x+width, y, fontcolor) + distance;
-        width += DrawDigit(cur_sec%10, x+width, y, fontcolor) + distance; 
-    }
-
-  }
-  else
-    if(cur_sec != last_sec) {
-        timeCounter++;
-        if (settings->getDisplaySeconds()) {
-
-        }
-        else {
-            if ((cur_sec % 2) == 1) {
-                DrawDigit(10, lastcolon, y, fontcolor);
-                if (settings->getDisplaySeconds())
-                    DrawDigit(10, lastseccolon, y, fontcolor);
-            } 
-            else 
-            {
-            DrawDigit(10, lastcolon, y, BLACK);
-            if (settings->getDisplaySeconds())
-                DrawDigit(10, lastseccolon, y, BLACK);
-            }
-        }
-    }
-
-
-  last_hour = cur_hour;
-  last_min = cur_min;
-  last_sec = cur_sec;
-
- }

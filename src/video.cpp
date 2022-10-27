@@ -314,6 +314,9 @@ void PlayRawVideo(String name, short filetype) {
    return;
   }
   size = myfile.size();
+  #ifdef webdebug 
+    //Serial.println("size: "+String(size));
+  #endif
 
   uint8_t *buffer = (uint8_t *)malloc(rawsize);
   uint16_t *memory = (uint16_t *)malloc(128*32*2);
@@ -327,6 +330,9 @@ void PlayRawVideo(String name, short filetype) {
   int framecounter=0;
 
   while(myfile) {
+    #ifdef webdebug 
+      //Serial.println("frame: "+String(framecounter));
+    #endif
     framecounter++;
     if (settings->needRefresh()) {
       settings->doRefresh();
@@ -347,22 +353,26 @@ void PlayRawVideo(String name, short filetype) {
           color = thedisplay->color565( buffer[counter+2], buffer[counter+1], buffer[counter]);
           
         if(memory[yy*128+xx] != color ) {
-              thedisplay->DrawPixel(xx, yy, color);
+              #ifdef UseDMD
+                thedisplay->DrawPixel(xx, yy, buffer[counter], buffer[counter+2], buffer[counter+1]);
+              #else
+                thedisplay->DrawPixel(xx, yy, color);
+              #endif
               memory[yy*128+xx]=color;
           }
        
         counter += 3;
       }
 
-    while (millis()<end_ms) 
+    while (millis()<end_ms)     {
+      //Serial.println("wait");
       loopalwaysrun();
+    }
 
   }
     myfile.close();
     if (buffer) free(buffer);
-  #ifndef UseDMD
-      if(memory) free(memory);
-  #endif  
+    if(memory) free(memory);
 
    uint32_t finalendtime = millis();
 #ifdef webdebug    
