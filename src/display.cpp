@@ -21,11 +21,18 @@
             display->begin();
             display->setRotation(0);       
         #else
-            tft = TFT_eSPI();  
-            display = &tft;
-            display->begin();
-            display->setRotation(2); 
-        #endif 
+          #ifdef TFT_PARALLEL_8_BIT
+              uint16_t ID = tft.readID(); 
+              tft.begin(ID);
+              display = &tft;
+              display->setRotation(1); 
+          #else
+              tft = TFT_eSPI();  
+              display = &tft;
+              display->begin();
+              display->setRotation(2); 
+          #endif 
+        #endif   
     }
 
 void Display::StartScreen() {
@@ -69,6 +76,16 @@ void Display::DrawPixel(int16_t x, int16_t y, uint8_t r, uint8_t g, uint8_t b ) 
         display->drawRect(x*2, y*2, 2, 2, color);
     #endif      
 };
+
+void Display::DrawImage(uint16_t * buffer) {
+  #ifdef TFT_PARALLEL_8_BIT
+    uint16_t testbuffer[8192];
+    for (int16_t i=0; i<8192; i++)
+      testbuffer[i] = 0x00FF;
+    display->setAddrWindow(0, 0, 128, 32);
+    display->pushColors(testbuffer, 8192, 1);
+  #endif
+}
 
 void Display::DrawString(String thetext, int8_t line = 0) {
     display->setTextColor(TFT_WHITE, 0x0000);

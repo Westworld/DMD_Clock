@@ -185,6 +185,10 @@ int8_t Digits::DrawTime (int16_t cur_hour, int16_t cur_min, int16_t cur_sec, int
     return width;  
  }
 
+void Digits::ResetUpDownCounter() {
+    upDownCounter=0;
+}
+
  void Digits::DrawTime(  int16_t cur_hour, int16_t cur_min, int16_t cur_sec, int16_t& timeCounter) {
   int8_t y = -1, width=0, distance=2;
 
@@ -195,8 +199,11 @@ int8_t Digits::DrawTime (int16_t cur_hour, int16_t cur_min, int16_t cur_sec, int
     if (cur_hour>12)
         cur_hour-=12;
 
+/*
   if ((upDownCounter>0) & (!settings->getClockUpDown())) // reset
-      upDownCounter = 0;
+   {   upDownCounter = 0;
+       display->FillRect(0, 0, 128, 32, BLACK); }
+*/
 
   int8_t draw1=0, draw2=0,  draw3=0,  draw4=0,  draw5=0,  draw6=0,  draw7=0,  draw8=0;
 
@@ -208,7 +215,7 @@ int8_t Digits::DrawTime (int16_t cur_hour, int16_t cur_min, int16_t cur_sec, int
   // nichts - sparkle#######
 
   if ( (cur_hour != last_hour) | (cur_min != last_min) | (settings->needRefresh()) ) 
-  { if (upDownCounter == 0)
+  { //if (upDownCounter == 0)
     {   timeCounter++;
         display->FillRect(0, 0, 128, 32, BLACK);
         display->DrawRect(0, 0, 128, 32, settings->getFrameColor());

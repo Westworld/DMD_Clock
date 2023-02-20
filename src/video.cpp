@@ -5,6 +5,8 @@
 #include "display.h"
 #include "settings.h"
 
+void UDBDebug(String message);
+
 /* MJPEG Video */
 #define FPS 30
 #define MJPEG_BUFFER_SIZE (160 * 128 * 2 / 4)
@@ -304,8 +306,8 @@ void PlayRawVideo(String name, short filetype) {
   Serial.println("Play: "+name);
   Serial.print("Filetype: ");
   Serial.println(filetype);
+  UDBDebug("Play: "+name);
 #endif
-  uint32_t starttime = millis();
 
   int32_t size;
   myfile = SD.open(name);
@@ -315,32 +317,48 @@ void PlayRawVideo(String name, short filetype) {
   }
   size = myfile.size();
   #ifdef webdebug 
-    //Serial.println("size: "+String(size));
+    if (size < 300000) {
+      Serial.println("size: "+String(size));
+      UDBDebug("size: "+String(size));
+    }
   #endif
 
   uint8_t *buffer = (uint8_t *)malloc(rawsize);
-  uint16_t *memory = (uint16_t *)malloc(128*32*2);
-    for (int yy=0; yy<32; yy++) 
-      for (int xx=0; xx<128; xx++) {
-         memory[yy*128+xx]=BLACK;
-      }
+  if (!buffer) return;
+  //uint16_t *memory = (uint16_t *)malloc(128*32*2);
+  uint16_t *memory = (uint16_t *) calloc(128*32, sizeof(uint16_t));
+  if (!memory) { free(buffer); return;}
+      #ifdef webdebug 
+        if (size < 300000) {
+          UDBDebug("after malloc");
+        }
+    #endif
+  
   thedisplay->Clear();
+
+  uint32_t starttime = millis();
 
   unsigned long end_ms;
   int framecounter=0;
 
-  while(myfile) {
+  while(myfile) {  
     #ifdef webdebug 
-      //Serial.println("frame: "+String(framecounter));
+        if (size < 300000) {
+          Serial.println("frame: "+String(framecounter));
+          UDBDebug("frame: "+String(framecounter));
+        }
     #endif
     framecounter++;
     if (settings->needRefresh()) {
       settings->doRefresh();
+        #ifdef webdebug 
+          Serial.println("break refresh");
+          UDBDebug("break refresh");
+        #endif
       break; 
     }  
 
     end_ms = millis()+35;  // play a little bit slower as real
-
     int nextread = myfile.read(buffer, rawsize);
     if (nextread < rawsize)  break;
 
@@ -356,41 +374,67 @@ void PlayRawVideo(String name, short filetype) {
               #ifdef UseDMD
                 thedisplay->DrawPixel(xx, yy, buffer[counter], buffer[counter+2], buffer[counter+1]);
               #else
-                thedisplay->DrawPixel(xx, yy, color);
+                #ifndef TFT_PARALLEL_8_BIT
+                  thedisplay->DrawPixel(xx, yy, color);
+                #endif  
               #endif
               memory[yy*128+xx]=color;
           }
        
         counter += 3;
       }
+    #ifdef TFT_PARALLEL_8_BIT
+     thedisplay->DrawImage(memory);
+    #endif   
+
+      #ifdef xxxwebdebug 
+        if (size < 500000) {
+          UDBDebug("after frame, ms "+String(millis())+" endms "+String(end_ms));
+         }
+       #endif
 
     while (millis()<end_ms)     {
+      #ifdef xxxwebdebug 
+        if (size < 500000) {
+          UDBDebug("loop");
+         }
+       #endif
       //Serial.println("wait");
       loopalwaysrun();
     }
 
   }
+     uint32_t finalendtime = millis();
+
+      #ifdef webdebug 
+        if (size < 500000) {
+          UDBDebug("before close, after loop");
+         }
+       #endif  
     myfile.close();
+          #ifdef webdebug 
+        if (size < 500000) {
+          UDBDebug("after close, after loop");
+         }
+       #endif  
     if (buffer) free(buffer);
+          #ifdef webdebug 
+        if (size < 500000) {
+          UDBDebug("after free buffer");
+         }
+       #endif  
     if(memory) free(memory);
 
-   uint32_t finalendtime = millis();
+
 #ifdef webdebug    
-Serial.println("Video run time: "+String(finalendtime-starttime)+"ms, frames: "+String(framecounter)+" fps: "+ String(framecounter/((finalendtime-starttime)/1000)));
+  Serial.println("Video run time: "+String(finalendtime-starttime)+"ms, frames: "+String(framecounter)+" fps: "+ String(framecounter*1000/((finalendtime-starttime))));
+  UDBDebug("Video run time: "+String(finalendtime-starttime)+"ms, frames: "+String(framecounter)+" fps: "+ String(framecounter*1000/((finalendtime-starttime))));
 #endif
-    if (framecounter<50)  // for short videos, wait a second
-      while (framecounter++ < 200)
-        loopalwaysrun();
 
-   if (framecounter < 50)
-    end_ms = millis()+1000;  // short video - wait one second
-   else
-    end_ms = millis()+500;  // wait half a second
 
-   while (millis()<end_ms) 
+  end_ms = millis()+250;  // wait half a second
+  while (millis()<end_ms) 
     loopalwaysrun();  
-
-   
 }
 
 void getFilesList(File dir) {

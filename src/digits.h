@@ -24,6 +24,7 @@ class Digits
     int16_t CalcTimeWidth( int16_t cur_hour, int16_t cur_min, int16_t cur_sec, int8_t distance);
     void DrawTime(  int16_t cur_hour, int16_t cur_min, int16_t cur_sec, int16_t& timeCounter) ;
     int8_t DrawTime (int16_t cur_hour, int16_t cur_min, int16_t cur_sec, int8_t draw1, int8_t draw2, int8_t draw3, int8_t draw4, int8_t draw5, int8_t draw6, int8_t draw7, int8_t draw8);
+    void ResetUpDownCounter();
 
     protected:
         char * fontbuffer = NULL;

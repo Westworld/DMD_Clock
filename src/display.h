@@ -1,9 +1,3 @@
-#ifdef UseDMD
-#include <ESP32-HUB75-MatrixPanel-I2S-DMA.h>
-#else
-#include <TFT_eSPI.h>
-#endif
-
 #ifndef Display_h
 #define Display_h 
 
@@ -43,8 +37,12 @@
     #define TFT_RED   0xF800      /* 255,   0,   0 */
 
 #else
-#include "TFT_eSPI.h"
-#endif
+    #ifdef TFT_PARALLEL_8_BIT
+    #include <MCUFRIEND_kbv.h>
+    #else
+    #include "TFT_eSPI.h"
+    #endif
+#endif    
 
 class Display
 {
@@ -58,6 +56,7 @@ class Display
     void DrawPixel(int16_t x, int16_t y, uint16_t color);
     void DrawPixel(int16_t x, int16_t y, uint8_t r, uint8_t g, uint8_t b ) ;
     void DrawString(String text, int8_t line);
+    void DrawImage(uint16_t * buffer);
     void Clear(void);
     uint16_t color565(uint8_t r, uint8_t g, uint8_t b);
     uint16_t color565( uint32_t rgb);
@@ -69,9 +68,15 @@ class Display
 #ifdef UseDMD
     MatrixPanel_I2S_DMA *display;
 #else
-    TFT_eSPI *display;
-    TFT_eSPI tft;
-#endif  
+    #ifdef TFT_PARALLEL_8_BIT
+        MCUFRIEND_kbv tft;
+        MCUFRIEND_kbv *display;
+    #else
+        TFT_eSPI *display;
+        TFT_eSPI tft;
+    #endif  
+#endif
+
 
 };   
 

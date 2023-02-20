@@ -1,6 +1,6 @@
 #include <Arduino.h>
 #include <WiFiManager.h> 
-
+#include <WiFiUdp.h>
 
 #include <time.h>  
 //#include "FS.h"
@@ -16,8 +16,12 @@
 #include "display.h"
 #include "settings.h"
 
-//#define firsttimeinit 5  // don't use that, not compatible with esp32 littlefs
-
+#define UDPDEBUG 1
+#ifdef UDPDEBUG
+WiFiUDP udp;
+const char * udpAddress = "192.168.0.34";
+const int udpPort = 19814;
+#endif
 
 extern String fontnames[];
 extern int noFonts;
@@ -50,10 +54,17 @@ const char* wifihostname = "DMD Clock";
 #define SD_MOSI 15
 #define SD_SS 13
 #else
-#define SD_SCK  14   //grün
-#define SD_MISO 33   //blau
-#define SD_MOSI 13   //gelb
-#define SD_SS   15   //orange cs
+    #ifdef TFT_PARALLEL_8_BIT
+      #define SD_SCK 18
+      #define SD_MISO 19
+      #define SD_MOSI 23
+      #define SD_SS 5
+    #else
+      #define SD_SCK  14   //grün
+      #define SD_MISO 33   //blau
+      #define SD_MOSI 13   //gelb
+      #define SD_SS   15   //orange cs
+    #endif  
 #endif
 
 SPIClass SPISD;
@@ -80,6 +91,12 @@ void setTimeZone(String TimeZone) {
  
 }
 
+void configModeCallback (WiFiManager *myWiFiManager) {
+  thedisplay->DrawString("Config mode", 0);
+  String ipaddress = WiFi.softAPIP().toString();
+  thedisplay->DrawString(ipaddress, 1);
+}
+
 void setup() {
   Serial.begin(115200);
   #ifdef webdebug 
@@ -91,7 +108,16 @@ void setup() {
   thedisplay->StartScreen();
   
   wifiManager.setHostname(wifihostname);
+  wifiManager.setConfigPortalTimeout(180);
+  wifiManager.setAPCallback(configModeCallback);
+  wifiManager.setConnectRetries(10);
+  wifiManager.setConnectTimeout(10);
   wifiManager.autoConnect(wifihostname); 
+
+  if (WiFi.status() != WL_CONNECTED) {
+    ESP.restart();
+  }
+
 
   String ipaddress = WiFi.localIP().toString();
   thedisplay->DrawString(ipaddress, 1);
@@ -179,6 +205,7 @@ void setup() {
   thedisplay->Clear();
   #ifdef webdebug 
     Serial.println("setup done");
+    UDBDebug("########setup done") ;
   #endif  
 }  
 
@@ -194,8 +221,10 @@ void loop() {
      DisplayTime();
   }
   else {
-    playRandomVideo();   
+    playRandomVideo();  
     settings->doRefresh(); 
+    thedisplay->Clear();
+    clockdigits->ResetUpDownCounter();  // if we are in the middle of drawing up down, when video started, it would continue
 
     timeCounter = 0;
     if (RandomFontcounter++ > 20) {
@@ -240,5 +269,13 @@ void DisplayTime() {
   clockdigits->DrawTime(cur_hour,cur_min, cur_sec, timeCounter);
 }
 
+
+void UDBDebug(String message) {
+#ifdef UDPDEBUG
+  udp.beginPacket(udpAddress, udpPort);
+  udp.write((const uint8_t* ) message.c_str(), (size_t) message.length());
+  udp.endPacket();
+#endif  
+}
 
 #endif
