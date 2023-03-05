@@ -222,10 +222,16 @@ void loop() {
   }
   else {
     playRandomVideo();  
-    settings->doRefresh(); 
-    thedisplay->Clear();
-    clockdigits->ResetUpDownCounter();  // if we are in the middle of drawing up down, when video started, it would continue
-
+    if (settings->getClockBlend()) {
+      // nothing
+    }
+    else
+    {
+      settings->doRefresh(); 
+      thedisplay->Clear();
+      clockdigits->ResetUpDownCounter();  // if we are in the middle of drawing up down, when video started, it would continue
+    }
+    
     timeCounter = 0;
     if (RandomFontcounter++ > 20) {
       RandomFontcounter=0;
@@ -267,6 +273,10 @@ void DisplayTime() {
 
   GetTime( cur_hour,cur_min, cur_sec);
   clockdigits->DrawTime(cur_hour,cur_min, cur_sec, timeCounter);
+}
+
+void VideoRedrawTime() {
+  clockdigits->RedrawTime();
 }
 
 

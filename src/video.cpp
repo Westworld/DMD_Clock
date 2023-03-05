@@ -31,6 +31,7 @@ unsigned char buffer[12288];
 extern Display * thedisplay;
 extern Settings * settings;
 extern void loopalwaysrun();
+extern void VideoRedrawTime();
 
 void * myOpen(const char *filename, int32_t *size) {
   myfile = SD.open(filename);
@@ -402,6 +403,7 @@ void PlayRawVideo(String name, short filetype) {
       //Serial.println("wait");
       loopalwaysrun();
     }
+    loopalwaysrun(); // to run it at least once per frame
 
   }
      uint32_t finalendtime = millis();
@@ -432,9 +434,12 @@ void PlayRawVideo(String name, short filetype) {
 #endif
 
 
-  end_ms = millis()+250;  // wait half a second
+  end_ms = millis()+500;  // wait half a second
   while (millis()<end_ms) 
     loopalwaysrun();  
+
+  // draw the clock slowly on top of it?
+  VideoRedrawTime();  // later via settings!
 }
 
 void getFilesList(File dir) {

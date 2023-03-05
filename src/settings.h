@@ -18,6 +18,7 @@ class Settings
     u_int8_t getTimeZoneID(void);
     bool getClockUpDown(void);
     bool getClockSparkle(void);
+    bool getClockBlend(void);  // draw clock over last video or blend over
 
     bool needRefresh(void);
     void doRefresh(void);
@@ -33,6 +34,7 @@ class Settings
     void setTimeZone(uint8_t Area, u_int8_t ID);
     void setClockUpDown(bool display);
     void setClockSparkle(bool display);
+    void setClockBlend(bool display);
      
   protected:
     uint8_t displayTime=20;
@@ -47,6 +49,7 @@ class Settings
     bool ClockUpDown = false;
     bool ClockSparkle = false;
     bool DisplayRefresh = false;
+    bool ClockBlend = true;
 
     void Flash_Read(void);
     void Flash_Write(int8_t what);

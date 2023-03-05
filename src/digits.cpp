@@ -3,6 +3,7 @@
 #include "video.h"
 
 extern String fontnames[];
+extern void loopalwaysrun();
 
 const int sparkleRandom=3;
 
@@ -91,7 +92,8 @@ int8_t Digits::DrawDigit(int8_t digit, int8_t x, int8_t y, uint16_t color) {
                     int8_t ran = random(sparkleRandom);  // 0-(sparkleRandom-1)
                     if (ran == 0) thecolor=SparkleColor; 
                 }
-                display->DrawPixel(xx+x, yy+y, thecolor);   
+                if ((ydrawSingleLine == 0) || (ydrawSingleLine == (yy+y)))
+                    display->DrawPixel(xx+x, yy+y, thecolor);   
             }
             bit--;
             if (bit<0) {
@@ -189,6 +191,58 @@ void Digits::ResetUpDownCounter() {
     upDownCounter=0;
 }
 
+ void Digits::RedrawTime() {
+  // draws time on top of video
+  // one line by line
+  // in between don'T forget to call loop
+
+  int8_t y = -1, width=0, distance=2;
+
+  CheckFont();
+  uint16_t fontcolor = settings->getFontColor();
+
+  if (settings->getTwelveHourFormat())
+    if (last_hour>12)
+        last_hour-=12;
+  upDownCounter = 0;
+  int8_t draw1=0, draw2=1,  draw3=0,  draw4=1,  draw5=1,  draw6=0,  draw7=0,  draw8=0;
+  if (last_hour>9)
+        draw1=1;
+  if ((last_sec % 2) == 1)
+        draw3=1;
+    else 
+        draw3=-1;
+    draw4=1;
+    draw5=1; 
+    if (settings->getDisplaySeconds()) {
+        lastseccolon = start_x+width;
+        if ((last_sec % 2) == 1)
+            draw6=1;
+        else 
+            draw6=-1;
+        draw7=1;
+        draw8=1;    
+    }    
+    
+   if (settings->getClockBlend()) {
+        for (int y=0;y<32;y++) {
+            ydrawSingleLine = y;  
+            if ((ydrawSingleLine==0) || (ydrawSingleLine==31))
+                display->DrawRect(0, y, 128, 1, settings->getFrameColor());
+            else {
+                display->DrawRect(0, y, 128, 1, BLACK);
+                display->DrawPixel(0, y, settings->getFrameColor());
+                display->DrawPixel(127, y, settings->getFrameColor());
+                DrawTime (last_hour, last_min, last_sec, draw1, draw2, draw3, draw4, draw5, draw6, draw7, draw8);     
+            }     
+
+            loopalwaysrun(); // to run it at least once per frame
+            delay(50);  // 600 ms for total drawing
+        }
+        ydrawSingleLine = 0;
+   }    
+ }
+
  void Digits::DrawTime(  int16_t cur_hour, int16_t cur_min, int16_t cur_sec, int16_t& timeCounter) {
   int8_t y = -1, width=0, distance=2;
 
@@ -206,6 +260,7 @@ void Digits::ResetUpDownCounter() {
 */
 
   int8_t draw1=0, draw2=0,  draw3=0,  draw4=0,  draw5=0,  draw6=0,  draw7=0,  draw8=0;
+
 
   if (upDownCounter > 30) upDownCounter = 0;
 
@@ -303,8 +358,6 @@ void Digits::ResetUpDownCounter() {
         }
     }      
     
-
-
   last_hour = cur_hour;
   last_min = cur_min;
   last_sec = cur_sec;

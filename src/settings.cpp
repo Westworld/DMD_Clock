@@ -1,7 +1,7 @@
 #include "settings.h"
 #include "EEPROM.h"
 
-#define EEPROM_SIZE 16
+#define EEPROM_SIZE 17
 
 Settings::Settings(){
     Flash_Read();     
@@ -51,6 +51,9 @@ bool Settings::getClockSparkle(void) {
     return ClockSparkle;
 }
 
+bool Settings::getClockBlend(void) {
+    return ClockBlend;
+}
 void Settings::setDisplayTime(uint8_t newTime) {
     if (newTime != displayTime) {
         displayTime = newTime;
@@ -134,6 +137,14 @@ void Settings::setClockSparkle(bool display) {
     }
 }
 
+void Settings::setClockBlend(bool display) {
+    if (display != ClockBlend) {
+        ClockBlend = display;
+        Flash_Write(16);
+        doRefresh();
+    }
+}
+
 void Settings::doRefresh(void) {
     DisplayRefresh=true;
 }
@@ -205,6 +216,20 @@ void Settings::Flash_Read() {
         fontSparkleColor = EEPROM.readShort(14);
         break;   
 
+      case 5:
+        displayTime = EEPROM.read(2);
+        twelveHourFormat = EEPROM.read(3);
+        displaySeconds = EEPROM.read(4);
+        fontColor = EEPROM.readShort(5);
+        frameColor = EEPROM.readShort(7);
+        fontnumber = EEPROM.read(9);   
+        timezonearea = EEPROM.read(10);
+        timezoneid = EEPROM.read(11);
+        ClockUpDown = EEPROM.read(12);
+        ClockSparkle = EEPROM.read(13);
+        fontSparkleColor = EEPROM.readShort(14);
+        ClockBlend = EEPROM.readShort(16);
+        break; 
       default:
         Flash_Write(0x4D);
     }
@@ -229,7 +254,7 @@ void Settings::Flash_Write(int8_t what) {
         Serial.println("Flash Init");
     #endif
     EEPROM.write(0, 0x4D);
-    EEPROM.write(1, 4);  // version
+    EEPROM.write(1, 5);  // version
     EEPROM.write(2, displayTime);
     EEPROM.write(3, twelveHourFormat);
     EEPROM.write(4, displaySeconds);
@@ -241,6 +266,7 @@ void Settings::Flash_Write(int8_t what) {
     EEPROM.write(12, ClockUpDown);  
     EEPROM.write(13, ClockSparkle); 
     EEPROM.writeShort(14, fontSparkleColor); 
+    EEPROM.write(16, ClockBlend); 
     break;
 
    case 2:
@@ -273,6 +299,9 @@ void Settings::Flash_Write(int8_t what) {
     break;     
    case 14:
     EEPROM.writeShort(14, fontSparkleColor);
+    break;
+   case 16:
+    EEPROM.write(16, ClockBlend); 
 
     // #### when enhance, increase EEPROM size!!!
 } 
