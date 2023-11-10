@@ -25,8 +25,10 @@ userPreferences.*/
 .DS_Store
 ehthumbs.db
 Thumbs.db
+
 RawEditor/video_raw_svg/data.4DD
 RawEditor/video_raw_svg/data.4DIndx
 RawEditor/video_raw_svg/data.journal
 RawEditor/video_raw_svg/data.Match
-SDCard/
+
+#SDCard/
