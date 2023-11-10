@@ -154,4 +154,7 @@ Now you need to find a software able to convert that avi to raw format and to cu
 to just convert:
 ffmpeg -i acd_170c.avi -vcodec rawvideo -pix_fmt rgb24 test.rgb
 
+to convert a folder with many files
+for i in *.gif; do ffmpeg -i "$i" -format rawvideo -pix_fmt rgb24  "${i%.*}.rgb"; done  
+
 

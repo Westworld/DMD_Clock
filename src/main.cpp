@@ -16,7 +16,7 @@
 #include "display.h"
 #include "settings.h"
 
-#define UDPDEBUG 1
+#define UDPDEBUG 0
 #ifdef UDPDEBUG
 WiFiUDP udp;
 const char * udpAddress = "192.168.0.34";

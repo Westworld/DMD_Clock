@@ -13,7 +13,7 @@ void UDBDebug(String message);
 
 static MjpegClass mjpeg;
 int noFiles = 0; // Number of media files on SD Card in clips directory
-#define maxFiles 500
+#define maxFiles 800
 String filenames[maxFiles];
 int filetypes[maxFiles];
 #define maxFontNames 100

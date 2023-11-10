@@ -39,7 +39,7 @@
 			<table_ref uuid="B68548A4269441ACB293D4058032DEDF" name="Games"/>
 		</field_ref>
 	</index>
-	<base_extra __stringCompHash="icu:68.1.0" __keywordBuildingHash="icu:68.1.0">
+	<base_extra __stringCompHash="icu:72.1.0" __keywordBuildingHash="icu:72.1.0">
 		<journal_file journal_file_enabled="true"/>
 	</base_extra>
 </base>
