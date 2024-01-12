@@ -107,6 +107,7 @@ static int drawMCU(JPEGDRAW *pDraw)
 int getVideoFiles(File dir, int numTabs)
 {  
   String dirchar = "/";
+  thedisplay->DrawString("create new cache", 0);
   while (true)
   {
     File entry =  dir.openNextFile();
@@ -151,7 +152,7 @@ int getVideoFiles(File dir, int numTabs)
   }
 
   // create cache
-  thedisplay->DrawString("create new cache", 0);
+  
   File card;
   card = SD.open("/cache.txt",FILE_WRITE);
   for (short i=0; i<noFiles;i++) {
