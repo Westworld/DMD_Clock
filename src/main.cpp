@@ -1,5 +1,7 @@
 #include <Arduino.h>
-#include <WiFiManager.h> 
+#include "WiFi.h"
+#include <WiFiMulti.h>
+//#include <WiFiManager.h> 
 #include <WiFiUdp.h>
 
 #include <time.h>  
@@ -16,10 +18,13 @@
 #include "display.h"
 #include "settings.h"
 
-#define UDPDEBUG 0
+
+WiFiMulti wifiMulti;
+
+#define UDPDEBUG 1
 #ifdef UDPDEBUG
 WiFiUDP udp;
-const char * udpAddress = "192.168.0.34";
+const char * udpAddress = "192.168.0.63";
 const int udpPort = 19814;
 #endif
 
@@ -41,7 +46,7 @@ void loop()
 #else
 
 
-WiFiManager wifiManager;
+//WiFiManager wifiManager;
 #define NTP_SERVER "de.pool.ntp.org"
 #define DefaultTimeZone "CET-1CEST,M3.5.0/02,M10.5.0/03"  
 String MY_TZ = DefaultTimeZone ;
@@ -91,11 +96,38 @@ void setTimeZone(String TimeZone) {
  
 }
 
+/*
 void configModeCallback (WiFiManager *myWiFiManager) {
   thedisplay->DrawString("Config mode", 0);
   String ipaddress = WiFi.softAPIP().toString();
   thedisplay->DrawString(ipaddress, 1);
 }
+*/
+
+void ConnectWifi() {
+  WiFi.mode(WIFI_STA);
+    WiFi.setHostname(wifihostname);
+    wifiMulti.addAP(WIFI_SSID, WIFI_PASS);
+    wifiMulti.addAP(WIFI_SSID2, WIFI_PASS2); 
+
+    int loop=1;
+
+   thedisplay->DrawString("Connecting Wifi...",0);
+
+    while ((loop < 10) && (wifiMulti.run() != WL_CONNECTED)) {
+      thedisplay->DrawString("try again to connect",1);
+      delay(1000);
+    }
+    if(loop < 10) {
+         thedisplay->DrawString("connected           ",1);
+    }
+    else
+    {
+           thedisplay->DrawString("NOT CONNECTED ********+",1);
+           delay(5000);
+    }
+}
+
 
 void setup() {
   Serial.begin(115200);
@@ -107,12 +139,15 @@ void setup() {
   thedisplay = new Display();
   thedisplay->StartScreen();
   
+  /*
   wifiManager.setHostname(wifihostname);
   wifiManager.setConfigPortalTimeout(180);
   wifiManager.setAPCallback(configModeCallback);
   wifiManager.setConnectRetries(10);
   wifiManager.setConnectTimeout(10);
   wifiManager.autoConnect(wifihostname); 
+  */
+ ConnectWifi();
 
   if (WiFi.status() != WL_CONNECTED) {
     ESP.restart();
