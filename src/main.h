@@ -5,3 +5,5 @@ void DisplayTime();
 void setTimeZone(String TimeZone);
 void UDBDebug(String message);
 void VideoRedrawTime();
+String GetCurrentTimeZone();
+void ReadTimeZones(String path);

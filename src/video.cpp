@@ -376,18 +376,13 @@ void PlayRawVideo(String name, short filetype) {
               #ifdef UseDMD
                 thedisplay->DrawPixel(xx, yy, buffer[counter], buffer[counter+2], buffer[counter+1]);
               #else
-                #ifndef TFT_PARALLEL_8_BIT
                   thedisplay->DrawPixel(xx, yy, color);
-                #endif  
               #endif
               memory[yy*128+xx]=color;
           }
        
         counter += 3;
-      }
-    #ifdef TFT_PARALLEL_8_BIT
-     thedisplay->DrawImage(memory);
-    #endif   
+      }  
 
       #ifdef xxxwebdebug 
         if (size < 500000) {

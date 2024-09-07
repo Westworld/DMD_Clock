@@ -37,11 +37,7 @@
     #define TFT_RED   0xF800      /* 255,   0,   0 */
 
 #else
-    #ifdef TFT_PARALLEL_8_BIT
-    #include <MCUFRIEND_kbv.h>
-    #else
     #include "TFT_eSPI.h"
-    #endif
 #endif    
 
 class Display
@@ -68,13 +64,8 @@ class Display
 #ifdef UseDMD
     MatrixPanel_I2S_DMA *display;
 #else
-    #ifdef TFT_PARALLEL_8_BIT
-        MCUFRIEND_kbv tft;
-        MCUFRIEND_kbv *display;
-    #else
         TFT_eSPI *display;
         TFT_eSPI tft;
-    #endif  
 #endif
 
 

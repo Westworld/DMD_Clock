@@ -5,11 +5,7 @@
 #ifdef UseDMD
 #include <ESP32-HUB75-MatrixPanel-I2S-DMA.h>
 #else
-    #ifdef TFT_PARALLEL_8_BIT
-    #include <MCUFRIEND_kbv.h>
-    #else
     #include "TFT_eSPI.h"
-    #endif
 #endif
 
 #define BLACK 0x0000

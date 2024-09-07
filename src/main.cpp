@@ -5,15 +5,11 @@
 #include <WiFiUdp.h>
 
 #include <time.h>  
-//#include "FS.h"
 #include "SD.h"
-#include "Web.h"
 #include "SPI.h"
 #include <ArduinoOTA.h>
-//#include "SPIFFS.h"
 #include "video.h"
 #include "main.h"
-#include "web.h"
 #include "digits.h"
 #include "display.h"
 #include "settings.h"
@@ -30,20 +26,17 @@ const int udpPort = 19814;
 
 extern String fontnames[];
 extern int noFonts;
+#define maxtimezonenames 15
+#define maxtimezonecitynames 150
+String timezonenames[maxtimezonenames];
+uint8_t notimezonenames = 0;
+String timezonencityvalues[maxtimezonecitynames];
+String timezonencitynames[maxtimezonecitynames];
+uint16_t timezonencityids[maxtimezonecitynames];
+uint8_t notimezonecitynames = 0;
+uint16_t SelectIDTimeZoneCity = 0;
 
 int16_t timeCounter = 0;
-
-#ifdef firsttimeinit
-void setup(void)
-{
-  Serial.begin(115200);
-  ESPUI.prepareFileSystem();
-}
-
-void loop()
-{
-}
-#else
 
 
 //WiFiManager wifiManager;
@@ -54,22 +47,22 @@ const char* wifihostname = "DMD Clock";
 
 // different SD-Card pins, as my DMD ESP32 has them on board, the test ESP32 not.
 #ifdef UseDMD
-#define SD_SCK 14
-#define SD_MISO 2
-#define SD_MOSI 15
-#define SD_SS 13
+      #define SD_SCK 14
+      #define SD_MISO 2
+      #define SD_MOSI 15
+      #define SD_SS 13
 #else
-    #ifdef TFT_PARALLEL_8_BIT
+  #ifdef UseCYD
       #define SD_SCK 18
       #define SD_MISO 19
       #define SD_MOSI 23
       #define SD_SS 5
-    #else
+  #else      
       #define SD_SCK  14   //grün
       #define SD_MISO 33   //blau
       #define SD_MOSI 13   //gelb
-      #define SD_SS   15   //orange cs
-    #endif  
+      #define SD_SS   15   //orange cs 
+  #endif
 #endif
 
 SPIClass SPISD;
@@ -95,14 +88,6 @@ void setTimeZone(String TimeZone) {
   #endif  
  
 }
-
-/*
-void configModeCallback (WiFiManager *myWiFiManager) {
-  thedisplay->DrawString("Config mode", 0);
-  String ipaddress = WiFi.softAPIP().toString();
-  thedisplay->DrawString(ipaddress, 1);
-}
-*/
 
 void ConnectWifi() {
   WiFi.mode(WIFI_STA);
@@ -139,14 +124,6 @@ void setup() {
   thedisplay = new Display();
   thedisplay->StartScreen();
   
-  /*
-  wifiManager.setHostname(wifihostname);
-  wifiManager.setConfigPortalTimeout(180);
-  wifiManager.setAPCallback(configModeCallback);
-  wifiManager.setConnectRetries(10);
-  wifiManager.setConnectTimeout(10);
-  wifiManager.autoConnect(wifihostname); 
-  */
  ConnectWifi();
 
   if (WiFi.status() != WL_CONNECTED) {
@@ -227,9 +204,7 @@ void setup() {
   #ifdef webdebug   
   Serial.println("vor timezones");
   #endif
-  ReadTimeZones("/TimeZones");  
-
-  Web_Init();  
+  ReadTimeZones("/TimeZones");   
 
   MY_TZ = GetCurrentTimeZone(); 
   #ifdef webdebug  
@@ -323,4 +298,54 @@ void UDBDebug(String message) {
 #endif  
 }
 
-#endif
+
+ void ReadTimeZones(String path) {
+  File dir = SD.open(path);
+  String dirchar = "/";
+  while (true)
+  {
+    File entry =  dir.openNextFile();
+    short filetype=0;
+    if (! entry)
+    {
+      // no more files
+      break;
+    }
+    
+    if (entry.isDirectory()) 
+    {
+      // Skip file if in subfolder
+       entry.close(); // Close folder entry
+    } 
+    else
+    {
+      //Serial.println(entry.name());
+      String dirname = dir.name();
+      String filename = entry.name();
+
+      if (filename.startsWith(".")) continue;
+      if (!(filename.endsWith(".txt"))) continue;
+      filename = filename.substring(0,filename.length()-4);
+
+      timezonenames[notimezonenames++] = filename;
+
+//#ifdef webdebug
+//Serial.println("TZ "+filename+" nr: "+String(notimezonenames));
+//#endif
+
+      entry.close();
+      if (notimezonenames>=maxtimezonenames)
+        { notimezonenames--; break;}
+    }
+    //sortArray(timezonenames, notimezonenames);
+  }
+  dir.close();
+ }
+
+String GetCurrentTimeZone() {
+  uint8_t id = settings->getTimeZoneID();
+  if (id >= notimezonecitynames) 
+  {  id = 0; settings->setTimeZone(id); }
+
+  return timezonencityvalues[id];
+}
