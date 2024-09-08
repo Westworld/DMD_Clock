@@ -36,7 +36,7 @@ class Digits
         int8_t count;
         int16_t fontsize; // length of fontbuffer;
         int8_t lastcolon, lastseccolon;
-        int8_t fontnumber; // local copy
+        int8_t fontnumber = -1; // local copy
         int8_t upDownCounter=0;
         int16_t last_hour = -1;
         int16_t last_min  = -1;

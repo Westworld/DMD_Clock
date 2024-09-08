@@ -7,3 +7,4 @@ void UDBDebug(String message);
 void VideoRedrawTime();
 String GetCurrentTimeZone();
 void ReadTimeZones(String path);
+void GetTimeZoneNames(String path);

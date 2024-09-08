@@ -42,7 +42,8 @@ void Digits::SetFont(String name) {
 }
 
 void Digits::SetFontNumber(int8_t number) {
-    if (number == 0)
+    
+    if (number <= 0)
         fontnumber = 0;
     else    
         fontnumber = number-1;
@@ -51,6 +52,7 @@ void Digits::SetFontNumber(int8_t number) {
 
 void Digits::CheckFont(void) {
     int8_t font = settings->getFontNumber();
+
     if (fontnumber != font) {
         SetFontNumber(font);
     }
@@ -59,7 +61,8 @@ void Digits::CheckFont(void) {
 #define CHECK_BIT(var,pos) ((var) & (1<<(pos)))
 
 
-int8_t Digits::DrawDigit(int8_t digit, int8_t x, int8_t y, uint16_t color) {    
+int8_t Digits::DrawDigit(int8_t digit, int8_t x, int8_t y, uint16_t color) {     
+
     if (y < 0)
         y = ((32-height)/2);
 
@@ -253,14 +256,7 @@ void Digits::ResetUpDownCounter() {
     if (cur_hour>12)
         cur_hour-=12;
 
-/*
-  if ((upDownCounter>0) & (!settings->getClockUpDown())) // reset
-   {   upDownCounter = 0;
-       display->FillRect(0, 0, 128, 32, BLACK); }
-*/
-
   int8_t draw1=0, draw2=0,  draw3=0,  draw4=0,  draw5=0,  draw6=0,  draw7=0,  draw8=0;
-
 
   if (upDownCounter > 30) upDownCounter = 0;
 

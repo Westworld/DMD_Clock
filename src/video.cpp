@@ -360,7 +360,11 @@ void PlayRawVideo(String name, short filetype) {
       break; 
     }  
 
+ #ifdef UseCYD
+    end_ms = millis()+50;  // play a little bit slower as real
+ #else
     end_ms = millis()+35;  // play a little bit slower as real
+  #endif
     int nextread = myfile.read(buffer, rawsize);
     if (nextread < rawsize)  break;
 

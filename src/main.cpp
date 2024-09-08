@@ -3,21 +3,21 @@
 #include <WiFiMulti.h>
 //#include <WiFiManager.h> 
 #include <WiFiUdp.h>
-
 #include <time.h>  
 #include "SD.h"
 #include "SPI.h"
-#include <ArduinoOTA.h>
 #include "video.h"
 #include "main.h"
 #include "digits.h"
 #include "display.h"
 #include "settings.h"
-
+#ifndef UseDMD
+  #include <ArduinoSort.h>
+#endif
 
 WiFiMulti wifiMulti;
 
-#define UDPDEBUG 1
+// #define UDPDEBUG 1
 #ifdef UDPDEBUG
 WiFiUDP udp;
 const char * udpAddress = "192.168.0.63";
@@ -93,7 +93,8 @@ void ConnectWifi() {
   WiFi.mode(WIFI_STA);
     WiFi.setHostname(wifihostname);
     wifiMulti.addAP(WIFI_SSID, WIFI_PASS);
-    wifiMulti.addAP(WIFI_SSID2, WIFI_PASS2); 
+    wifiMulti.addAP(WIFI_SSID3, WIFI_PASS3); 
+    wifiMulti.addAP(WIFI_SSID2, WIFI_PASS2);
 
     int loop=1;
 
@@ -117,10 +118,14 @@ void ConnectWifi() {
 void setup() {
   Serial.begin(115200);
   #ifdef webdebug 
+    delay(1000);
     Serial.println("start");
   #endif  
 
   settings = new Settings();
+    #ifdef webdebug 
+    Serial.println("Settings loaded");
+  #endif  
   thedisplay = new Display();
   thedisplay->StartScreen();
   
@@ -134,7 +139,7 @@ void setup() {
   String ipaddress = WiFi.localIP().toString();
   thedisplay->DrawString(ipaddress, 1);
   #ifdef webdebug 
-    Serial.println("vor spisd");
+    Serial.println("before spisd");
   #endif  
 
   SPISD.begin(SD_SCK, SD_MISO, SD_MOSI, SD_SS);//SCK MISO MOSI SS
@@ -147,37 +152,10 @@ void setup() {
   #endif  
   randomSeed(analogRead(39));
 
-    ArduinoOTA
-    .onStart([]() {
-      String type;
-      if (ArduinoOTA.getCommand() == U_FLASH)
-        type = "sketch";
-      else // U_SPIFFS
-        type = "filesystem";
-
-      // NOTE: if updating SPIFFS this would be the place to unmount SPIFFS using SPIFFS.end()
-      Serial.println("Start updating " + type);
-    })
-    .onEnd([]() {
-      Serial.println("\nEnd");
-    })
-    .onProgress([](unsigned int progress, unsigned int total) {
-      Serial.printf("Progress: %u%%\r", (progress / (total / 100)));
-    })
-    .onError([](ota_error_t error) {
-      Serial.printf("Error[%u]: ", error);
-      if (error == OTA_AUTH_ERROR) Serial.println("Auth Failed");
-      else if (error == OTA_BEGIN_ERROR) Serial.println("Begin Failed");
-      else if (error == OTA_CONNECT_ERROR) Serial.println("Connect Failed");
-      else if (error == OTA_RECEIVE_ERROR) Serial.println("Receive Failed");
-      else if (error == OTA_END_ERROR) Serial.println("End Failed");
-    });
-
-  ArduinoOTA.begin();
 
   clockdigits = new Digits(thedisplay, settings);  // we need to do this early, used in Web_init
   #ifdef webdebug 
-    Serial.println("vor cache");
+    Serial.println("before cache");
   #endif  
 
   if (SD.exists("/cache.txt"))
@@ -189,7 +167,7 @@ void setup() {
       root.close();
     }
   #ifdef webdebug 
-  Serial.println("vor font");
+  Serial.println("before font");
   #endif
 
   if (SD.exists("/fontcache.txt"))
@@ -202,7 +180,7 @@ void setup() {
       root.close();
     }
   #ifdef webdebug   
-  Serial.println("vor timezones");
+  Serial.println("before timezones");
   #endif
   ReadTimeZones("/TimeZones");   
 
@@ -217,10 +195,21 @@ void setup() {
     Serial.println("setup done");
     UDBDebug("########setup done") ;
   #endif  
+
+#ifdef UseCYD
+  #define CYD_LED_BLUE 17
+  #define CYD_LED_RED 4
+  #define CYD_LED_GREEN 16
+  pinMode(CYD_LED_RED, OUTPUT);  // all off
+  pinMode(CYD_LED_GREEN, OUTPUT);
+  pinMode(CYD_LED_BLUE, OUTPUT);
+  digitalWrite(CYD_LED_RED, HIGH); 
+  digitalWrite(CYD_LED_GREEN, HIGH);
+  digitalWrite(CYD_LED_BLUE, HIGH);
+#endif
 }  
 
 void loopalwaysrun() {
-      ArduinoOTA.handle();
 
 }
 
@@ -329,23 +318,66 @@ void UDBDebug(String message) {
 
       timezonenames[notimezonenames++] = filename;
 
-//#ifdef webdebug
-//Serial.println("TZ "+filename+" nr: "+String(notimezonenames));
-//#endif
+#ifdef webdebug
+  Serial.println("TZ "+filename+" nr: "+String(notimezonenames));
+#endif
 
       entry.close();
       if (notimezonenames>=maxtimezonenames)
         { notimezonenames--; break;}
     }
-    //sortArray(timezonenames, notimezonenames);
+    #ifndef UseDMD
+      sortArray(timezonenames, notimezonenames);
+    #endif
   }
   dir.close();
  }
 
 String GetCurrentTimeZone() {
+  u_int8_t area = settings->getTimeZoneArea();
+  if ((area < 0) && (area >notimezonenames))
+    area = 0;  
+
+  if (notimezonecitynames < 1)  
+    GetTimeZoneNames(timezonenames[area]);
+
   uint8_t id = settings->getTimeZoneID();
   if (id >= notimezonecitynames) 
+    #ifdef webdebug
+      Serial.println("TZ error. Was "+String(id)+" max names: "+String(notimezonecitynames));
+    #endif
   {  id = 0; settings->setTimeZone(id); }
 
   return timezonencityvalues[id];
+}
+
+void GetTimeZoneNames(String path) {
+  File card;
+  String zonename, zoneTZ;
+
+#ifdef webdebug
+  Serial.println(path);
+#endif
+
+  path = "/TimeZones/"+path+".txt";
+  notimezonecitynames = 0;
+  card = SD.open(path);
+  if(card) {
+    while(card.available()) {
+      zonename = card.readStringUntil('\t');
+      zoneTZ = card.readStringUntil('\n');
+      if ((zoneTZ.endsWith("\r"))) zoneTZ.remove(zoneTZ.length()-1);
+
+      #ifdef webdebug
+      Serial.println("Add city ("+String(notimezonecitynames)+") "+zonename);
+      #endif 
+
+      timezonencityvalues[notimezonecitynames] = zoneTZ;
+      timezonencitynames[notimezonecitynames] = zonename;
+
+      notimezonecitynames++;      
+    }
+    card.close();
+  }
+
 }

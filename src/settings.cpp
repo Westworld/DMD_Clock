@@ -163,12 +163,13 @@ void Settings::Flash_Read() {
   // check if our structure
   EEPROM.begin(EEPROM_SIZE);
   int8_t check = EEPROM.read(0);
+  int8_t version = 0;
 
   if (check != 0x4D) 
     Flash_Write(0x4D);
   else {
-    int8_t version = EEPROM.read(1);
- 
+    version = EEPROM.read(1);
+
     switch (version) {
       case 1:
         displayTime = EEPROM.read(2);
@@ -236,7 +237,7 @@ void Settings::Flash_Read() {
   }
   EEPROM.end();
   #ifdef webdebug  
-  Serial.println("FlashRead TZ="+String(timezonearea)+"/"+String(timezoneid)+" displayTime="+String(displayTime)+" font="+String(fontnumber)+" fontcolor="+String(fontColor));
+  Serial.println("FlashRead version="+String(version)+" TZ="+String(timezonearea)+"/"+String(timezoneid)+" displayTime="+String(displayTime)+" font="+String(fontnumber)+" fontcolor="+String(fontColor));
   #endif
   if (fontColor == 0)
     fontColor = 0xFFFF;  // White

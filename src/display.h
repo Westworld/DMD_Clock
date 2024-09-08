@@ -66,7 +66,10 @@ class Display
 #else
         TFT_eSPI *display;
         TFT_eSPI tft;
+        short offsetx;
+        short offsety;
 #endif
+
 
 
 };   

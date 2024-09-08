@@ -13,6 +13,15 @@
 
     Display::Display() {
         Init();
+        #ifdef UseCYD
+          offsetx = 32; //040;
+          offsety = 80; //104;
+        #else
+        #ifndef UseDMD
+          offsetx = 0;
+          offsety = 0;
+        #endif
+        #endif
     };
 
     void Display::Init() {
@@ -25,7 +34,7 @@
                 tft = TFT_eSPI();  
                 display = &tft;
                 display->begin();
-                display->setRotation(1);       
+                display->setRotation(1);    
           #else
                 tft = TFT_eSPI();  
                 display = &tft;
@@ -46,8 +55,8 @@ void Display::DrawRect(int16_t x, int16_t y, int16_t w, int16_t h, uint16_t colo
   #ifdef UseDMD
     display->drawRect(x, y, w, h, color);
   #else
-    display->drawRect(x*2, y*2, w*2, h*2, color);
-    display->drawRect(x*2+1, y*2+1, w*2-2, h*2-2, color);
+    display->drawRect(x*2+offsetx, y*2+offsety, w*2, h*2, color);
+    display->drawRect(x*2+1+offsetx, y*2+1+offsety, w*2-2, h*2-2, color);
   #endif    
 }
 
@@ -55,7 +64,7 @@ void Display::FillRect(int16_t x, int16_t y, int16_t w, int16_t h, uint16_t colo
   #ifdef UseDMD
     display->fillRect(x, y, w, h, color);
   #else
-    display->fillRect(x*2, y*2, w*2, h*2, color);
+    display->fillRect(x*2+offsetx, y*2+offsety, w*2, h*2, color);
   #endif
 }
 
@@ -63,7 +72,7 @@ void Display::DrawPixel(int16_t x, int16_t y, uint16_t color) {
     #ifdef UseDMD
         display->drawPixel(x, y, color); 
     #else
-        display->drawRect(x*2, y*2, 2, 2, color);
+        display->drawRect(x*2+offsetx, y*2+offsety, 2, 2, color);
     #endif      
 };
 
@@ -73,15 +82,19 @@ void Display::DrawPixel(int16_t x, int16_t y, uint8_t r, uint8_t g, uint8_t b ) 
       display->drawPixelRGB888(x, y, r, g, b); 
     #else
         uint16_t color = color565( r, g,b);
-        display->drawRect(x*2, y*2, 2, 2, color);
+        display->drawRect(x*2+offsetx, y*2+offsety, 2, 2, color);
     #endif      
 };
 
 
 void Display::DrawString(String thetext, int8_t line = 0) {
     display->setTextColor(TFT_WHITE, 0x0000);
-    display->setCursor(5, 5+(line*12));   
-    display->print(thetext);
+    #ifdef UseDMD
+      display->setCursor(5, 5+(line*12));   
+      display->print(thetext);
+    #else
+      display->drawString(thetext, 5+offsetx, 5+(line*14)+offsety, 2);
+    #endif
 }
 
 void Display::Clear(void) {
