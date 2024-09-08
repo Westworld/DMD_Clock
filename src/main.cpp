@@ -11,9 +11,8 @@
 #include "digits.h"
 #include "display.h"
 #include "settings.h"
-#ifndef UseDMD
   #include <ArduinoSort.h>
-#endif
+
 
 WiFiMulti wifiMulti;
 
@@ -326,9 +325,8 @@ void UDBDebug(String message) {
       if (notimezonenames>=maxtimezonenames)
         { notimezonenames--; break;}
     }
-    #ifndef UseDMD
       sortArray(timezonenames, notimezonenames);
-    #endif
+
   }
   dir.close();
  }
