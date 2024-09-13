@@ -3,6 +3,7 @@
 #include <WiFiMulti.h>
 //#include <WiFiManager.h> 
 #include <WiFiUdp.h>
+#include <ArduinoOTA.h>
 #include <time.h>  
 #include "SD.h"
 #include "SPI.h"
@@ -11,8 +12,8 @@
 #include "digits.h"
 #include "display.h"
 #include "settings.h"
-  #include <ArduinoSort.h>
-
+#include <ArduinoSort.h>
+#include <XPT2046_Touchscreen.h>
 
 WiFiMulti wifiMulti;
 
@@ -37,6 +38,9 @@ uint16_t SelectIDTimeZoneCity = 0;
 
 int16_t timeCounter = 0;
 
+uint8_t configmode = 0;
+uint32_t configmodestart = 0;
+char logString[200];
 
 //WiFiManager wifiManager;
 #define NTP_SERVER "de.pool.ntp.org"
@@ -56,6 +60,15 @@ const char* wifihostname = "DMD Clock";
       #define SD_MISO 19
       #define SD_MOSI 23
       #define SD_SS 5
+      #define XPT2046_IRQ 36
+      #define XPT2046_MOSI 32
+      #define XPT2046_MISO 39
+      #define XPT2046_CLK 25
+      #define XPT2046_CS 33
+      SPIClass touchscreenSpi = SPIClass(VSPI);
+      XPT2046_Touchscreen touchscreen(XPT2046_CS, XPT2046_IRQ);
+      uint16_t touchScreenMinimumX = 200, touchScreenMaximumX = 3700, touchScreenMinimumY = 240,touchScreenMaximumY = 3800;
+
   #else      
       #define SD_SCK  14   //grün
       #define SD_MISO 33   //blau
@@ -88,12 +101,22 @@ void setTimeZone(String TimeZone) {
  
 }
 
-void ConnectWifi() {
-  WiFi.mode(WIFI_STA);
-    WiFi.setHostname(wifihostname);
-    wifiMulti.addAP(WIFI_SSID, WIFI_PASS);
-    wifiMulti.addAP(WIFI_SSID3, WIFI_PASS3); 
-    wifiMulti.addAP(WIFI_SSID2, WIFI_PASS2);
+
+
+void ConnectWifi(bool redirectWifi1) {
+    if (redirectWifi1) {
+      WiFi.disconnect();
+      WiFi.mode(WIFI_STA);
+      WiFi.setHostname(wifihostname);
+      wifiMulti.addAP(WIFI_SSID, WIFI_PASS);
+    }
+    else {
+      WiFi.mode(WIFI_STA);
+      WiFi.setHostname(wifihostname);
+      wifiMulti.addAP(WIFI_SSID, WIFI_PASS);
+      wifiMulti.addAP(WIFI_SSID3, WIFI_PASS3); 
+      wifiMulti.addAP(WIFI_SSID2, WIFI_PASS2);
+    }
 
     int loop=1;
 
@@ -128,7 +151,7 @@ void setup() {
   thedisplay = new Display();
   thedisplay->StartScreen();
   
- ConnectWifi();
+ ConnectWifi(false);
 
   if (WiFi.status() != WL_CONNECTED) {
     ESP.restart();
@@ -205,6 +228,11 @@ void setup() {
   digitalWrite(CYD_LED_RED, HIGH); 
   digitalWrite(CYD_LED_GREEN, HIGH);
   digitalWrite(CYD_LED_BLUE, HIGH);
+
+  touchscreenSpi.begin(XPT2046_CLK, XPT2046_MISO, XPT2046_MOSI, XPT2046_CS); /* Start second SPI bus for touchscreen */
+  touchscreen.begin(touchscreenSpi); /* Touchscreen init */
+  touchscreen.setRotation(1); /* Inverted landscape orientation to match screen */
+
 #endif
 }  
 
@@ -212,33 +240,137 @@ void loopalwaysrun() {
 
 }
 
+short checkButton() {
+// 0 == no button, 1 = short, 2 = long
+
+  #ifdef UseCYD
+  if (touchscreen.tirqTouched() && touchscreen.touched()) {
+    uint32_t timer = millis();
+
+    while (touchscreen.tirqTouched() && touchscreen.touched()) 
+      ;  // loop
+
+    if (millis()-timer > 1000)
+      return 2;
+    else 
+      return 1;
+  }
+  else
+    return 0;
+
+  #else
+    return 0;
+  #endif
+
+}
+
+void handleClick(short button) {
+  // 1 = short, 2 = long
+  #ifdef webdebug 
+    Serial.println("Button"); 
+  #endif
+
+  if (configmode == 0) {
+      configmode = 1;
+      thedisplay->Clear();
+      thedisplay->DrawRect(0, 0, 128, 32, TFT_RED);
+      if (WiFi.status() != WL_CONNECTED) {
+          ConnectWifi(false);
+      }
+      thedisplay->DrawString("Config mode", 0);
+      String ipaddress = WiFi.localIP().toString();
+      thedisplay->DrawString(ipaddress, 1);
+
+      ArduinoOTA.setHostname(wifihostname);
+
+      ArduinoOTA
+        .onStart([]() {
+          thedisplay->DrawString("Start updating", 0);
+          Serial.println("Start updating");
+        });
+        ArduinoOTA.onEnd([]() {
+          thedisplay->DrawString("End updating", 0);
+          Serial.println("End updating");
+        });
+        ArduinoOTA.onProgress([](unsigned int progress, unsigned int total) {
+          sprintf(logString, "Progress: %u", (progress / (total / 100)));
+          Serial.println(logString);
+          thedisplay->DrawString(logString, 1);
+        });
+        ArduinoOTA.onError([](ota_error_t error) {
+          sprintf(logString, "Error[%u]: ", error);
+          Serial.println(logString);
+          thedisplay->DrawString(logString, 1);
+          if (error == OTA_AUTH_ERROR)  Serial.println("Auth Failed");
+          else if (error == OTA_BEGIN_ERROR)  Serial.println("Begin Failed");
+          else if (error == OTA_CONNECT_ERROR)  Serial.println("Connect Failed");
+          else if (error == OTA_RECEIVE_ERROR)  Serial.println("Receive Failed");
+          else if (error == OTA_END_ERROR)  Serial.println("End Failed");
+        });
+
+      ArduinoOTA.begin();  
+
+      configmodestart = millis();
+  }
+  else {
+    // already in config mode
+      if (button == 2) {
+        // long click, reboot
+        ESP.restart();
+      }
+      if ((millis() - configmodestart) > 10000) {
+        // switch to Wifi1 only, main network
+        ConnectWifi(true);
+      }
+      else 
+      {  // leave config mode
+        configmode = 0;
+        ArduinoOTA.end();
+        thedisplay->Clear();
+        thedisplay->DrawRect(0, 0, 128, 32, TFT_RED);
+      }
+      // force redraw
+  }
+
+}
+
 void loop() {
   loopalwaysrun();  // also called from Video player
 
-  if (timeCounter < settings->getDisplayTime()) {
-     DisplayTime();
+  int click = checkButton();
+  if (click != 0) handleClick(click);
+
+  if (configmode == 0) {
+
+      if (timeCounter < settings->getDisplayTime()) {
+        DisplayTime();
+      }
+      else {
+        playRandomVideo();  
+        if (settings->getClockBlend()) {
+          // nothing
+        }
+        else
+        {
+          settings->doRefresh(); 
+          thedisplay->Clear();
+          clockdigits->ResetUpDownCounter();  // if we are in the middle of drawing up down, when video started, it would continue
+        }
+        
+        timeCounter = 0;
+        if (RandomFontcounter++ > 20) {
+          RandomFontcounter=0;
+          if (settings->getFontNumber() == 0) {
+            int8_t font = random(noFonts)+1;
+            settings->setFontNumber(font); 
+          }  
+        }
+      }  
   }
   else {
-    playRandomVideo();  
-    if (settings->getClockBlend()) {
-      // nothing
-    }
-    else
-    {
-      settings->doRefresh(); 
-      thedisplay->Clear();
-      clockdigits->ResetUpDownCounter();  // if we are in the middle of drawing up down, when video started, it would continue
-    }
-    
-    timeCounter = 0;
-    if (RandomFontcounter++ > 20) {
-      RandomFontcounter=0;
-      if (settings->getFontNumber() == 0) {
-        int8_t font = random(noFonts)+1;
-        settings->setFontNumber(font); 
-      }  
-    }
-  }  
+    // in config mode
+      ArduinoOTA.handle();
+  }   
   
 }
 
