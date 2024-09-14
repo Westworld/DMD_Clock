@@ -12,7 +12,7 @@
 #include "digits.h"
 #include "display.h"
 #include "settings.h"
-#include <ArduinoSort.h>
+#include "web.h"
 #include <XPT2046_Touchscreen.h>
 
 WiFiMulti wifiMulti;
@@ -114,8 +114,8 @@ void ConnectWifi(bool redirectWifi1) {
       WiFi.mode(WIFI_STA);
       WiFi.setHostname(wifihostname);
       wifiMulti.addAP(WIFI_SSID, WIFI_PASS);
-      wifiMulti.addAP(WIFI_SSID3, WIFI_PASS3); 
-      wifiMulti.addAP(WIFI_SSID2, WIFI_PASS2);
+      //wifiMulti.addAP(WIFI_SSID3, WIFI_PASS3); 
+      //wifiMulti.addAP(WIFI_SSID2, WIFI_PASS2);
     }
 
     int loop=1;
@@ -309,6 +309,7 @@ void handleClick(short button) {
         });
 
       ArduinoOTA.begin();  
+      Web_Init();
 
       configmodestart = millis();
   }
@@ -318,9 +319,12 @@ void handleClick(short button) {
         // long click, reboot
         ESP.restart();
       }
-      if ((millis() - configmodestart) > 10000) {
+      if ((millis() - configmodestart) < 10000) {
         // switch to Wifi1 only, main network
         ConnectWifi(true);
+        thedisplay->DrawString("Config mode", 0);
+        String ipaddress = WiFi.localIP().toString();
+        thedisplay->DrawString(ipaddress, 1);
       }
       else 
       {  // leave config mode
@@ -328,6 +332,8 @@ void handleClick(short button) {
         ArduinoOTA.end();
         thedisplay->Clear();
         thedisplay->DrawRect(0, 0, 128, 32, TFT_RED);
+        settings->doRefresh(); 
+        DisplayTime();
       }
       // force redraw
   }
@@ -418,96 +424,3 @@ void UDBDebug(String message) {
 #endif  
 }
 
-
- void ReadTimeZones(String path) {
-  File dir = SD.open(path);
-  String dirchar = "/";
-  while (true)
-  {
-    File entry =  dir.openNextFile();
-    short filetype=0;
-    if (! entry)
-    {
-      // no more files
-      break;
-    }
-    
-    if (entry.isDirectory()) 
-    {
-      // Skip file if in subfolder
-       entry.close(); // Close folder entry
-    } 
-    else
-    {
-      //Serial.println(entry.name());
-      String dirname = dir.name();
-      String filename = entry.name();
-
-      if (filename.startsWith(".")) continue;
-      if (!(filename.endsWith(".txt"))) continue;
-      filename = filename.substring(0,filename.length()-4);
-
-      timezonenames[notimezonenames++] = filename;
-
-#ifdef webdebug
-  Serial.println("TZ "+filename+" nr: "+String(notimezonenames));
-#endif
-
-      entry.close();
-      if (notimezonenames>=maxtimezonenames)
-        { notimezonenames--; break;}
-    }
-      sortArray(timezonenames, notimezonenames);
-
-  }
-  dir.close();
- }
-
-String GetCurrentTimeZone() {
-  u_int8_t area = settings->getTimeZoneArea();
-  if ((area < 0) && (area >notimezonenames))
-    area = 0;  
-
-  if (notimezonecitynames < 1)  
-    GetTimeZoneNames(timezonenames[area]);
-
-  uint8_t id = settings->getTimeZoneID();
-  if (id >= notimezonecitynames) 
-    #ifdef webdebug
-      Serial.println("TZ error. Was "+String(id)+" max names: "+String(notimezonecitynames));
-    #endif
-  {  id = 0; settings->setTimeZone(id); }
-
-  return timezonencityvalues[id];
-}
-
-void GetTimeZoneNames(String path) {
-  File card;
-  String zonename, zoneTZ;
-
-#ifdef webdebug
-  Serial.println(path);
-#endif
-
-  path = "/TimeZones/"+path+".txt";
-  notimezonecitynames = 0;
-  card = SD.open(path);
-  if(card) {
-    while(card.available()) {
-      zonename = card.readStringUntil('\t');
-      zoneTZ = card.readStringUntil('\n');
-      if ((zoneTZ.endsWith("\r"))) zoneTZ.remove(zoneTZ.length()-1);
-
-      #ifdef webdebug
-      Serial.println("Add city ("+String(notimezonecitynames)+") "+zonename);
-      #endif 
-
-      timezonencityvalues[notimezonecitynames] = zoneTZ;
-      timezonencitynames[notimezonecitynames] = zonename;
-
-      notimezonecitynames++;      
-    }
-    card.close();
-  }
-
-}

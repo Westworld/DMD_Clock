@@ -1,0 +1,371 @@
+#include "Web.h"
+#include "Video.h"
+#include "digits.h"
+#include <ArduinoSort.h>
+#include "display.h"
+
+#define TFT_WHITE 0xFFFF
+
+void setTimeZone(String TimeZone);
+extern String fontnames[];
+extern int noFonts;
+extern String timezonenames[];
+extern uint8_t notimezonenames;
+extern String timezonencityvalues[];
+extern String timezonencitynames[];
+extern uint16_t timezonencityids[];
+extern uint8_t notimezonecitynames;
+extern uint16_t SelectIDTimeZoneCity;
+extern String MY_TZ; 
+uint16_t web_sparklecolor;
+
+extern Digits  * clockdigits;
+extern Display * thedisplay;
+extern Settings * settings;
+
+
+void Web_timedisplayCall(Control* sender, int type)
+{
+  #ifdef webdebug
+    thedisplay->DrawString("Time Display: "+sender->value, 0);
+  #endif
+  settings->setDisplayTime(sender->value.toInt());
+}
+
+void Web_timecolorCall(Control* sender, int type)
+{
+  #ifdef webdebug
+    thedisplay->DrawString("Time Color: "+sender->value, 0);
+  #endif
+
+  String message = sender->value.substring(1);
+  long color = strtol(message.c_str(), 0, 16); 
+  settings->setFontColor(thedisplay->color565(color));
+}
+
+void Web_timeSparklecolorCall(Control* sender, int type)
+{
+  #ifdef webdebug
+    thedisplay->DrawString("Time Sparkle Color: "+sender->value, 0);
+  #endif
+
+  String message = sender->value.substring(1);
+  long color = strtol(message.c_str(), 0, 16); 
+  settings->setFontSparkleColor(thedisplay->color565(color));
+}
+
+void Web_timeframeCall(Control* sender, int type)
+{
+  #ifdef webdebug
+    thedisplay->DrawString("Frame Color: "+sender->value, 0);
+  #endif
+
+  String message = sender->value.substring(1);
+  long color = strtol(message.c_str(), 0, 16); 
+  settings->setFrameColor(thedisplay->color565(color));
+}
+
+void Web_FontCall(Control* sender, int type)
+{
+  #ifdef webdebug
+    thedisplay->DrawString("Font Call: "+sender->value, 0);
+    Serial.println("Font Call: "+sender->value);
+  #endif
+
+  String message = sender->value;
+  settings->setFontNumber(strtol(message.c_str(), 0, 10));
+}
+
+void WebSwitchSeconds(Control* sender, int value)
+{
+    switch (value)
+    {
+    case S_ACTIVE:
+        settings->setDisplaySeconds(true);
+        break;
+
+    case S_INACTIVE:
+        settings->setDisplaySeconds(false);
+        break;
+    }
+}
+
+void WebSwitchAMPM(Control* sender, int value)
+{
+    switch (value)
+    {
+    case S_ACTIVE:
+        settings->setTwelveHourFormat(true);
+        break;
+
+    case S_INACTIVE:
+        settings->setTwelveHourFormat(false);
+        break;
+    }
+}
+
+void WebSwitchUpDown(Control* sender, int value)
+{
+    switch (value)
+    {
+    case S_ACTIVE:
+        settings->setClockUpDown(true);
+        break;
+
+    case S_INACTIVE:
+        settings->setClockUpDown(false);
+        break;
+    }
+}
+
+void WebSwitchSparkle(Control* sender, int value)
+{
+    switch (value)
+    {
+    case S_ACTIVE:
+        settings->setClockSparkle(true);
+        ESPUI.updateVisibility(web_sparklecolor, true);
+        break;
+
+    case S_INACTIVE:
+        settings->setClockSparkle(false);
+        ESPUI.updateVisibility(web_sparklecolor, false);
+        break;
+    }
+}
+
+void WebSwitchBlend(Control* sender, int value)
+{
+    switch (value)
+    {
+    case S_ACTIVE:
+        settings->setClockBlend(true);
+        break;
+
+    case S_INACTIVE:
+        settings->setClockBlend(false);
+        break;
+    }
+}
+
+void Web_TimeZoneArea(Control* sender, int type)
+{
+  #ifdef webdebug
+    thedisplay->DrawString("Web_TimeZoneArea Call: "+sender->value, 0);
+    Serial.println("Web_TimeZoneArea Call: "+sender->value);
+  #endif
+
+  String message = sender->value;
+  u_int8_t zone = strtol(message.c_str(), 0, 10);
+  settings->setTimeZone(zone, 0);
+   // delete all entries
+  for (int i=0; i<notimezonecitynames; i++) {
+      ESPUI.removeControl(timezonencityids[i], true);
+  }
+
+  GetTimeZoneNames(timezonenames[zone]);
+  Web_AddTimeZoneNames(SelectIDTimeZoneCity, timezonenames[zone]);
+}
+
+void Web_TimeZoneSelect(Control* sender, int type)
+{
+  #ifdef webdebug
+    thedisplay->DrawString("Web_TimeZoneSelect Call: "+sender->value, 0);
+    Serial.println("Web_TimeZoneSelect Call: "+sender->value);
+  #endif
+
+  String message = sender->value;
+  u_int8_t id = strtol(message.c_str(), 0, 10);
+  settings->setTimeZone(id);
+  MY_TZ = timezonencityvalues[id];
+  setTimeZone(timezonencityvalues[id]);
+}
+
+
+void Web_Init() {
+  //ESPUI.sliderContinuous = true;
+  ESPUI.number("Time display in seconds:", &Web_timedisplayCall, ControlColor::Alizarin, settings->getDisplayTime());
+  String colorstring = thedisplay->ConvertColor565to888hex(settings->getFontColor());
+  uint16_t text_colour = ESPUI.text("Time display color:", &Web_timecolorCall, ControlColor::Alizarin, colorstring);
+  ESPUI.setInputType(text_colour, "color");
+  
+  colorstring = thedisplay->ConvertColor565to888hex(settings->getFrameColor());
+  text_colour = ESPUI.text("Time frame color:", &Web_timeframeCall, ControlColor::Alizarin, colorstring);
+  ESPUI.setInputType(text_colour, "color");
+
+  uint16_t select1
+        = ESPUI.addControl(ControlType::Select, "Font:", "", ControlColor::Alizarin, -1, &Web_FontCall);
+  ESPUI.addControl(ControlType::Option, "Random", "0", ControlColor::Alizarin, select1);
+  for (int i=0; i<noFonts; i++)    
+      ESPUI.addControl(ControlType::Option, fontnames[i].c_str(), String(i+1), ControlColor::Alizarin, select1);
+
+  ESPUI.updateSelect(select1, String(settings->getFontNumber()), -1);
+
+  ESPUI.switcher("Show Seconds", &WebSwitchSeconds, ControlColor::Alizarin, settings->getDisplaySeconds());
+  ESPUI.switcher("12 hour format", &WebSwitchAMPM, ControlColor::Alizarin, settings->getTwelveHourFormat());
+  ESPUI.switcher("Clock display up>down", &WebSwitchUpDown, ControlColor::Alizarin, settings->getClockUpDown());
+  ESPUI.switcher("Clock blend", &WebSwitchBlend, ControlColor::Alizarin, settings->getClockBlend());
+  ESPUI.switcher("Clock sparkle", &WebSwitchSparkle, ControlColor::Alizarin, settings->getClockSparkle());
+
+  String sparklecolorstring = thedisplay->ConvertColor565to888hex(settings->getFontSparkleColor());
+  web_sparklecolor = ESPUI.text("Time display color sparkle:", &Web_timeSparklecolorCall, ControlColor::Alizarin, sparklecolorstring);
+  ESPUI.setInputType(web_sparklecolor, "color");
+  if (!settings->getClockSparkle()) ESPUI.updateVisibility(web_sparklecolor, false);
+
+
+  select1 = ESPUI.addControl(ControlType::Select, "Time Zone Continent:", "", ControlColor::Alizarin, -1, &Web_TimeZoneArea);
+  for (int i=0; i<notimezonenames; i++)    
+      ESPUI.addControl(ControlType::Option, timezonenames[i].c_str(), String(i), ControlColor::Alizarin, select1);
+  u_int8_t area = settings->getTimeZoneArea();
+  ESPUI.updateSelect(select1, String(area), -1);
+
+  SelectIDTimeZoneCity = ESPUI.addControl(ControlType::Select, "Time Zone:", "", ControlColor::Alizarin, -1, &Web_TimeZoneSelect);
+  Web_AddTimeZoneNames(SelectIDTimeZoneCity, timezonenames[area]);
+//ESPUI.addControl(ControlType::Option, "test", "1", ControlColor::Alizarin, SelectIDTimeZoneCity);
+ //ESPUI.updateSelect(SelectIDTimeZoneCity, "1", -1);
+
+  ESPUI.begin("DMD Clock");
+}
+
+void Web_AddTimeZoneNames(uint16_t select, String path) {
+  File card;
+  String zonename, zoneTZ;
+
+#ifdef webdebug
+  Serial.println(path);
+  Serial.println(notimezonecitynames);
+#endif
+
+  for (short i=0;i<notimezonecitynames;i++) {
+    #ifdef webdebug
+      Serial.println("Add city ("+String(i)+") "+timezonencitynames[i]);
+    #endif
+    timezonencityids[i] = ESPUI.addControl(ControlType::Option, timezonencitynames[i].c_str(), String(i), ControlColor::Alizarin, select);
+  }
+  ESPUI.updateSelect(select, String(notimezonecitynames), -1);
+  return;
+
+  path = "/TimeZones/"+path+".txt";
+  notimezonecitynames = 0;
+  card = SD.open(path);
+  if(card) {
+    while(card.available()) {
+      zonename = card.readStringUntil('\t');
+      zoneTZ = card.readStringUntil('\n');
+      if ((zoneTZ.endsWith("\r"))) zoneTZ.remove(zoneTZ.length()-1);
+
+      #ifdef webdebug
+      Serial.println("Add city ("+String(notimezonecitynames)+") "+zonename);
+      #endif 
+
+      timezonencityvalues[notimezonecitynames] = zoneTZ;
+      timezonencitynames[notimezonecitynames] = zonename;
+
+      timezonencityids[notimezonecitynames] = ESPUI.addControl(ControlType::Option, timezonencitynames[notimezonecitynames].c_str(), String(notimezonecitynames), ControlColor::Alizarin, select);
+      notimezonecitynames++;    
+
+      if (notimezonecitynames>10) break;  
+    }
+    uint8_t id = settings->getTimeZoneID();
+    if (notimezonecitynames > id)
+        ESPUI.updateSelect(select, String(id), -1);
+    else  
+      ESPUI.updateSelect(select, String(notimezonecitynames), -1);
+    card.close();
+  }
+
+}
+
+
+void ReadTimeZones(String path) {
+  File dir = SD.open(path);
+  String dirchar = "/";
+  while (true)
+  {
+    File entry =  dir.openNextFile();
+    short filetype=0;
+    if (! entry)
+    {
+      // no more files
+      break;
+    }
+    
+    if (entry.isDirectory()) 
+    {
+      // Skip file if in subfolder
+       entry.close(); // Close folder entry
+    } 
+    else
+    {
+      //Serial.println(entry.name());
+      String dirname = dir.name();
+      String filename = entry.name();
+
+      if (filename.startsWith(".")) continue;
+      if (!(filename.endsWith(".txt"))) continue;
+      filename = filename.substring(0,filename.length()-4);
+
+      timezonenames[notimezonenames++] = filename;
+
+#ifdef webdebug
+  Serial.println("TZ "+filename+" nr: "+String(notimezonenames));
+#endif
+
+      entry.close();
+      if (notimezonenames>=maxtimezonenames)
+        { notimezonenames--; break;}
+    }
+      sortArray(timezonenames, notimezonenames);
+
+  }
+  dir.close();
+ }
+
+String GetCurrentTimeZone() {
+  u_int8_t area = settings->getTimeZoneArea();
+  if ((area < 0) && (area >notimezonenames))
+    area = 0;  
+
+  if (notimezonecitynames < 1)  
+    GetTimeZoneNames(timezonenames[area]);
+
+  uint8_t id = settings->getTimeZoneID();
+  if (id >= notimezonecitynames) 
+    #ifdef webdebug
+      Serial.println("TZ error. Was "+String(id)+" max names: "+String(notimezonecitynames));
+    #endif
+  {  id = 0; settings->setTimeZone(id); }
+
+  return timezonencityvalues[id];
+}
+
+void GetTimeZoneNames(String path) {
+  File card;
+  String zonename, zoneTZ;
+
+#ifdef webdebug
+  Serial.println(path);
+#endif
+
+  path = "/TimeZones/"+path+".txt";
+  notimezonecitynames = 0;
+  card = SD.open(path);
+  if(card) {
+    while(card.available()) {
+      zonename = card.readStringUntil('\t');
+      zoneTZ = card.readStringUntil('\n');
+      if ((zoneTZ.endsWith("\r"))) zoneTZ.remove(zoneTZ.length()-1);
+
+      #ifdef webdebug
+      Serial.println("Init Add city ("+String(notimezonecitynames)+") "+zonename);
+      #endif 
+
+      timezonencityvalues[notimezonecitynames] = zoneTZ;
+      timezonencitynames[notimezonecitynames] = zonename;
+
+      notimezonecitynames++;      
+    }
+    card.close();
+  }
+
+}
