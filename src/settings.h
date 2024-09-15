@@ -19,6 +19,7 @@ class Settings
     bool getClockUpDown(void);
     bool getClockSparkle(void);
     bool getClockBlend(void);  // draw clock over last video or blend over
+    String getSSIDPass(short);
 
     bool needRefresh(void);
     void doRefresh(void);
@@ -50,9 +51,17 @@ class Settings
     bool ClockSparkle = false;
     bool DisplayRefresh = false;
     bool ClockBlend = true;
+    String SSID1="";
+    String PASS1="";
+    String SSID2=""; 
+    String PASS2=""; 
+    String SSID3="";
+    String PASS3="";
+
 
     void Flash_Read(void);
     void Flash_Write(int8_t what);
+
 };
 
 #endif

@@ -54,6 +54,9 @@ const char* wifihostname = "DMD Clock";
       #define SD_MISO 2
       #define SD_MOSI 15
       #define SD_SS 13
+
+      #define config_button 35
+      //  links oben, darüber 34, darüber RST
 #else
   #ifdef UseCYD
       #define SD_SCK 18
@@ -90,6 +93,7 @@ int8_t RandomFontcounter = 0;
 Display * thedisplay;
 Settings * settings;
 
+
 void setTimeZone(String TimeZone) {
   struct tm local;
   configTzTime(TimeZone.c_str(), NTP_SERVER); // ESP32 Systemzeit mit NTP Synchronisieren
@@ -103,20 +107,18 @@ void setTimeZone(String TimeZone) {
 
 
 
-void ConnectWifi(bool redirectWifi1) {
-    if (redirectWifi1) {
-      WiFi.disconnect();
+void ConnectWifi() {
       WiFi.mode(WIFI_STA);
       WiFi.setHostname(wifihostname);
-      wifiMulti.addAP(WIFI_SSID, WIFI_PASS);
-    }
-    else {
-      WiFi.mode(WIFI_STA);
-      WiFi.setHostname(wifihostname);
-      wifiMulti.addAP(WIFI_SSID, WIFI_PASS);
+      String ssid = settings->getSSIDPass(1);
+      String pass = settings->getSSIDPass(2);
+      if ((ssid != "") && (pass != ""))
+        wifiMulti.addAP(ssid.c_str(), pass.c_str());
+      else
+        wifiMulti.addAP(WIFI_SSID, WIFI_PASS);
+
       //wifiMulti.addAP(WIFI_SSID3, WIFI_PASS3); 
       //wifiMulti.addAP(WIFI_SSID2, WIFI_PASS2);
-    }
 
     int loop=1;
 
@@ -144,6 +146,9 @@ void setup() {
     Serial.println("start");
   #endif  
 
+  //SD.remove("/config.json");
+  // Serial.println("########setting deleted#########");
+
   settings = new Settings();
     #ifdef webdebug 
     Serial.println("Settings loaded");
@@ -151,12 +156,10 @@ void setup() {
   thedisplay = new Display();
   thedisplay->StartScreen();
   
- ConnectWifi(false);
-
+  ConnectWifi();
   if (WiFi.status() != WL_CONNECTED) {
     ESP.restart();
   }
-
 
   String ipaddress = WiFi.localIP().toString();
   thedisplay->DrawString(ipaddress, 1);
@@ -234,6 +237,11 @@ void setup() {
   touchscreen.setRotation(1); /* Inverted landscape orientation to match screen */
 
 #endif
+
+#ifdef UseDMD
+  pinMode(config_button, INPUT_PULLUP);
+#endif
+
 }  
 
 void loopalwaysrun() {
@@ -259,7 +267,21 @@ short checkButton() {
     return 0;
 
   #else
-    return 0;
+    #ifdef UseDMD
+      if (digitalRead(config_button) == HIGH) {
+        uint32_t timer = millis();
+
+        while (digitalRead(config_button) == HIGH) 
+          ;  // loop
+
+        if (millis()-timer > 1000)
+          return 2;
+        else 
+          return 1;
+      }
+    #else
+      return 0;
+    #endif
   #endif
 
 }
@@ -275,7 +297,7 @@ void handleClick(short button) {
       thedisplay->Clear();
       thedisplay->DrawRect(0, 0, 128, 32, TFT_RED);
       if (WiFi.status() != WL_CONNECTED) {
-          ConnectWifi(false);
+          ConnectWifi();
       }
       thedisplay->DrawString("Config mode", 0);
       String ipaddress = WiFi.localIP().toString();
@@ -318,13 +340,6 @@ void handleClick(short button) {
       if (button == 2) {
         // long click, reboot
         ESP.restart();
-      }
-      if ((millis() - configmodestart) < 10000) {
-        // switch to Wifi1 only, main network
-        ConnectWifi(true);
-        thedisplay->DrawString("Config mode", 0);
-        String ipaddress = WiFi.localIP().toString();
-        thedisplay->DrawString(ipaddress, 1);
       }
       else 
       {  // leave config mode

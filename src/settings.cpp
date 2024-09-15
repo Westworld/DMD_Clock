@@ -1,5 +1,7 @@
 #include "settings.h"
 #include "EEPROM.h"
+#include "ArduinoJson.h"
+#include "SD.h"
 
 #define EEPROM_SIZE 17
 
@@ -54,6 +56,21 @@ bool Settings::getClockSparkle(void) {
 bool Settings::getClockBlend(void) {
     return ClockBlend;
 }
+
+String Settings::getSSIDPass(short was) {
+    switch (was) {
+        case 1: return SSID1; 
+        case 2: return PASS1; 
+        case 3: return SSID2; 
+        case 4: return PASS2; 
+        case 5: return SSID3; 
+        case 6: return PASS3; 
+        
+    }
+    return "";
+
+}
+
 void Settings::setDisplayTime(uint8_t newTime) {
     if (newTime != displayTime) {
         displayTime = newTime;
@@ -160,6 +177,61 @@ bool Settings::needRefresh(void) {
 
 
 void Settings::Flash_Read() {
+  // check if settings on SD Card
+  if (SD.exists("/config.json"))
+    { 
+        JsonDocument doc;
+
+        File card = SD.open("/config.json",FILE_READ);
+        deserializeJson(doc, card);
+        card.close();
+
+        if (!doc["displayTime"].isNull())
+            displayTime = doc["displayTime"].as<uint8_t>();
+
+        if (!doc["twelveHourFormat"].isNull())
+            twelveHourFormat = doc["twelveHourFormat"].as<bool>();
+        if (!doc["displaySeconds"].isNull())
+            displaySeconds = doc["displaySeconds"].as<bool>();
+
+        if (!doc["fontColor"].isNull())
+            fontColor = doc["fontColor"].as<uint16_t>();
+        if (!doc["frameColor"].isNull())
+            frameColor = doc["frameColor"].as<uint16_t>();
+        if (!doc["fontnumber"].isNull())
+            fontnumber = doc["fontnumber"].as<uint8_t>();
+        if (!doc["timezonearea"].isNull())
+            timezonearea = doc["timezonearea"].as<uint8_t>();
+        if (!doc["timezoneid"].isNull())
+            timezoneid = doc["timezoneid"].as<uint8_t>();
+
+        if (!doc["ClockUpDown"].isNull())
+            ClockUpDown = doc["ClockUpDown"].as<bool>();
+        if (!doc["ClockSparkle"].isNull())
+            ClockSparkle = doc["ClockSparkle"].as<bool>();
+        if (!doc["fontSparkleColor"].isNull())
+            fontSparkleColor = doc["fontSparkleColor"].as<bool>();
+        if (!doc["ClockBlend"].isNull())
+            ClockBlend = doc["ClockBlend"].as<bool>();            
+
+        if (!doc["Wifi"][0]["SSID"].isNull())
+            SSID1 = doc["Wifi"][0]["SSID"].as<String>();  
+        if (!doc["Wifi"][0]["PASS"].isNull())
+            PASS1 = doc["Wifi"][0]["PASS"].as<String>(); 
+        if (!doc["Wifi"][1]["SSID"].isNull())
+            SSID2 = doc["Wifi"][1]["SSID"].as<String>();  
+        if (!doc["Wifi"][1]["PASS"].isNull())
+            PASS2 = doc["Wifi"][1]["PASS"].as<String>(); 
+        if (!doc["Wifi"][2]["SSID"].isNull())
+            SSID3 = doc["Wifi"][2]["SSID"].as<String>();  
+        if (!doc["Wifi"][2]["PASS"].isNull())
+            PASS3 = doc["Wifi"][2]["PASS"].as<String>(); 
+
+        if (fontColor == 0)
+            fontColor = 0xFFFF;  // White
+    }
+else {
+
   // check if our structure
   EEPROM.begin(EEPROM_SIZE);
   int8_t check = EEPROM.read(0);
@@ -241,9 +313,15 @@ void Settings::Flash_Read() {
   #endif
   if (fontColor == 0)
     fontColor = 0xFFFF;  // White
+
+  Serial.println("Write settings to config.json");
+  Flash_Write(0x4D);  
+}
+
 }
 
 void Settings::Flash_Write(int8_t what) {
+    /*
   EEPROM.begin(EEPROM_SIZE);
     #ifdef webdebug 
         Serial.print("flash write: ");
@@ -309,4 +387,36 @@ void Settings::Flash_Write(int8_t what) {
 
    EEPROM.commit();
    EEPROM.end();
+*/
+
+    JsonDocument doc;
+
+    doc["Wifi"][0]["SSID"] = WIFI_SSID;
+    doc["Wifi"][0]["Pass"] = WIFI_PASS;
+    doc["Wifi"][1]["SSID"] = WIFI_SSID3;
+    doc["Wifi"][1]["Pass"] = WIFI_PASS3;
+
+    doc["version"] = 5;
+    doc["displayTime"] = displayTime;
+    doc["twelveHourFormat"] = twelveHourFormat;
+    doc["displaySeconds"] = displaySeconds;
+    doc["fontColor"] = fontColor;
+    doc["frameColor"] = frameColor;
+    doc["fontnumber"] = fontnumber;
+    doc["timezonearea"] = timezonearea;
+    doc["timezoneid"] = timezoneid;
+    doc["ClockUpDown"] = ClockUpDown;
+    doc["ClockSparkle"] = ClockSparkle;
+    doc["fontSparkleColor"] = fontSparkleColor;
+    doc["ClockBlend"] = ClockBlend;
+
+   #ifdef webdebug 
+        serializeJson(doc, Serial);
+    #endif
+
+    File card;
+    card = SD.open("/config.json",FILE_WRITE);
+    serializeJson(doc, card);
+    card.close();
+
 }
