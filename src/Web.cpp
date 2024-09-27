@@ -241,6 +241,7 @@ void Web_AddTimeZoneNames(uint16_t select, String path) {
       Serial.println("Add city ("+String(i)+") "+timezonencitynames[i]);
     #endif
     timezonencityids[i] = ESPUI.addControl(ControlType::Option, timezonencitynames[i].c_str(), String(i), ControlColor::Alizarin, select);
+ //if (i>15) break;
   }
   ESPUI.updateSelect(select, String(notimezonecitynames), -1);
   return;

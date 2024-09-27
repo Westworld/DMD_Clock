@@ -149,13 +149,24 @@ void setup() {
   //SD.remove("/config.json");
   // Serial.println("########setting deleted#########");
 
+  thedisplay = new Display();
+  thedisplay->StartScreen();
+
+
+  SPISD.begin(SD_SCK, SD_MISO, SD_MOSI, SD_SS);//SCK MISO MOSI SS
+  if (!SD.begin(SD_SS, SPISD))  {
+    Serial.println("SD Card initialization failed!");
+    thedisplay->DrawString("SD Card error", 1);
+  }
+  #ifdef webdebug 
+    Serial.println("SD Card initialization done.");
+  #endif 
+
   settings = new Settings();
     #ifdef webdebug 
     Serial.println("Settings loaded");
   #endif  
-  thedisplay = new Display();
-  thedisplay->StartScreen();
-  
+
   ConnectWifi();
   if (WiFi.status() != WL_CONNECTED) {
     ESP.restart();
@@ -166,15 +177,7 @@ void setup() {
   #ifdef webdebug 
     Serial.println("before spisd");
   #endif  
-
-  SPISD.begin(SD_SCK, SD_MISO, SD_MOSI, SD_SS);//SCK MISO MOSI SS
-  if (!SD.begin(SD_SS, SPISD))  {
-    Serial.println("SD Card initialization failed!");
-    thedisplay->DrawString("SD Card error", 1);
-  }
-  #ifdef webdebug 
-    Serial.println("SD Card initialization done.");
-  #endif  
+ 
   randomSeed(analogRead(39));
 
 
@@ -268,10 +271,10 @@ short checkButton() {
 
   #else
     #ifdef UseDMD
-      if (digitalRead(config_button) == HIGH) {
+      if (digitalRead(config_button) == LOW) {
         uint32_t timer = millis();
 
-        while (digitalRead(config_button) == HIGH) 
+        while (digitalRead(config_button) == LOW) 
           ;  // loop
 
         if (millis()-timer > 1000)
@@ -283,7 +286,7 @@ short checkButton() {
       return 0;
     #endif
   #endif
-
+  return 0;
 }
 
 void handleClick(short button) {
