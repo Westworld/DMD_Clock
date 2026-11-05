@@ -1,0 +1,25 @@
+{
+  "Wifi": [
+    {
+      "SSID": "xx",
+      "Pass": "xx"
+    },
+    {
+      "SSID": "yy",
+      "Pass": "yy"
+    }
+  ],
+  "version": 5,
+  "displayTime": 20,
+  "twelveHourFormat": false,
+  "displaySeconds": false,
+  "fontColor": 65535,
+  "frameColor": 63488,
+  "fontnumber": 0,
+  "timezonearea": 8,
+  "timezoneid": 0,
+  "ClockUpDown": false,
+  "ClockSparkle": false,
+  "fontSparkleColor": 0,
+  "ClockBlend": true
+}

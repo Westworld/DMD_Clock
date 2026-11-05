@@ -1,0 +1,611 @@
+/clips/tftc_400_rip.rgb
+/clips/t2_l8_bike.rgb
+/clips/godzilla Kopie_start.rgb
+/clips/TAF_L7_intro.rgb
+/clips/trn_174h_clu.rgb
+/clips/acd_170c_car.rgb
+/clips/lw3_208_extraball.rgb
+/clips/fs_lx5_dino1.rgb
+/clips/cc_13_dump_extraball.rgb
+/clips/stargat4_gate.rgb
+/clips/DBA.rgb
+/clips/mm_109c_clash1.rgb
+/clips/bbb109_freeshot.rgb
+/clips/lw3_208_shoot again.rgb
+/clips/gnr_300_multiball.rgb
+/clips/sttng_l7_dump_mission_rescue.rgb
+/clips/elvis_jailjackpot.rgb
+/clips/lah_112 Kopie_shoot_crane.rgb
+/clips/fs_lx5_intro.rgb
+/clips/lotr_warg.rgb
+/clips/mtl_180hc Kopie_yellow.rgb
+/clips/lostspc_mball.rgb
+/clips/potc_600as Kopie_shoot.rgb
+/clips/sttng_l7_dump_extraball.rgb
+/clips/W7B.rgb
+/clips/t2_l8_shoot.rgb
+/clips/godzilla_size.rgb
+/clips/monopoly_cashgrab.rgb
+/clips/smanve_101c_venom.rgb
+/clips/elvis_scores.rgb
+/clips/godzilla_insertcoins.rgb
+/clips/t2_l8_start.rgb
+/clips/jb_10r (1)_skill.rgb
+/clips/potc_600as_plank.rgb
+/clips/term3_lock1.rgb
+/clips/gnr_300_dump_match.rgb
+/clips/mb_106b_dracula.rgb
+/clips/stwr_107_trooper.rgb
+/clips/twd_160h_prison1.rgb
+/clips/sc_18_computer.rgb
+/clips/abv106_usa.rgb
+/clips/cftbl_l4 Kopie_mball.rgb
+/clips/cc_13_reward.rgb
+/clips/avs_170c_hulk.rgb
+/clips/TAF_L7_locked1.rgb
+/clips/cp_16_dump_extralball.rgb
+/clips/sopranos_jackpot.rgb
+/clips/lw3_208_replay.rgb
+/clips/stwr_107_deathstar.rgb
+/clips/cftbl_l4 Kopie_move2.rgb
+/clips/mm_109c_troll madness.rgb
+/clips/sc_18_rocket.rgb
+/clips/jy_12_super.rgb
+/clips/gnr_300_dump_axl3ball.rgb
+/clips/fs_lx5_dino2.rgb
+/clips/jupk_513_intro.rgb
+/clips/sttng_l7_dump_man1.rgb
+/clips/lah_112 Kopie_chicken.rgb
+/clips/term3_flag.rgb
+/clips/mb_106b_jackpot.rgb
+/clips/cp_16_dump_raid.rgb
+/clips/dm_lx4_shot.rgb
+/clips/sttng_l7_dump_warup.rgb
+/clips/mm_109c_intro.rgb
+/clips/cc_13 boat1.rgb
+/clips/gnr_300_shootagain.rgb
+/clips/rctycn_match.rgb
+/clips/jupk_513_skill.rgb
+/clips/cp_16 Kopie_ball2.rgb
+/clips/xfiles_safe.rgb
+/clips/L7A.rgb
+/clips/trn_174h_bike multiball.rgb
+/clips/SAB.rgb
+/clips/gnr_300 Kopie_start.rgb
+/clips/fs_lx5_dino3.rgb
+/clips/mm_109c_jackpot.rgb
+/clips/H8J.rgb
+/clips/jd_l1 Kopie_sniper.rgb
+/clips/lotr_match.rgb
+/clips/gnr_300_start.rgb
+/clips/cc_13 gunslinger1.rgb
+/clips/cp_16 Kopie_boxer.rgb
+/clips/wcs_l2_skillshot.rgb
+/clips/pop_lx5_rescue.rgb
+/clips/cc_13_dump_wild_ride.rgb
+/clips/elvis_leftthebuilding1.rgb
+/clips/QA2.rgb
+/clips/potc_600as_lock.rgb
+/clips/cv_20h_roonie.rgb
+/clips/gprix (2)_testcar2.rgb
+/clips/pz_f4_monsters.rgb
+/clips/smanve_101c_sand2.rgb
+/clips/ft_l5_2x.rgb
+/clips/tftc_400_drinkdrive.rgb
+/clips/congo_21_mine.rgb
+/clips/ft_l5_multi.rgb
+/clips/cc_13 railroad.rgb
+/clips/smanve_101c_goblin.rgb
+/clips/godzilla Kopie_mystery.rgb
+/clips/rctycn_bumber.rgb
+/clips/btmn_106_million.rgb
+/clips/xmn_151h Kopie_lock4.rgb
+/clips/potc_600as_liar.rgb
+/clips/bsv103_jackpot.rgb
+/clips/id4_lock1.rgb
+/clips/cc_13_gunfight.rgb
+/clips/P1B.rgb
+/clips/wcs_l2_finaldraw.rgb
+/clips/avs_170c_hulk2.rgb
+/clips/trn_174h_disk battle.rgb
+/clips/potc_600as_broadside.rgb
+/clips/abv106_tower.rgb
+/clips/K00.rgb
+/clips/sttng_l7_start.rgb
+/clips/cp_16_dump_bar.rgb
+/clips/smanve_101c_sand3.rgb
+/clips/cueball_special.rgb
+/clips/twd_160h_skill.rgb
+/clips/potc_600as Kopie_plank.rgb
+/clips/acd_170c_albummultiball.rgb
+/clips/cc_13_dump_shoot_out.rgb
+/clips/lah_112 Kopie_dbljackpot.rgb
+/clips/mt_145hc_race.rgb
+/clips/jupk_513_extraball.rgb
+/clips/elvis_sherlock.rgb
+/clips/austin_Hurryup.rgb
+/clips/mm_109c_super jackpot.rgb
+/clips/godzilla_taxi.rgb
+/clips/trn_174h_3moremulti.rgb
+/clips/cc_13_dump_train2.rgb
+/clips/mt_145hc_bonus.rgb
+/clips/monopoly Kopie_chase.rgb
+/clips/sc_18_ball1.rgb
+/clips/tom_14hb_stairs.rgb
+/clips/mb_106b_leg.rgb
+/clips/elvis_jailhouse.rgb
+/clips/hurr_l2_wheel.rgb
+/clips/lw3_208_triball_start.rgb
+/clips/xmn_151h Kopie_rogue.rgb
+/clips/tftc_400_intro.rgb
+/clips/gnr_300_dump_gun.rgb
+/clips/lah_112_mballready.rgb
+/clips/stwr_107_match.rgb
+/clips/stwr_107_multiball.rgb
+/clips/stwr_107_dark.rgb
+/clips/cc_13 stampede jackpot.rgb
+/clips/id4_intro2.rgb
+/clips/gnr_300_dump_gilby rolls.rgb
+/clips/cftbl_l4 Kopie_center.rgb
+/clips/acd_170c (1)_canons.rgb
+/clips/smanve_101c Kopie_black2.rgb
+/clips/cueball_dump_video.rgb
+/clips/sc_18_burglar.rgb
+/clips/stwr_107_relaunch.rgb
+/clips/sttng_l7_dump_men2.rgb
+/clips/lw3_208_explode.rgb
+/clips/cftbl_l4 Kopie_move.rgb
+/clips/cp_16_spit.rgb
+/clips/term3_illbeback.rgb
+/clips/America_intro.rgb
+/clips/mtl_180hc Kopie_replay.rgb
+/clips/xmn_151h_cyclops.rgb
+/clips/mtl_180hc Kopie_hit.rgb
+/clips/cftbl_l4 Kopie_3d.rgb
+/clips/sopranos_episode.rgb
+/clips/elvseeSeeRider.rgb
+/clips/cp_16_dump_door_prize.rgb
+/clips/term3_intro.rgb
+/clips/afm_113ba_jackpot2.rgb
+/clips/cc_13 bar1.rgb
+/clips/sc_18_safe.rgb
+/clips/tom_14hb_levi.rgb
+/clips/jy_12_multiball.rgb
+/clips/jupk_513_freeze.rgb
+/clips/cc_13_dump_boat1.rgb
+/clips/cueball_intro.rgb
+/clips/W02.rgb
+/clips/dw_l2_lock1.rgb
+/clips/elvis_replay.rgb
+/clips/gnr_300_guitar.rgb
+/clips/gprix (2)_testcar.rgb
+/clips/i500_11r_replay.rgb
+/clips/mm_109c_damsel madness.rgb
+/clips/i500_11r_extraball.rgb
+/clips/bbb109_gameover.rgb
+/clips/jb_10r (1)_lock1.rgb
+/clips/fg_1200af_Death.rgb
+/clips/bsv103_bankshot.rgb
+/clips/elvis_scarf.rgb
+/clips/mt_145hc_gear.rgb
+/clips/elvis_shootagain.rgb
+/clips/tftc_400_eye.rgb
+/clips/jd_l1 Kopie_ball1.rgb
+/clips/elvis_leftbuildingbonus.rgb
+/clips/mtl_180hc Kopie_ball2.rgb
+/clips/bbb109_1.rgb
+/clips/cp_16_dump_extraball2.rgb
+/clips/jd_l1 Kopie_multiball.rgb
+/clips/gnr_300 Kopie_multiball.rgb
+/clips/cc_13_dump_gunfight_hit.rgb
+/clips/dh_lx2_bankrobber.rgb
+/clips/sttng_l7_intro2.rgb
+/clips/cv_20h_sideshow.rgb
+/clips/cftbl_l4 Kopie_madness.rgb
+/clips/rab_320_train.rgb
+/clips/jm_12r_dump_upload.rgb
+/clips/wcs_l2_lock1.rgb
+/clips/ss_15_dump_replay.rgb
+/clips/xmn_151h_ball2.rgb
+/clips/smanve_101c_fire.rgb
+/clips/mm_109c_wham1.rgb
+/clips/mm_109c_lock1.rgb
+/clips/cv_20h_cv.rgb
+/clips/sopranos_multiball.rgb
+/clips/cv_20h_pop.rgb
+/clips/potc_600as Kopie_shoot_again.rgb
+/clips/ft_l5 color boat1.rgb
+/clips/ts_lx5_flippers.rgb
+/clips/ss_15_dump_snake.rgb
+/clips/gprix (2)_alljackpots.rgb
+/clips/xmn_151h Kopie_intro.rgb
+/clips/bbb109_intro.rgb
+/clips/jb_10r (1)_lock2.rgb
+/clips/ffv104_intro.rgb
+/clips/smb3_mario.rgb
+/clips/trn_174h_match.rgb
+/clips/mtl_180hc Kopie_engine.rgb
+/clips/xmn_151h_ball3.rgb
+/clips/potc_600as_bonusx.rgb
+/clips/cp_16 Kopie_bar.rgb
+/clips/ts_lx5_mongol.rgb
+/clips/jy_12_selectjunk.rgb
+/clips/abv106_start.rgb
+/clips/bbb109_2.rgb
+/clips/mtl_180hc Kopie_ball1.rgb
+/clips/cv_20h_ringmaster.rgb
+/clips/mm_109c_replay.rgb
+/clips/tftc_400_jackpotready.rgb
+/clips/austin_fart.rgb
+/clips/America_ghost.rgb
+/clips/acd_170c_jam.rgb
+/clips/smanve_101c Kopie_green1.rgb
+/clips/mt_145hc_map.rgb
+/clips/cv_20h_sideshow2.rgb
+/clips/xmn_151h Kopie_9fach.rgb
+/clips/elvis_ball1.rgb
+/clips/twd_156h_1.rgb
+/clips/xmn_151h Kopie_sabretooth.rgb
+/clips/afm_113ba_Lock3.rgb
+/clips/sopranos_superjackpot.rgb
+/clips/tom_14hb_tigersaw2.rgb
+/clips/B0Z.rgb
+/clips/playboys_shootagain.rgb
+/clips/jplstw22_lock1.rgb
+/clips/rctycn_elephant.rgb
+/clips/acd_170c (2)_backInBlack.rgb
+/clips/id4_intro.rgb
+/clips/P7A.rgb
+/clips/lotr Kopie_palantir.rgb
+/clips/cp_16_dump_multibrawl.rgb
+/clips/potc_600as_match.rgb
+/clips/gnr_300_dump_replay.rgb
+/clips/xmn_151h_intro.rgb
+/clips/jy_12_escape_spike.rgb
+/clips/lw3_208_bomb.rgb
+/clips/hurr_l2_dunk.rgb
+/clips/cftbl_l4_Bally.rgb
+/clips/roller.rgb
+/clips/jupk_513_dataeast.rgb
+/clips/elvis_extraball.rgb
+/clips/jupk_513_universal.rgb
+/clips/rab_320_triball.rgb
+/clips/jy_12_girl.rgb
+/clips/shr_141_donkey.rgb
+/clips/ss_15_dump_terror.rgb
+/clips/mm_109c_trolls.rgb
+/clips/pz_f4_animal.rgb
+/clips/lah_112_intro.rgb
+/clips/smanve_101c Kopie_green2.rgb
+/clips/SRP.rgb
+/clips/mm_109c_multiball.rgb
+/clips/potc_600as Kopie_jack.rgb
+/clips/smanve_101c Kopie_intro.rgb
+/clips/ss_15_dump_extraball.rgb
+/clips/bsv103_Intro.rgb
+/clips/term3_kickback.rgb
+/clips/monopoly Kopie_railroad.rgb
+/clips/TAF_L7_multiball.rgb
+/clips/trn_174h_fastscoring.rgb
+/clips/MM7.rgb
+/clips/tftc_400_skillshot.rgb
+/clips/jupk_513_shootagain.rgb
+/clips/apollo13a_intro.rgb
+/clips/tom_14hb_intro2.rgb
+/clips/ft_l5 color_locked1.rgb
+/clips/rctycn_power_ride.rgb
+/clips/sopranos_ball1.rgb
+/clips/SS_15_spider.rgb
+/clips/ft_l5_intro.rgb
+/clips/elvis_dog.rgb
+/clips/mtl_180hc Kopie_mystery.rgb
+/clips/tftc_400_mball.rgb
+/clips/jplstw22_lock3.rgb
+/clips/lw3_208_redwire.rgb
+/clips/lw3_208_carcrash.rgb
+/clips/acd_170c (1)_dance.rgb
+/clips/SS_15_multiball.rgb
+/clips/elvis_loop.rgb
+/clips/LJ2.rgb
+/clips/afm_113ba_lock1.rgb
+/clips/wcs_l2_tvaward.rgb
+/clips/acd_170c (2)_666.rgb
+/clips/smanve_101c Kopie_black.rgb
+/clips/term3_rpg.rgb
+/clips/mt_145hc_x.rgb
+/clips/cftbl_l4 Kopie_extra.rgb
+/clips/lotr_gandalf.rgb
+/clips/jupk_513_shoot.rgb
+/clips/smanve_101c_spider.rgb
+/clips/potc_600as_dice.rgb
+/clips/ft_l5_500k.rgb
+/clips/elvis_screaming.rgb
+/clips/tftc_400_mballready.rgb
+/clips/xmn_151h Kopie_iceman.rgb
+/clips/jupk_513_raptor.rgb
+/clips/rctycn_burger.rgb
+/clips/sopranos_cash.rgb
+/clips/monopoly Kopie_jail.rgb
+/clips/sttng_l7_dump_wormhole.rgb
+/clips/America_holywater.rgb
+/clips/rctycn_lock1.rgb
+/clips/SS_15_Deadheads1.rgb
+/clips/mb_106b_arm.rgb
+/clips/cftbl_l4_Kiss.rgb
+/clips/M8G.rgb
+/clips/cc_13_jackpot.rgb
+/clips/xmn_151h Kopie_lockislit.rgb
+/clips/jm_12r_disk.rgb
+/clips/cc_13 intro.rgb
+/clips/ss_15_dump_laboratory.rgb
+/clips/i500_11r_shootagain.rgb
+/clips/dh_lx2_ballsave.rgb
+/clips/dm_lx4a_retina.rgb
+/clips/mt_145hc_drag70.rgb
+/clips/congo_21_lock1.rgb
+/clips/ss_15_dump_leaper1.rgb
+/clips/xmn_151h Kopie_intro2.rgb
+/clips/mm_109c_door1.rgb
+/clips/t2_l8_extraball.rgb
+/clips/jupk_513_intro2.rgb
+/clips/cc_13_goldmine.rgb
+/clips/ft_l5 color 2x.rgb
+/clips/mm_109c_castle1.rgb
+/clips/bbb109_worm.rgb
+/clips/ts_lx5_lock1.rgb
+/clips/tftc_400_intro2.rgb
+/clips/M8E.rgb
+/clips/cc_13_dump_replay.rgb
+/clips/D01.rgb
+/clips/jm_12r_dump_video.rgb
+/clips/Hook_501_start.rgb
+/clips/B0A.rgb
+/clips/cc_13_lock1.rgb
+/clips/afm_113ba_woman.rgb
+/clips/cc_13_dump_polly.rgb
+/clips/andretti_dash.rgb
+/clips/lostspc_match.rgb
+/clips/elvis_match.rgb
+/clips/stwr_107_jackpot.rgb
+/clips/jm_12r_dump_yakuza.rgb
+/clips/twst_405_intro.rgb
+/clips/sttng_l7_dump_3balls.rgb
+/clips/tom_14hb_tiger.rgb
+/clips/potc_600as Kopie_extraball.rgb
+/clips/tftc_400_intro3.rgb
+/clips/bbb109_marsians.rgb
+/clips/hurr_l2_loop.rgb
+/clips/mtl_180hc Kopie_2x.rgb
+/clips/potc_600as Kopie_replay.rgb
+/clips/lotr Kopie_shelop.rgb
+/clips/pop_lx5_intro.rgb
+/clips/t2_l8_intro.rgb
+/clips/smanve_101c_match.rgb
+/clips/wcs_l2_ball_locked1.rgb
+/clips/tom_14hb_trunkescape.rgb
+/clips/lah_112 dynamite feature.rgb
+/clips/AT2.rgb
+/clips/playboys_Match.rgb
+/clips/cp_16_dump_bar2.rgb
+/clips/potc_600as_bonus4.rgb
+/clips/afm_113ba_jackpot.rgb
+/clips/wcs_l2_jackpot.rgb
+/clips/lotr Kopie_saruman2.rgb
+/clips/pz_f4_dance.rgb
+/clips/elvis_encore.rgb
+/clips/gw_l5_hitchhiker.rgb
+/clips/gw_l5_replay.rgb
+/clips/jy_12_extraball.rgb
+/clips/stargat4_1.rgb
+/clips/P4D.rgb
+/clips/gw_l5_green.rgb
+/clips/i500_11r_multiball.rgb
+/clips/xmn_151h_ballsave.rgb
+/clips/ft_l5 color grand.rgb
+/clips/i500_11r_jackpot.rgb
+/clips/apollo13a_match.rgb
+/clips/afm_113ba_extraball.rgb
+/clips/ss_15_dump_returnDeadhead.rgb
+/clips/tom_14hb_jacket.rgb
+/clips/bbb109_ballsave.rgb
+/clips/SS_15_ball1.rgb
+/clips/monopoly Kopie_bank.rgb
+/clips/lostspc_replay.rgb
+/clips/M8A.rgb
+/clips/xmn_151h Kopie_xavier.rgb
+/clips/stargat4_extraball.rgb
+/clips/rctycn_drunk.rgb
+/clips/smanve_101c Kopie_match.rgb
+/clips/lotr Kopie_saruman.rgb
+/clips/jd_l1 Kopie_extraball.rgb
+/clips/trn_174h (3)_match.rgb
+/clips/tom_14hb_intro.rgb
+/clips/smanve_101c_sand.rgb
+/clips/lotr Kopie_legolas.rgb
+/clips/sopranos_rip.rgb
+/clips/jm_12r_dump_yakuza3.rgb
+/clips/id4_multiball.rgb
+/clips/rctycn_map.rgb
+/clips/lotr Kopie_intro.rgb
+/clips/potc_600as Kopie_victory.rgb
+/clips/tom_14hb_tiger saw.rgb
+/clips/smb3_Mario2.rgb
+/clips/EBY.rgb
+/clips/dh_lx2_heli.rgb
+/clips/potc_600as Kopie_kraken.rgb
+/clips/t2_l8_shootagain.rgb
+/clips/P9A.rgb
+/clips/jm_12r_dump_again.rgb
+/clips/cueball_extralball.rgb
+/clips/TAF_L7_thing_multiball.rgb
+/clips/gw_l5_car2.rgb
+/clips/id4_say no.rgb
+/clips/xmn_151h Kopie_light.rgb
+/clips/jm_12r_dump_recovery.rgb
+/clips/lah_112 Kopie_ramp.rgb
+/clips/monopoly_intro.rgb
+/clips/rctycn_train.rgb
+/clips/cc_13_horse.rgb
+/clips/tftc_400_jackpot.rgb
+/clips/sttng_l7_dump_transported.rgb
+/clips/cc_13_multiball_jackbot.rgb
+/clips/smb3_mario3.rgb
+/clips/mtl_180hc_eye.rgb
+/clips/lotr Kopie_witch.rgb
+/clips/smanve_101c_spider2.rgb
+/clips/id4_match.rgb
+/clips/elvis_onTheAir.rgb
+/clips/sttng_l7_intro.rgb
+/clips/ft_l5_video.rgb
+/clips/jm_12r_dump_yakuza2.rgb
+/clips/ww_lh6_balllocked.rgb
+/clips/lah_112 Kopie_6balls.rgb
+/clips/monopoly_movespace.rgb
+/clips/mb_106b_torso.rgb
+/clips/jplstw22_start.rgb
+/clips/ts_lx5_tilt.rgb
+/clips/acd_170c_highwaytohell.rgb
+/clips/jy_12_dog_start.rgb
+/clips/ft_l5 color intro.rgb
+/clips/bsv103_elk.rgb
+/clips/avs_170c_bumper.rgb
+/clips/TAF_L7 (9)_intro.rgb
+/clips/cc_13 saloon1.rgb
+/clips/ft_l5_autocast.rgb
+/clips/mb_106b_match.rgb
+/clips/mm_109c_Dragon2.rgb
+/clips/cc_13 goldmine_multiball.rgb
+/clips/viprsega_mball.rgb
+/clips/andretti_mystery.rgb
+/clips/pz_f4_intro.rgb
+/clips/smanve_101c Kopie_1.rgb
+/clips/potc_600as Kopie_catch.rgb
+/clips/jupk_513_Match.rgb
+/clips/ss_15_dump_intro.rgb
+/clips/bsv103_8ball.rgb
+/clips/mtl_180hc Kopie_multiplan.rgb
+/clips/jm_12r_dump_replay.rgb
+/clips/tom_14hb_multiball.rgb
+/clips/rab_320_extraball.rgb
+/clips/lw3_208_heli2.rgb
+/clips/hurr_l2_match.rgb
+/clips/pz_f4_football.rgb
+/clips/cc_13_dump_quickdraw.rgb
+/clips/sc_18_Teller.rgb
+/clips/sc_18_cellar.rgb
+/clips/jd_l1 Kopie_gameover.rgb
+/clips/abv106_intro.rgb
+/clips/ffv104_start.rgb
+/clips/lostspc_fighterjackpot.rgb
+/clips/elvis_intro1.rgb
+/clips/mm_109c_bridge1.rgb
+/clips/sttng_l7_mission.rgb
+/clips/sttng_l7_dump_Asteroid.rgb
+/clips/America_warfort.rgb
+/clips/twd_160h_flame.rgb
+/clips/elvis_2x.rgb
+/clips/mtl_180hc Kopie_Metallica.rgb
+/clips/cftbl_l4 Kopie_shootagain.rgb
+/clips/cftbl_l4 Kopie_end.rgb
+/clips/jy_12_firework_all.rgb
+/clips/abv106_blueangel.rgb
+/clips/H4A.rgb
+/clips/congo_21_multiball.rgb
+/clips/id4_mball ready.rgb
+/clips/cc_13_dump_ball2locked.rgb
+/clips/mb_106b_full_moon.rgb
+/clips/cc_13 bank1.rgb
+/clips/cc_13 markman.rgb
+/clips/trn_174h_light cycle.rgb
+/clips/BAA.rgb
+/clips/twst_405_lock1.rgb
+/clips/gnr_300_dump_slash_solo.rgb
+/clips/mm_109c_dragon1.rgb
+/clips/mb_106b_green1.rgb
+/clips/gnr_300_dump_intro.rgb
+/clips/ft_l5_lock.rgb
+/clips/congo_21_hippo.rgb
+/clips/gw_l5_race.rgb
+/clips/rctycn_ghost.rgb
+/clips/sc_18_bank.rgb
+/clips/term3_skynet.rgb
+/clips/ts_lx5_multiball.rgb
+/clips/rctycn_guests.rgb
+/clips/ts_lx5_intro.rgb
+/clips/abv106_gameover.rgb
+/clips/mm_109c_royal madness.rgb
+/clips/potc_600as Kopie_collect.rgb
+/clips/xmn_151h_wolverine.rgb
+/clips/elvis_intro2.rgb
+/clips/twd_160h_ballsaved.rgb
+/clips/mtl_180hc Kopie_kreuz.rgb
+/clips/Hook_501_match.rgb
+/clips/mm_109c_merlin.rgb
+/clips/gw_l5_car.rgb
+/clips/apollo13a_mission.rgb
+/clips/rab_320_counter.rgb
+/clips/mtl_180hc_match.rgb
+/clips/sopranos_truck.rgb
+/clips/cftbl_l4_free.rgb
+/clips/mtl_180hc Kopie_snake.rgb
+/clips/ts_lx5_chinatown.rgb
+/clips/jd_l1 Kopie_2x.rgb
+/clips/bbb109_lost.rgb
+/clips/xfiles Kopie_intro.rgb
+/clips/mb_106b_head.rgb
+/clips/potc_600as_sink.rgb
+/clips/rctycn_rocket.rgb
+/clips/lostspc_multiball.rgb
+/clips/ripleys_extraball.rgb
+/clips/afm_113ba_beam.rgb
+/clips/apollo13a_countdown.rgb
+/clips/sttng_l7_dump_billion.rgb
+/clips/xmn_151h_ball1locked.rgb
+/clips/gnr_300_dump_pops.rgb
+/clips/ft_l5 color fish1.rgb
+/clips/xfiles_intro.rgb
+/clips/hurr_l2_iuntro.rgb
+/clips/tftc_400_match.rgb
+/clips/cv_20h_lock1.rgb
+/clips/cftbl_l4 Kopie_target.rgb
+/clips/bbb109_happyhour.rgb
+/clips/stwr_107_intro.rgb
+/clips/mt_145hc_drive.rgb
+/clips/cftbl_l4 Kopie_mballrestart.rgb
+/clips/cftbl_l4_pass.rgb
+/clips/jupk_513_pushstart.rgb
+/clips/cc_13_dump_stampede.rgb
+/clips/smanve_101c Kopie_sandman1.rgb
+/clips/afm_113ba_ship.rgb
+/clips/lah_112 Kopie_dynfeatlit.rgb
+/clips/xmn_151h Kopie_ani1.rgb
+/clips/H5A.rgb
+/clips/jy_12_fireworkcollected.rgb
+/clips/jd_l1_intro.rgb
+/clips/id4_start.rgb
+/clips/smanve_101c Kopie_sandman3.rgb
+/clips/gnr_300_dump_kickback.rgb
+/clips/jm_12r_dump_ballsave.rgb
+/clips/sopranos_cash2.rgb
+/clips/gnr_300_dump_intro3.rgb
+/clips/DAA.rgb
+/clips/godzilla Kopie_launch.rgb
+/clips/ft_l5_stretch.rgb
+/clips/cc_13_dump_bank.rgb
+/clips/rctycn_extraball.rgb
+/clips/lw3_208_triball.rgb
+/clips/WAH.rgb
+/clips/wpt_140a_cards.rgb
+/clips/monopoly Kopie_match.rgb
+/clips/andretti_Multiball.rgb
+/clips/avs_170c_disc.rgb
+/clips/cv_20h_lock2.rgb
+/clips/mb_106b_mulitball.rgb
+/clips/trn_174h_bike.rgb
+/clips/ffv104_game.rgb
+/clips/gnr_300_dump_intro2.rgb
+/clips/lah_112 Kopie_mball.rgb
+/clips/smanve_101c Kopie_sandman2.rgb
+/clips/cftbl_l4 Kopie_5million.rgb
+/clips/H9A.rgb
+/clips/acd_170c_train.rgb

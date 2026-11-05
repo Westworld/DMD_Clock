@@ -14,6 +14,7 @@
 #include "settings.h"
 #include "web.h"
 #include <XPT2046_Touchscreen.h>
+#include "web_upload.h"
 
 WiFiMulti wifiMulti;
 
@@ -44,9 +45,13 @@ char logString[200];
 
 //WiFiManager wifiManager;
 #define NTP_SERVER "de.pool.ntp.org"
+#define NTP_SERVER2 "pool.ntp.org"
+#define NTP_SERVER3 "time.google.com"
 #define DefaultTimeZone "CET-1CEST,M3.5.0/02,M10.5.0/03"  
 String MY_TZ = DefaultTimeZone ;
 const char* wifihostname = "DMD Clock";
+
+
 
 // different SD-Card pins, as my DMD ESP32 has them on board, the test ESP32 not.
 #ifdef UseDMD
@@ -96,7 +101,7 @@ Settings * settings;
 
 void setTimeZone(String TimeZone) {
   struct tm local;
-  configTzTime(TimeZone.c_str(), NTP_SERVER); // ESP32 Systemzeit mit NTP Synchronisieren
+  configTzTime(TimeZone.c_str(), NTP_SERVER, NTP_SERVER2, NTP_SERVER3); // ESP32 Systemzeit mit NTP Synchronisieren
   getLocalTime(&local, 10000);      // Versuche 10 s zu Synchronisieren
   #ifdef webdebug  
     Serial.println("TimeZone: "+TimeZone);
@@ -127,6 +132,7 @@ void ConnectWifi() {
     while ((loop < 10) && (wifiMulti.run() != WL_CONNECTED)) {
       thedisplay->DrawString("try again to connect",1);
       delay(1000);
+      loop++;
     }
     if(loop < 10) {
          thedisplay->DrawString("connected           ",1);
@@ -335,6 +341,8 @@ void handleClick(short button) {
 
       ArduinoOTA.begin();  
       Web_Init();
+      Web_Upload_Init();
+
 
       configmodestart = millis();
   }
@@ -401,12 +409,29 @@ void loop() {
 
 
 void GetTime( int16_t &hour, int16_t &min, int16_t &sec) {
+  static uint32_t failSince = 0;     // 0 = time is valid
+  static uint32_t lastRetry = 0;
   struct tm timeinfo;
-  if(!getLocalTime(&timeinfo, 2000)){
-    thedisplay->DrawString("Failed to obtain time",0);
+  time_t now_t;
+
+  // read system clock directly: getLocalTime(&t, 0) can fail spuriously when millis() ticks
+  time(&now_t);
+  localtime_r(&now_t, &timeinfo);
+  if(timeinfo.tm_year <= (2016 - 1900)){   // not yet synced via NTP
+    uint32_t now = millis();
+    if (failSince == 0) failSince = now;
+
+    if (now - lastRetry > 30000) {   // retry NTP sync every 30 s
+      lastRetry = now;
+      if (WiFi.status() != WL_CONNECTED) WiFi.reconnect();
+      configTzTime(MY_TZ.c_str(), NTP_SERVER, NTP_SERVER2, NTP_SERVER3);
+    }
+    if (now - failSince > 5UL * 60000) ESP.restart();  // give up after 5 min
+
     timeinfo.tm_hour=12;
     timeinfo.tm_min=30;
   }
+  else failSince = 0;
   hour = timeinfo.tm_hour;
   min  = timeinfo.tm_min;
   sec = timeinfo.tm_sec;

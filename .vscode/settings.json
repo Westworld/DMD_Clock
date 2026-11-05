@@ -257,5 +257,6 @@
     "*.tcc": "cpp",
     "fstream": "cpp"
   },
-  "cmake.configureOnOpen": false
+  "cmake.configureOnOpen": false,
+  "cmake.sourceDirectory": "/Users/thomas/Documents/PlatformIO/Projects/DMD_Clock/lib/JPEGDEC"
 }

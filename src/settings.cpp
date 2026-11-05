@@ -244,8 +244,8 @@ void Settings::Flash_Write(int8_t what) {
 
     doc["Wifi"][0]["SSID"] = WIFI_SSID;
     doc["Wifi"][0]["Pass"] = WIFI_PASS;
-    doc["Wifi"][1]["SSID"] = WIFI_SSID3;
-    doc["Wifi"][1]["Pass"] = WIFI_PASS3;
+    doc["Wifi"][1]["SSID"] = WIFI_SSID2;
+    doc["Wifi"][1]["Pass"] = WIFI_PASS2;
 
     doc["version"] = 5;
     doc["displayTime"] = displayTime;

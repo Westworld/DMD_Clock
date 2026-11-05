@@ -1,0 +1,31 @@
+/fonts/Menlo.font
+/fonts/Futura.font
+/fonts/STIXIntegralsSm.font
+/fonts/Silom.font
+/fonts/GB18030 Bitmap.font
+/fonts/Noteworthy.font
+/fonts/DIN Alternate.font
+/fonts/Monaco.font
+/fonts/Chalkboard.font
+/fonts/Kailasa.font
+/fonts/Palatino.font
+/fonts/Tahoma.font
+/fonts/Rockwell.font
+/fonts/Helvetica.font
+/fonts/Thonburi.font
+/fonts/Damascus.font
+/fonts/Gill Sans.font
+/fonts/Arial.font
+/fonts/Times New Roman.font
+/fonts/Lucida Grande.font
+/fonts/Skia.font
+/fonts/Microsoft Sans Serif.font
+/fonts/Phosphate.font
+/fonts/Marker Felt.font
+/fonts/Sinhala MN.font
+/fonts/Arial Black.font
+/fonts/Hiragino Sans.font
+/fonts/Impact.font
+/fonts/Trebuchet MS.font
+/fonts/Verdana.font
+/fonts/Krungthep.font
